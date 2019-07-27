@@ -2,12 +2,11 @@ __pycache__/
 build_info
 pavement.pyc
 build
-_static/
-_templates/
 .vscode
 dist
 *.egg-info/
 
+test-project
 
 # A developer may use pipenv on his own
 Pipfile
