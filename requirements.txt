@@ -1,4 +1,3 @@
-sphinx
-runestone
-click
-
+sphinx>=1.8.5
+runestone>=4.0
+click>=7.0

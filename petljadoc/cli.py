@@ -4,7 +4,7 @@ import re
 import getpass
 import click
 from pkg_resources import resource_filename
-import bootstrap_petlja_theme
+from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 
 

@@ -21,7 +21,7 @@ import os
 
 import pkg_resources
 from runestone import runestone_static_dirs, runestone_extensions
-import runestone_petlja_ext
+import petljadoc
 
 # -- General configuration -----------------------------------------------------
 
@@ -30,7 +30,7 @@ import runestone_petlja_ext
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.mathjax'] + runestone_extensions() + runestone_petlja_ext.extensions()
+extensions = ['sphinx.ext.mathjax'] + runestone_extensions() + petljadoc.runestone_ext.extensions()
 
 #,'runestone.video','runestone.reveal','runestone.poll','runestone.tabbedStuff','runestone.disqus','runestone.codelens','runestone.activecode', 'runestone.assess', 'runestone.animation','runestone.meta', 'runestone.parsons', 'runestone.blockly', 'runestone.livecode','runestone.accessibility']
 
@@ -207,7 +207,7 @@ html_short_title ='{{project_title}}'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 
-html_static_path = ['_static']  + runestone_static_dirs() + runestone_petlja_ext.static_dirs()
+html_static_path = ['_static']  + runestone_static_dirs() + petljadoc.runestone_ext.static_dirs()
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -274,4 +274,4 @@ htmlhelp_basename = '{{project_name}}-doc'
 #showeval_div_class = 'runestone explainer alert alert-warning'
 #tabbed_div_class = 'alert alert-warning'
 
-runestone_petlja_ext.config_values_for_components(globals())
+petljadoc.runestone_ext.config_values_for_components(globals())
