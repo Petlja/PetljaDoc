@@ -17,6 +17,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Petlja/PetljaDoc",
+    install_requires=dependencies,
     include_package_data=True,
     zip_safe=False,
     packages=setuptools.find_packages(),
