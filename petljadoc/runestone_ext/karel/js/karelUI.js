@@ -120,8 +120,7 @@ $(document).ready(function() {
 								if(result){
 									showEndMessageSuccess();
 								} else {
-                                    // showEndMessageError("Нетачно.");
-                                    showEndMessageError("Incorrect.");
+                                    showEndMessageError("Нетачно.");
 								}
 							}
 						});
@@ -156,8 +155,7 @@ $(document).ready(function() {
 		function showEndMessageSuccess(){
             var eContainer = outerDiv.appendChild(document.createElement('div'));
             eContainer.className = 'col-md-12 alert alert-success';
-            // var msgHead = $('<p>').html('Тачно!');
-            var msgHead = $('<p>').html('Correct!');
+            var msgHead = $('<p>').html('Тачно!');
             eContainer.appendChild(msgHead[0]);
             $('.run-button').removeAttr('disabled')
             $('.reset-button').removeAttr('disabled');;
