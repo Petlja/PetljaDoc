@@ -114,6 +114,32 @@ div.modal-header {
 }
 
 
+.navbar {
+  background-color: white;
+  color: #18bc9c;
+  box-shadow: 0 6px 5px #ddd;
+}
+
+.navbar a {
+  color: #18bc9c !important;
+}
+
+.navbar a:hover {
+  border-bottom: 1px solid #5eceb8 !important;
+}
+
+.navbar-nav>.active a {
+  background-color: white !important;
+  font-weight: 600;
+  font-size: 17px;
+}
+.navbar-nav>.active a:hover {
+  border-bottom: 1px solid #5eceb8 !important; 
+}
+
+#main-content {
+  margin-top: 72px;
+}
 
 @media only screen and (max-width: 900px) {
     .course-content {
