@@ -130,9 +130,11 @@ div.modal-header {
 
 .navbar-nav>.active a {
   background-color: white !important;
-  font-weight: 600;
-  font-size: 17px;
+  font-weight: 800;
+  font-size: 35px;
 }
+
+
 .navbar-nav>.active a:hover {
   border-bottom: 1px solid #5eceb8 !important; 
 }
@@ -140,6 +142,9 @@ div.modal-header {
 #main-content {
   margin-top: 72px;
 }
+
+
+
 
 @media only screen and (max-width: 900px) {
     .course-content {
