@@ -35,4 +35,7 @@ Sk.externalLibraries = {
         path: basePath + 'version.js',
     },
 };
- Sk.imgPath = "/_images/";
+if(typeof(eBookConfig) != "undefined" && "imagesDir" in eBookConfig)
+    Sk.imgPath = eBookConfig.imagesDir;
+else
+    Sk.imgPath = "/_images/";

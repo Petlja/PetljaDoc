@@ -16,7 +16,10 @@ def setup(app):
     app.add_node(InfoNoteNode, html=(visit_info_note_node, depart_info_note_node))
     app.add_node(QuestionNoteNode, html=(visit_question_note_node, depart_question_note_node))
     app.add_node(LevelNode, html=(visit_level_node, depart_level_node))
+    app.connect('html-page-context', html_page_context_handler)
 
+def html_page_context_handler(app, pagename, templatename, context, doctree):
+    app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
     <div class="course-box course-box-info">
@@ -76,7 +79,7 @@ TEMPLATE_START_Q = """
     <div class="course-box course-box-special">
         <div class="course-content">
             <h4 class="carbox-title">
-                <img class="corner-image float-right" src="_static/img/question-mark.png" />
+                <img class="corner-image float-right" src="%s" />
             </h4>
             <p>
 """
@@ -95,7 +98,8 @@ class QuestionNoteNode(nodes.General, nodes.Element):
 def visit_question_note_node(self, node):
     node.delimiter = "_start__{}_".format("info")
     self.body.append(node.delimiter)
-    res = TEMPLATE_START_Q
+    pathto = self.builder.env.h_ctx['pathto']
+    res = TEMPLATE_START_Q % (pathto("_static/img/question-mark.png",1))
     self.body.append(res)
 
 
