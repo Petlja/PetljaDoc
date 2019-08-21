@@ -52,7 +52,7 @@
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="margin-top: 10px; margin-left: 25px;">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="/">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a></li>
+        <li class="active"><a href="{{pathto('', 1)}}">{% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}</a></li>
       </ul>
     </div>
   </div>
