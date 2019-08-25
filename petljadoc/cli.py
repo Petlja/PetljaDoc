@@ -1,14 +1,16 @@
 import os
 import sys
 import re
+from pathlib import Path
 import getpass
 import click
 from pkg_resources import resource_filename
+from paver.easy import sh
 from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 
-
-def _prompt(text, default=None, hide_input=False, confirmation_prompt=False, type=None,
+def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
+            type=None, #pylint: disable=redefined-builtin
             value_proc=None, prompt_suffix=': ', show_default=True, err=False, show_choices=True,
             force_default=False):
     if default and force_default:
@@ -79,3 +81,42 @@ def init_runestone(yes, defaults):
                                         'bootstrap_petlja_theme'),
                            os.path.join(ta['html_theme_path'], ta['html_theme']), {},
                            lambda dir, fname: fname not in ['__init__.py','__pycache__'])
+
+
+def projectPath():
+    p = Path(os.getcwd())
+    while True:
+        if p.joinpath('pavement.py').exists() and p.joinpath('conf.py').exists():
+            return p
+        if p == p.parent:
+            return None
+        p = p.parent
+
+@main.command()
+@click.option("--port","-p", default=8000, type=int,help="HTTP port numpber (default 8000)")
+def preview(port):
+    """
+    Build and preview the Runestone project in browser
+    """
+    path = projectPath()
+    if not path:
+        raise click.ClickException("You must be in a Runestone project to execute preview command")
+    os.chdir(path)
+    sys.path.insert(0, str(path))
+    print(os.getcwd())
+    from pavement import options as paver_options  #pylint: disable=import-error
+    buildPath = Path(paver_options.build.builddir)
+    if not buildPath.exists:
+        os.makedirs(buildPath)
+    args = []
+    args.append(f'--port {port}')
+    args.append('-B')
+    args.append('-b html')
+    args.append(f'-c "{paver_options.build.confdir}"')
+    args.append(f'-d "{paver_options.build.builddir}/doctrees"')
+    for k, v in paver_options.build.template_args.items():
+        args.append(f'-A "{k}={v}"')
+    args.append(f'"{paver_options.build.sourcedir}"')
+    args.append(f'"{paver_options.build.builddir}"')
+
+    sh(f'"{sys.executable}" -m sphinx_autobuild '+ " ".join(args))
