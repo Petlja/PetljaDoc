@@ -1,8 +1,8 @@
 import os
 import re
 import shutil
-import jinja2
 import datetime
+import jinja2
 
 _template_pattern = re.compile(r"^.*(\.t)\.[^\.]+$")
 

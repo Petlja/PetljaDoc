@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import shutil
 from pathlib import Path
 import getpass
 import click
@@ -92,25 +93,27 @@ def projectPath():
             return None
         p = p.parent
 
-@main.command()
-@click.option("--port","-p", default=8000, type=int,help="HTTP port numpber (default 8000)")
-def preview(port):
-    """
-    Build and preview the Runestone project in browser
-    """
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False):
     path = projectPath()
     if not path:
-        raise click.ClickException("You must be in a Runestone project to execute preview command")
+        raise click.ClickException(
+            f"You must be in a Runestone project to execute {cmd_name} command")
     os.chdir(path)
     sys.path.insert(0, str(path))
-    print(os.getcwd())
     from pavement import options as paver_options  #pylint: disable=import-error
     buildPath = Path(paver_options.build.builddir)
     if not buildPath.exists:
         os.makedirs(buildPath)
     args = []
-    args.append(f'--port {port}')
-    args.append('-B')
+    if sphinx_autobuild:
+        args.append(f'--port {port}')
+        args.append('-B')
+        args.append('--no-initial')
+        build_module = "sphinx_autobuild"
+    if sphinx_build:
+        build_module = "sphinx.cmd.build"
+        args.append('-a')
+        args.append('-E')
     args.append('-b html')
     args.append(f'-c "{paver_options.build.confdir}"')
     args.append(f'-d "{paver_options.build.builddir}/doctrees"')
@@ -119,4 +122,53 @@ def preview(port):
     args.append(f'"{paver_options.build.sourcedir}"')
     args.append(f'"{paver_options.build.builddir}"')
 
-    sh(f'"{sys.executable}" -m sphinx_autobuild '+ " ".join(args))
+    sh(f'"{sys.executable}" -m {build_module} '+ " ".join(args))
+
+@main.command()
+@click.option("--port","-p", default=8000, type=int,help="HTTP port numpber (default 8000)")
+def preview(port):
+    """
+    Build and preview the Runestone project in browser
+    """
+    build_or_autobuild("preview", port=port, sphinx_build=True)
+    build_or_autobuild("preview", port=port, sphinx_autobuild=True)
+
+
+def copy_dir(src_dir, dest_dir, filter_name=None):
+    # print(f"D {src_dir} -> {dest_dir}")
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+    for item in os.listdir(src_dir):
+        if filter_name and not filter_name(src_dir, item):
+            continue
+        s = os.path.join(src_dir, item)
+        if os.path.isdir(s):
+            d = os.path.join(dest_dir, item)
+            copy_dir(s, d, filter_name)
+        else:
+            d = os.path.join(dest_dir, item)
+            shutil.copyfile(s,d)
+            #print(f"C {s} -> {d}")
+
+@main.command()
+def publish():
+    """
+    Build and copy the publish folder (docs)
+    """
+    build_or_autobuild("publish", sphinx_build=True)
+    path = projectPath()
+    if not path:
+        raise click.ClickException("You must be in a Runestone project to execute publish command")
+    os.chdir(path)
+    sys.path.insert(0, str(path))
+    from pavement import options as paver_options  #pylint: disable=import-error
+    buildPath = Path(paver_options.build.builddir)
+    publishPath = path.joinpath("docs")
+    click.echo(f'Publishing to {publishPath}')
+    def filter_name(src_dir, item):
+        if src_dir != publishPath:
+            return True
+        return item not in {"doctrees", "sources", ".buildinfo","search.html",
+                            "searchindex.js", "objects.inv","pavement.py"}
+    copy_dir(buildPath, publishPath, filter_name)
+    open(publishPath.joinpath(".nojekyll"),"w").close()
