@@ -1,3 +1,3 @@
 from . import cli, bootstrap_petlja_theme, runestone_ext
 
-__version__ = "0.0.2"
+__version__ = "0.1.0"
