@@ -7,7 +7,7 @@ Tools are based on https://github.com/RunestoneInteractive/RunestoneComponents a
 - additional ActiveCode features
 - customized Sphinx theme 
 - customized project template 
-- ``petljadoc`` command line interface
+- ``petljadoc`` command line interface (CLI)
 
 PetljaDoc currenty depends on forked RunestoneComonents, but we are gradually closing the gap with the upstream repository through pull requests.
 
@@ -21,7 +21,7 @@ If you use Windows and previous command does not work, try:
 
 `py -3 -m pip install https://github.com/Petlja/PetljaDoc/archive/master.zip`
 
-## Usage
+## CLI usage
 
 `petljadoc [OPTIONS] COMMAND [ARGS]...`
 
@@ -35,7 +35,7 @@ Commands:
 
 By using `petljadoc preview`, an author may keep opened a browser window for preview. Any saved changes will be updated in browser in about 5-10 seconds.
 
-By using `petljadoc publish`, an author can easily publish current version on GitHub Pages (if already use GitHub).
+`petljadoc publish` command helps an author to share a public preview of his work via GitHub Pages.
 
 
 
