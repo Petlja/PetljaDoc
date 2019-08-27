@@ -1,6 +1,6 @@
 # PetljaDoc - Petlja's tool for interactive books
 
-Tools are based on https://github.com/RunestoneInteractive/RunestoneComponents and https://github.com/sphinx-doc/sphinx and includes:
+The tool is based on https://github.com/RunestoneInteractive/RunestoneComponents and https://github.com/sphinx-doc/sphinx and includes:
 
 - additional Sphinx extensions 
 - partial Pygame implementation for Sculpt (https://github.com/Petlja/pygame4skulpt)
