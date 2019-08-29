@@ -6,6 +6,7 @@ from docutils.parsers.rst import Directive
 
 
 def setup(app):
+    app.connect('html-page-context', html_page_context_handler)
     app.add_stylesheet('notes.css')
     app.add_javascript('notes.js')
 
@@ -16,7 +17,6 @@ def setup(app):
     app.add_node(InfoNoteNode, html=(visit_info_note_node, depart_info_note_node))
     app.add_node(QuestionNoteNode, html=(visit_question_note_node, depart_question_note_node))
     app.add_node(LevelNode, html=(visit_level_node, depart_level_node))
-    app.connect('html-page-context', html_page_context_handler)
 
 def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
@@ -98,8 +98,8 @@ class QuestionNoteNode(nodes.General, nodes.Element):
 def visit_question_note_node(self, node):
     node.delimiter = "_start__{}_".format("info")
     self.body.append(node.delimiter)
-    pathto = self.builder.env.h_ctx['pathto']
-    res = TEMPLATE_START_Q % (pathto("_static/img/question-mark.png",1))
+    prefix = '../' * self.builder.current_docname.count('/')
+    res = TEMPLATE_START_Q % (prefix + "_static/img/question-mark.png")
     self.body.append(res)
 
 

@@ -63,7 +63,7 @@
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-<link rel="shortcut icon" href="_static/favicon.ico" type="image/ico" />
+<link rel="shortcut icon" href="{{pathto('_static/favicon.ico', 1)}}" type="image/ico" />
 
 <script type="text/javascript">
   eBookConfig = {};
@@ -80,6 +80,7 @@
   eBookConfig.basecourse = '{{ basecourse }}';
   eBookConfig.runestone_version = '{{ runestone_version }}';
   eBookConfig.imagesDir = '{{ pathto("_images/",1) }}';
+  eBookConfig.staticDir = '{{ pathto("_static/",1) }}';
   if(typeof(Sk) != "undefined")
       Sk.imgPath = eBookConfig.imagesDir;
 </script>

@@ -1,4 +1,12 @@
-basePath = "../_static/pygamelib/";
+if(typeof(eBookConfig) != "undefined" && "imagesDir" in eBookConfig) {
+    Sk.imgPath = eBookConfig.imagesDir;
+    basePath = eBookConfig.staticDir + "pygamelib/";
+}
+else {
+    Sk.imgPath = "/_images/";
+    basePath = "/_static/pygamelib/";
+}
+
 Sk.externalLibraries = Sk.externalLibraries || {};
 Sk.externalLibraries = {
     'pygame': {
@@ -35,7 +43,3 @@ Sk.externalLibraries = {
         path: basePath + 'version.js',
     },
 };
-if(typeof(eBookConfig) != "undefined" && "imagesDir" in eBookConfig)
-    Sk.imgPath = eBookConfig.imagesDir;
-else
-    Sk.imgPath = "/_images/";
