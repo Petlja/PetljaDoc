@@ -39,7 +39,7 @@ def init_runestone(yes, defaults):
     """
     template_dir = resource_filename('petljadoc', 'project-templates/runestone')
     print("This will create a new Runestone project in your current directory.")
-    if os.listdir('.'):
+    if [f for f in os.listdir() if f[0] != '.']:
         raise click.ClickException("Current directrory in not empty")
     if not yes:
         click.confirm("Do you want to proceed? ", abort=True, default=True)
