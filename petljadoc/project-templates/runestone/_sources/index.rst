@@ -16,9 +16,14 @@ This Is A New Project
 SECTION 1: Introduction
 :::::::::::::::::::::::
 
-Congratulations!   If you can see this file you have probably successfully run the ``runestone init`` command.  If you are looking at this as a source file you should now run ``runestone build``  to generate html files.   Once you have run the build command you can run ``runestone serve`` and then view this in your browser at ``http://localhost:8000``
+Congratulations!   If you can see this file you have probably successfully run the ``petljadoc runestone-init`` command.  
 
-This is just a sample of what you can do.  The index.rst file is the table of contents for your entire project.  You can put all of your writing in the index, or  you can include additional rst files.  Those files may even be in subdirectories that you can reference using a relative path.
+If you are looking at this as a source file you should now run ``petljadoc preview``  to generate html files and preview 
+them in your browser.
+
+This is just a sample of what you can do.  The index.rst file is the table of contents for your entire project.
+ You can put all of your writing in the index, or  you can include additional rst files. 
+ Those files may even be in subdirectories that you can reference using a relative path.
 
 
 ::
@@ -35,15 +40,17 @@ Section 2: Links
 
 Runestone uses the ``restructuredText`` (rst) markup language.  We chose this over markdown largely because rst is extensible.  Nearly all of the basic markup tasks are already handled by restructuredText.  You should check out the docs for the basics of restructuredText (link below). Our extensions are all for the interactive elements.  One key hint about restructuredText:  Its like **Python** -- *indentation matters!*
 
-* `restructuredText Docs <http://docutils.sourceforge.net/rst.html>`_
-* `Runestone Docs <http://runestoneinteractive.org/build/html/index.html>`_
-* Join the discussion on our `Google Group <https://groups.google.com/forum/#!forum/runestone_instructors>`_
-* Tell us about problems on `Github <https://github.com/RunestoneInteractive/RunestoneComponents>`_
-
+* Section `restructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ from Sphinx Docs 
+* `Runestone Author’s Guide <https://runestone.academy/runestone/static/authorguide/index.html>`_
+* `PetljaDoc README <https://github.com/Petlja/PetljaDoc/blob/master/README.md>`_ 
+* An Overview of Runestone Interactive `source <https://github.com/RunestoneInteractive/overview>`_ and 
+  `published book <https://runestone.academy/runestone/static/overview/overview.html>`_
+* A PetljaDoc project Textual Programming in Python `source code <https://github.com/Petlja/TxtProgInPythonEng/>`_ and 
+  `public preview <https://petlja.github.io/TxtProgInPythonEng/>`_
 
 
 SECTION 3: Sample Directives
-::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::
 
 ActiveCode
 ----------
@@ -76,7 +83,4 @@ Multiple Choice
 
     Which colors might be found in a rainbow? (choose all that are correct)
 
-These are just two of the many interactive components for writing online course materials.  You can see examples of all of them `On our Example Page <http://interactivepython.org/runestone/static/overview/overview.html>`_
-
 Now feel free to modify this file to start creating your own interactive page.
-
