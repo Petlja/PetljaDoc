@@ -24,7 +24,43 @@ jquery_url = "http://code.jquery.com/jquery-1.12.4.min.js"
 
 class BlockpyTest(RunestoneTestCase):
 
+    def test_blockly_karel_transition(self):
+         """
+         Testing that changing Blockly will be saved in Karel code
+         """
+         self.driver.get(self.host + "/index.html")  
+         self.driver.execute_script('window.localStorage.clear();')
+         actionChains = ActionChains(self.driver)
+
+         #going into blockly window
+         rb = self.driver.find_element_by_class_name("blockly-button")
+         self.assertIsNotNone(rb)
+         rb.click()
+
+        
+         #selecting and draging "move" piece on to the canvas placing it into "for loop block"
+         karel = self.driver.find_element_by_id(":1")
+         karel.click()
+       
+         getBlocklyElement(self, 0)
+         piece = self.driver.find_element_by_class_name("blocklySelected")
+         actionChains.click_and_hold(piece).perform()
+         actionChains.move_by_offset(140, 35).release(piece).perform()
+        
+         #back to karel
+         back = self.driver.find_elements_by_class_name("btn-primary")[1]
+         self.assertIsNotNone(back)
+         back.click()
+
+         #checking if code is in sync with blockly
+         code = self.driver.find_element_by_class_name("CodeMirror-code")
+         self.assertEqual(code.text, '1\nfrom karel import * \n2\nmove()\n3')
+ 
     def test_success(self):
+         """
+         Testing a simple karel program made in blockly window.
+         Becouse multiple modules are tested this could be regarded as integration test.
+         """
          self.driver.get(self.host + "/index.html")  
          self.driver.execute_script('window.localStorage.clear();')
 
@@ -32,56 +68,65 @@ class BlockpyTest(RunestoneTestCase):
          actionChains2 = ActionChains(self.driver)
          actionChains3 = ActionChains(self.driver)
          actionChains4 = ActionChains(self.driver)
-
+        #going into blockly window
          rb = self.driver.find_element_by_class_name("blockly-button")
          self.assertIsNotNone(rb)
          rb.click()
 
+        #selecting and draging "move" piece on to the canvas
          karel = self.driver.find_element_by_id(":1")
          self.assertIsNotNone(karel)
   
          karel.click()
-         getBlocklyElement(self,0)
+         getBlocklyElement(self, 0)
          piece = self.driver.find_element_by_class_name("blocklySelected")
-         actionChains.drag_and_drop_by_offset(piece,100,0).perform()
+         actionChains.drag_and_drop_by_offset(piece, 100, 0).perform()
         
-        
+        #selecting and draging "move" piece on to the canvas
          karel.click()
-         getBlocklyElement(self,0)
+         getBlocklyElement(self, 0)
          piece = self.driver.find_element_by_class_name("blocklySelected")
          actionChains2.click_and_hold(piece).perform()
-         actionChains2.move_by_offset(100,12).release(piece).perform()
-
+         actionChains2.move_by_offset(100, 12).release(piece).perform()
+        
+        #selecting and draging "move" piece on to the canvas
          karel.click()
-         getBlocklyElement(self,0)
+         getBlocklyElement(self, 0)
          piece = self.driver.find_element_by_class_name("blocklySelected")
          actionChains3.click_and_hold(piece).perform()
-         actionChains3.move_by_offset(100,12).release(piece).perform()
+         actionChains3.move_by_offset(100, 12).release(piece).perform()
          
+         #selecting and draging "pickup" piece on to the canvas
          karel.click()
-         getBlocklyElement(self,3)
+         getBlocklyElement(self, 3)
          piece = self.driver.find_element_by_class_name("blocklySelected")
          actionChains4.click_and_hold(piece).perform()
-         actionChains4.move_by_offset(100,-75).release(piece).perform()
+         actionChains4.move_by_offset(100, -75).release(piece).perform()
 
-
+        #going back to karel
          back = self.driver.find_elements_by_class_name("btn-primary")[1]
          self.assertIsNotNone(back)
          back.click()
-
+       
+        #running program
          run = self.driver.find_element_by_class_name("run-button")
          self.assertIsNotNone(run)
          run.click()
-
+        
+        #checking if the program finished successfully
          self.assertIsNotNone(self.driver.find_element_by_class_name("alert-success"))
    
     def test_failure(self):
+         """
+         Testing a simple karel program made in blockly window.
+         Checking if incorecct program produces a correct error message
+         """
          self.driver.get(self.host + "/index.html")  
          self.driver.execute_script('window.localStorage.clear();')
 
          actionChains = ActionChains(self.driver)
          
-
+        #going into blockly window
          rb = self.driver.find_element_by_class_name("blockly-button")
          self.assertIsNotNone(rb)
          rb.click()
@@ -89,18 +134,22 @@ class BlockpyTest(RunestoneTestCase):
          karel = self.driver.find_element_by_id(":1")
          self.assertIsNotNone(karel)
   
-
+        #going back to karel
          back = self.driver.find_elements_by_class_name("btn-primary")[1]
          self.assertIsNotNone(back)
          back.click()
-
+        #running empty code
          run = self.driver.find_element_by_class_name("run-button")
          self.assertIsNotNone(run)
          run.click()
-
+        #testing if error is displayed correctly
          self.assertIsNotNone(self.driver.find_element_by_class_name("alert-danger"))
 
     def test_loop(self):
+        """
+         Testing options: creating variable and fusing multiple blockly blocks into one.
+         Becouse multiple modules are tested this could be regarded as integration test.
+         """
         self.driver.get(self.host + "/index.html")  
         self.driver.execute_script('window.localStorage.clear();')
         actionChains = ActionChains(self.driver)
@@ -109,10 +158,13 @@ class BlockpyTest(RunestoneTestCase):
         actionChains4 = ActionChains(self.driver)
         actionChains5 = ActionChains(self.driver)
         actionChains6 = ActionChains(self.driver)
+
+        #going into blockly window
         rb = self.driver.find_element_by_class_name("blockly-button")
         self.assertIsNotNone(rb)
         rb.click()
 
+        #selecting and draging "for loop" piece on to the canvas
         karel = self.driver.find_element_by_id(":4")
         self.assertIsNotNone(karel)
         karel.click()
@@ -121,10 +173,11 @@ class BlockpyTest(RunestoneTestCase):
         pice1 = blocklyCanvas.find_elements_by_tag_name("rect")[0]
         time.sleep(.5)
         pice1.click()
-
+  
         piece = self.driver.find_element_by_class_name("blocklySelected")
-        actionChains.drag_and_drop_by_offset(piece,100,0).perform()
+        actionChains.drag_and_drop_by_offset(piece, 100, 0).perform()
         
+        #selecting and draging "move" piece on to the canvas placing it into "for loop block"
         karel = self.driver.find_element_by_id(":1")
         karel.click()
        
@@ -133,17 +186,20 @@ class BlockpyTest(RunestoneTestCase):
         actionChains2.click_and_hold(piece).perform()
         actionChains2.move_by_offset(140,35).release(piece).perform()
          
+        #selecting and draging "pickup" piece on to the canvas placing it into "for loop block"
         karel.click()
         getBlocklyElement(self,3)
         piece = self.driver.find_element_by_class_name("blocklySelected")
         actionChains4.click_and_hold(piece).perform()
         actionChains4.move_by_offset(100,-75).release(piece).perform()
 
+        #selecting and draging "range" piece on to the canvas placing it into "for loop block"
         karel = self.driver.find_element_by_id(":c")
         karel.click()
         getBlocklyElementRect(self,-1)
         piece = self.driver.find_element_by_class_name("blocklySelected")
 
+        #init for new variable, name input is done in alert window
         karel = self.driver.find_element_by_id(":2")
         karel.click()
         newVariable = self.driver.find_elements_by_class_name("blocklyBlockCanvas")[1].find_element_by_class_name("blocklyText")
@@ -163,6 +219,7 @@ class BlockpyTest(RunestoneTestCase):
         actionChains5.click_and_hold(piece).perform()
         actionChains5.move_by_offset(170,-75).release(piece).perform()
         
+        #selecting and draging "range attributes" piece on to the canvas placing it into "range block"
         karel = self.driver.find_element_by_id(":a")
         karel.click()
        
@@ -175,15 +232,19 @@ class BlockpyTest(RunestoneTestCase):
         pieceInput = self.driver.find_element_by_class_name("blocklyEditableText")
         webdriver.ActionChains(self.driver).move_to_element(pieceInput ).click(pieceInput ).perform()
         time.sleep(.5)
+
+        #setting range(3)
         pieceInput2 = self.driver.find_element_by_class_name("blocklyWidgetDiv").find_element_by_class_name("blocklyHtmlInput")
         self.assertIsNotNone(pieceInput2)
         self.driver.execute_script("arguments[0].value=3;", pieceInput2)
         time.sleep(.5)
-
+        
+        #after setting input to 3, moving focus to another element in order to save it 
         workSpace = self.driver.find_element_by_class_name("blocklyWorkspace")
         self.assertIsNotNone(workSpace)
         workSpace.click()
-
+        
+        #back to karel
         back = self.driver.find_elements_by_class_name("btn-primary")[1]
         self.assertIsNotNone(back)
         back.click()
@@ -194,36 +255,8 @@ class BlockpyTest(RunestoneTestCase):
         run.click()
 
         self.assertIsNotNone(self.driver.find_element_by_class_name("alert-success"))
-       
-    def wait_for_animation(self, selector):
-        is_animation_in_progress = self.is_element_animated(selector)
-        while is_animation_in_progress is True:
-            time.sleep(.5)
-            is_animation_in_progress = self.is_element_animated(selector)
 
 
-    def is_element_animated(self, selector):
-        return self.driver.execute_script("return jQuery('" + selector + "').is(':animated');")
-
-
-    def f_exists(self, selector_id):
-        try:
-            self.driver.find_element_by_id(selector_id)
-        except NoSuchElementException:
-            return False
-        return True
-
-
-    def wait_and_close_alert(self, timeout = 3):
-        try:
-            WebDriverWait(self.driver, timeout).until(EC.alert_is_present(),
-                                   'Timed out waiting for PA creation ' +
-                                   'confirmation popup to appear.')
-            alert = self.driver.switch_to_alert()
-            alert.accept()
-            return True
-        except TimeoutException:
-            return False
         
 
 def getBlocklyElement(self, elementNo):

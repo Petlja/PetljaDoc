@@ -58,6 +58,8 @@ class KarelTests(RunestoneTestCase):
          message = t2.find_element_by_class_name('alert')    
     
          self.assertEqual(message.get_attribute("class"),"col-md-12 alert alert-danger")
+         self.assertEqual(message.text, "Robot crashed at the wall!")
+         
          reset = t2.find_element_by_class_name('reset-button')
          reset.click()
          self.assertEqual(len(karel.find_elements_by_id("Karel_2-error")),0)
@@ -78,6 +80,26 @@ class KarelTests(RunestoneTestCase):
 
          self.assertIsNotNone(t3.find_element_by_class_name('error'))
          
+    def test_ball_cond(self):
+         """
+         Testing ball condition failure
+         """
+         self.driver.get(self.host + "/index.html") 
+         self.driver.execute_script('window.localStorage.clear();')
+
+         t4 = self.driver.find_element_by_css_selector("div[data-childcomponent='Karel_4']")
+         karel = t4.find_element_by_class_name('course-content')
+         self.assertIsNotNone(karel)
+
+         checkme = t4.find_element_by_class_name('run-button')
+         checkme.click()      
+
+         message = t4.find_element_by_class_name('alert')    
+    
+         self.assertEqual(message.get_attribute("class"),"col-md-12 alert alert-danger")
+         self.assertEqual(message.text,"Incorrect!")
+
+
         
         
 if __name__ == '__main__':

@@ -20,7 +20,7 @@ import selenium.webdriver.support.ui as ui
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
 
-class KarelTests(RunestoneTestCase):
+class NoteTests(RunestoneTestCase):
      
     def test_general(self):
         """
@@ -28,9 +28,9 @@ class KarelTests(RunestoneTestCase):
         """
         self.driver.get(self.host + "/index.html")
         note1 = self.driver.find_element_by_class_name("course-box-special")
-        self.assertEqual(note1.value_of_css_property("background-color"),'rgba(217, 232, 242, 1)')
-
         note2 = self.driver.find_element_by_class_name("course-box-info")
+
+        self.assertEqual(note1.value_of_css_property("background-color"),'rgba(217, 232, 242, 1)')
         self.assertEqual(note2.value_of_css_property("border-top"),'5px solid rgb(52, 152, 219)')
         self.assertEqual(note2.value_of_css_property("background-color"),'rgba(255, 255, 255, 1)')
               
