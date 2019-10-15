@@ -9,6 +9,7 @@ from pkg_resources import resource_filename
 from paver.easy import sh
 from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
+from .cyr2lat import cyr2latTranslate
 
 def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
             type=None, #pylint: disable=redefined-builtin
@@ -172,3 +173,19 @@ def publish():
                             "searchindex.js", "objects.inv","pavement.py"}
     copy_dir(buildPath, publishPath, filter_name)
     open(publishPath.joinpath(".nojekyll"),"w").close()
+
+
+@main.command()
+def cyr2lat():
+    """
+    Translate from cyrilic to latin letters. Source folder must end with 'Cyrl'.
+    """
+    sourcePath = os.getcwd()
+    print(sourcePath)
+    if (sourcePath.endswith('Cyrl')):
+        destinationPath = Path(sourcePath.split('Cyrl')[0] + "Lat")
+        print(destinationPath)
+        cyr2latTranslate(sourcePath, destinationPath)
+    else:
+        print('Folder name must end with Cyrl')
+    
