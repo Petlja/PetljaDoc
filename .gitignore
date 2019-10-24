@@ -12,3 +12,5 @@ test-project
 Pipfile
 Pipfile.lock
 
+petljadoc/1.py
+petljadoc/1.rst
