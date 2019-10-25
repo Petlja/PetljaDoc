@@ -1,36 +1,35 @@
-ActiveCode Test
-===============
-
 
 .. activecode:: test1
-
+    :nocodelens:
+   
+    #test
     import pygame as pg
 
-    prozor_sirina, prozor_visina = 400, 300
+    window_width, window_height = 400, 300
 
-    vx, vy = 40, 20 # piksela u sekundi
+    vx, vy = 40, 20 
 
-    stranica = 50
+    side = 50
 
-    boja = pg.Color('yellow')
+    color = pg.Color('yellow')
 
-    pozadina = pg.Color('black')
+    background_color = pg.Color('black')
 
     pg.init()
 
-    prozor = pg.display.set_mode([prozor_sirina, prozor_visina])
+    window = pg.display.set_mode([window_width, window_height])
 
     while not pg.event.get(pg.QUIT):
 
-        t = 1.0 * pg.time.get_ticks() / 1000 # sekundi od inicijalizacije
+        t = 1.0 * pg.time.get_ticks() / 1000 
 
-        x = (t * vx) % (prozor_sirina - stranica)
+        x = (t * vx) % (window_width - side)
 
-        y = (t * vy) % (prozor_visina - stranica)
+        y = (t * vy) % (window_height - side)
 
-        prozor.fill(pozadina)
+        window.fill(background_color)
 
-        pg.draw.rect(prozor, boja, pg.Rect(x, y, stranica, stranica))
+        pg.draw.rect(window, color, pg.Rect(x, y, side, side))
 
         pg.display.update()
 

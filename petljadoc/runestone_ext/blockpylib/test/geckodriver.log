@@ -1,0 +1,132 @@
+1571056309763	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\Jovan\\AppData\\Local\\Temp\\rust_mozprofile02gPzs"
+1571056310313	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1571056310313	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1571056310314	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1571056310314	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1571056312571	Marionette	INFO	Listening on port 63987
+1571056312992	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: http://127.0.0.1:8081/_static/jquery.jsPlumb-1.3.10-all-min.js, line 1: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 65: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 208: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 256: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 392: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 426: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 460: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 100: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 121: unreachable code after return statement
+1571056316005	Marionette	INFO	Stopped listening on port 63987
+[Parent 3252, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 1888, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 1888, Chrome[Parent 3252, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 30316, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 30316, C[Parent 3252, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 8872, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 8872, Chrome_Ch
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+[G
+###!!! [Child][MessageChannel::SendAndWait] Error: Channel error: cannot send/recv
+
+1571056320502	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\Jovan\\AppData\\Local\\Temp\\rust_mozprofilenM5Fb2"
+1571056321006	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1571056321006	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1571056321007	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1571056321007	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1571056322918	Marionette	INFO	Listening on port 64192
+1571056323229	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: http://127.0.0.1:8081/_static/jquery.jsPlumb-1.3.10-all-min.js, line 1: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 65: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 208: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 256: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 392: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 426: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 460: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 100: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 121: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 65: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 208: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 256: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 392: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 426: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 460: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 100: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 121: unreachable code after return statement
+1571056326198	Marionette	INFO	Stopped listening on port 64192
+[Parent 1816, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 26568, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 26568, Chrom[Child 16592, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 16592, Chr[Parent 1816, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 24364, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 24364, Chrome_ChildT
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+[GPU 28
+###!!! [Child][MessageChannel::SendAndWait] Error: Channel error: cannot send/recv
+
+1571056330698	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\Jovan\\AppData\\Local\\Temp\\rust_mozprofilemjlwJ8"
+1571056331203	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1571056331203	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1571056331204	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1571056331204	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1571056333417	Marionette	INFO	Listening on port 64393
+1571056333919	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: http://127.0.0.1:8081/_static/jquery.jsPlumb-1.3.10-all-min.js, line 1: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 65: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 208: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 256: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 392: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 426: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 460: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 100: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 121: unreachable code after return statement
+1571056337082	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:237:64
+1571056337339	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:237:64
+1571056337339	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:237:64
+1571056337626	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:237:64
+1571056338412	Marionette	INFO	Stopped listening on port 64393
+[Child 30412, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 30412, Chrome_Ch[Parent 384, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 16428, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 16428, Chrome_Chil
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+[GPU 86
+###!!! [Child][MessageChannel::SendAndWait] Error: Channel error: cannot send/recv
+
+1571056342923	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\Jovan\\AppData\\Local\\Temp\\rust_mozprofile9Ap37R"
+1571056343446	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1571056343446	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1571056343446	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1571056343446	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1571056345386	Marionette	INFO	Listening on port 64598
+1571056345638	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: http://127.0.0.1:8081/_static/jquery.jsPlumb-1.3.10-all-min.js, line 1: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 65: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 208: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 256: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 392: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 426: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 460: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 100: unreachable code after return statement
+JavaScript warning: http://127.0.0.1:8081/_static/skulpt.min.js, line 121: unreachable code after return statement
+1571056348685	Marionette	INFO	Stopped listening on port 64598
+[Parent 7196, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 5876, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 5876, Chrome_[Parent 7196, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 8596, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 8596, Chrome_ChildThread] W[Parent 7196, Gecko_IOThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 13680, Chrome_ChildThread] WARNING: pipe error: 109: file z:/task_1570640083/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 341
+[Child 13680, Chrome_Child
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+[GPU
+###!!! [Child][MessageChannel::SendAndWait] Error: Channel error: cannot send/recv
+
