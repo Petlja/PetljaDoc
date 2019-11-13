@@ -1,5 +1,5 @@
 """
-Test karel directive
+Test audio directive
 """
 
 __author__ = 'Jovan'
@@ -30,7 +30,6 @@ class AudioTests(RunestoneTestCase):
          self.driver.get(self.host + "/index.html") 
 
          self.driver.execute_script("document.querySelector('.audio').play();")
-                
-        
+             
 if __name__ == '__main__':
     unittest.main()
