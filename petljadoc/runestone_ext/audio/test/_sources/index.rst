@@ -20,7 +20,8 @@ Congratulations!   If you can see this file you have probably successfully run t
 
 This is just a sample of what you can do.  The index.rst file is the table of contents for your entire project.  You can put all of your writing in the index, or  you can include additional rst files.  Those files may even be in subdirectories that you can reference using a relative path.
 
-.. audio:: Example04_Tour01_Line01
+.. audio:: test
+    :ext: 'mp3'
 
 ::
 
@@ -81,4 +82,5 @@ These are just two of the many interactive components for writing online course 
 
 Now feel free to modify this file to start creating your own interactive page.
 
-.. audio:: _static\\audio\Example04_Tour01_Line01.mp3
+.. audio:: test
+    :ext: 'mp3'

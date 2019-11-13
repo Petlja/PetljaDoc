@@ -20,18 +20,17 @@ import selenium.webdriver.support.ui as ui
 mf, setUpModule, tearDownModule = module_fixture_maker(__file__, True)
 
 
-class KarelTests(RunestoneTestCase):
+class AudioTests(RunestoneTestCase):
      
     def test_general(self):
         
          """
-         Testing of a correct Karel program
+         Testing if Audio loaded 
          """
          self.driver.get(self.host + "/index.html") 
-         while True:
-              pass
 
-        
+         self.driver.execute_script("document.querySelector('.audio').play();")
+                
         
 if __name__ == '__main__':
     unittest.main()
