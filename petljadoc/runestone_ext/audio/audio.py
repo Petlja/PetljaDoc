@@ -34,7 +34,7 @@ class AudioDirective(Directive):
     """
     required_arguments = 1
     optional_arguments = 1
-    has_content = True
+    has_content = False
     option_spec = {
         "ext":directives.unchanged,
     }
