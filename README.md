@@ -13,7 +13,7 @@ PetljaDoc currenty depends on forked RunestoneComonents, but we are gradually cl
 
 ## Installation
 
-Use `pip` to `install` DetljaDoc:
+Use `pip` to `install` PetljaDoc:
 
 `pip3 install https://github.com/Petlja/PetljaDoc/archive/master.zip`
 
