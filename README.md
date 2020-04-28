@@ -9,7 +9,7 @@ The tool is based on https://github.com/RunestoneInteractive/RunestoneComponents
 - customized project template 
 - ``petljadoc`` command line interface (CLI)
 
-PetljaDoc currenty depends on forked RunestoneComonents, but we are gradually closing the gap with the upstream repository through pull requests.
+PetljaDoc currently depends on forked RunestoneComonents, but we are gradually closing the gap with the upstream repository through pull requests.
 
 ## Installation
 

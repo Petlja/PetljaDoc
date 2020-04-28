@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://petlja.org/json-schema/petljadoc-course.schema.json",
+  "title": "PetljaDoc Course",
+  "description": "A product PetljaDoc Course project",
+  "type": "object",
+  "properties": {
+    "courseId": {
+      "description": "Course identifier",
+      "type": "string"
+    }
+    // ...
+  },
+  "required": [ "productId" ]
+}
