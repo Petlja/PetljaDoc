@@ -2,60 +2,54 @@ import os
 import sys
 import re
 import shutil
+import json
 from pathlib import Path
 import getpass
 import click
+import yaml
 from pkg_resources import resource_filename
 from paver.easy import sh
 from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 
-def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
-            type=None, #pylint: disable=redefined-builtin
-            value_proc=None, prompt_suffix=': ', show_default=True, err=False, show_choices=True,
-            force_default=False):
-    if default and force_default:
-        print(text+prompt_suffix+str(default), file=sys.stderr if err else sys.stdout)
-        return default
-    return click.prompt(text, default=default, hide_input=hide_input,
-                        confirmation_prompt=confirmation_prompt, type=type, value_proc=value_proc,
-                        prompt_suffix=prompt_suffix, show_default=show_default, err=err,
-                        show_choices=show_choices)
+INDEX_TEMPLATE_HIDDEN = '''
+.. toctree:: 
+    :hidden:
+    :maxdepth: {}
 
-@click.group()
-def main():
-    """
-    Petlja's command-line interface for learning content
+'''
+INDEX_TEMPLATE= '''
+.. toctree:: 
+    :maxdepth: {}
 
-    For help on specific command, use: petljadoc [COMMAND] --help
-    """
+'''
+YOUTUBE_TEMPLATE = '''
+.. ytpopup:: {}
+      :width: 735
+      :height: 415
+      :align: center
+'''
+PDF_TEMPLATE = '''
+.. raw:: html
 
-@main.command('init-runestone')
-@click.option("--yes","-y", is_flag=True, help="Answer positive to all confirmation questions.")
-@click.option("--defaults", is_flag=True, help="Always select the default answer.")
-def init_runestone(yes, defaults):
-    """
-    Create a new Runestone project in your current directory
-    """
-    template_dir = resource_filename('petljadoc', 'project-templates/runestone')
-    print("This will create a new Runestone project in your current directory.")
-    if [f for f in os.listdir() if f[0] != '.']:
-        raise click.ClickException("Current directrory in not empty")
-    if not yes:
-        click.confirm("Do you want to proceed? ", abort=True, default=True)
+  <embed src="{}" width="100%" height="700px" type="application/pdf">
+'''
+
+def init_template_arguments(template_dir, defaults,project_type):
     ta = default_template_arguments()
     default_project_name = re.sub(r'\s+', '-', os.path.basename(os.getcwd()))
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
                                  default=default_project_name, force_default=defaults)
     while ' ' in ta['project_name']:
         ta['project_name'] = click.prompt("Project name: (one word, NO SPACES)")
+    ta['project_type'] = project_type
     ta['build_dir'] = "./_build"
     ta['dest'] = "../../static"
     ta['use_services'] = "false"
     ta['author'] = _prompt("Author's name", default=getpass.getuser(), force_default=defaults)
     ta['project_title'] = _prompt("Project title",
-                                  default=f"Online Book {os.path.basename(os.getcwd())}",
+                                  default=f"Petlja course {os.path.basename(os.getcwd())}",
                                   force_default=defaults)
     ta['python3'] ="true"
     ta['default_ac_lang'] = _prompt("Default ActiveCode language", default="python",
@@ -79,10 +73,122 @@ def init_runestone(yes, defaults):
         ta['html_theme'] = 'bootstrap_petlja_theme'
     apply_template_dir(template_dir, '.', ta)
     if custom_theme:
-        apply_template_dir(os.path.join(bootstrap_petlja_theme.get_html_theme_path(),
-                                        'bootstrap_petlja_theme'),
+        if project_type == 'runestone':
+            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+                                      'runestone_theme')
+        else:
+            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+                                      'course_theme')
+        apply_template_dir(theme_path,
                            os.path.join(ta['html_theme_path'], ta['html_theme']), {},
                            lambda dir, fname: fname not in ['__init__.py','__pycache__'])
+
+
+def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
+            type=None, #pylint: disable=redefined-builtin
+            value_proc=None, prompt_suffix=': ', show_default=True, err=False, show_choices=True,
+            force_default=False):
+    if default and force_default:
+        print(text+prompt_suffix+str(default), file=sys.stderr if err else sys.stdout)
+        return default
+    return click.prompt(text, default=default, hide_input=hide_input,
+                        confirmation_prompt=confirmation_prompt, type=type, value_proc=value_proc,
+                        prompt_suffix=prompt_suffix, show_default=show_default, err=err,
+                        show_choices=show_choices)
+
+def parse_yaml(path):
+    with open('_sources/index.yaml', encoding='utf8') as f:
+        data = yaml.load(f, Loader=yaml.FullLoader,)
+        index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
+        index.write('**Ime Kursa**: *'+data['title']+'*\n')
+        index.write('\n')
+        index.write('Sta cete nauciti:\n')
+        for i in data['description']['willLearn']:
+            index.write(' '*4+'- '+i+'\n')
+        index.write('\n')
+        index.write('Potrebon:\n')
+        for i in data['description']['requirements']:
+            index.write(' '*4+'- '+i+'\n')
+        index.write('\n')
+        index.write('Sadrzaj kursa:'+'\n')
+        for i in data['description']['toc']:
+            index.write(' '*4+'- '+i+'\n')
+        index.write('\n')
+        index.write(INDEX_TEMPLATE_HIDDEN.format(3))
+        path = path.joinpath('_intermediate')
+        for i in data['lessons'][1:]:
+            copy_dir('_sources/'+i['lesson']['title'],'_intermediate/'+i['lesson']['title'])
+            index.write(' '*4+ i['lesson']['title']+'/index\n')
+            section_index = open(path.joinpath(i['lesson']['title']).joinpath('index.rst'),
+                                 mode = 'w+',
+                                 encoding='utf-8')
+            section_index.write("="*len(i['lesson']['title'])+'\n'+i['lesson']['title']+'\n'+"="*len(i['lesson']['title'])+'\n')
+            section_index.write(INDEX_TEMPLATE.format(1))
+            for a in i['lesson']['activities'][1:]:
+                if "url" not in a:
+                    if a['file'].rsplit('.')[1] == 'rst':
+                        section_index.write(' '*4+a['file']+'\n')
+                    if a['file'].rsplit('.')[1] == 'pdf':
+                        pdf_rst = open('_intermediate/'+i['lesson']['title']+'/'+a['title']+'.rst',
+                                     mode = 'w+',encoding='utf-8')
+                        pdf_rst.write(a['title']+'\n'+"="*len(a['title'])+'\n')
+                        pdf_rst.write(PDF_TEMPLATE.format('/_static/'+a['file']))
+                        section_index.write(' '*4+a['title']+'.rst\n')
+                else:
+                    video_rst = open('_intermediate/'+i['lesson']['title']+'/'+a['title']+'.rst',
+                                     mode = 'w+',encoding='utf-8')
+                    video_rst.write(a['title']+'\n'+"="*len(a['title'])+'\n')
+                    video_rst.write(YOUTUBE_TEMPLATE.format(a['url'].rsplit('/',1)[1]))
+                    section_index.write(' '*4+a['title']+'.rst\n')
+           
+def prebuild():
+    p = Path(os.getcwd())
+    if not p.joinpath('_sources/index.yaml').exists():
+        raise click.ClickException("index.yaml is not present in source directory")
+    if not p.joinpath('_intermediate').exists():
+        os.mkdir('_intermediate')
+    parse_yaml(p)
+
+
+@click.group()
+def main():
+    """
+    Petlja's command-line interface for learning content
+
+    For help on specific command, use: petljadoc [COMMAND] --help
+    """
+
+@main.command('init-course')
+@click.option("--yes","-y", is_flag=True, help="Answer positive to all confirmation questions.")
+@click.option("--defaults", is_flag=True, help="Always select the default answer.")
+def init_course(yes, defaults):
+    """
+    Create a new Runestone project in your current directory
+    """
+    template_dir = resource_filename('petljadoc', 'project-templates/course')
+    print("This will create a new Runestone project in your current directory.")
+    if [f for f in os.listdir() if f[0] != '.']:
+        raise click.ClickException("Current directrory in not empty")
+    if not yes:
+        click.confirm("Do you want to proceed? ", abort=True, default=True)
+    init_template_arguments(template_dir,defaults,'course')
+
+
+
+@main.command('init-runestone')
+@click.option("--yes","-y", is_flag=True, help="Answer positive to all confirmation questions.")
+@click.option("--defaults", is_flag=True, help="Always select the default answer.")
+def init_runestone(yes, defaults):
+    """
+    Create a new Runestone project in your current directory
+    """
+    template_dir = resource_filename('petljadoc', 'project-templates/runestone')
+    print("This will create a new Runestone project in your current directory.")
+    if [f for f in os.listdir() if f[0] != '.']:
+        raise click.ClickException("Current directrory in not empty")
+    if not yes:
+        click.confirm("Do you want to proceed? ", abort=True, default=True)
+    init_template_arguments(template_dir,defaults,'runestone')
 
 
 def projectPath():
@@ -131,6 +237,12 @@ def preview(port):
     """
     Build and preview the Runestone project in browser
     """
+    p = Path(os.getcwd())
+    if p.joinpath('conf-petljadoc.json').exists():
+        with open('conf-petljadoc.json') as f:
+            data = json.load(f)
+            if data["project_type"] == "course":
+                prebuild()
     build_or_autobuild("preview", port=port, sphinx_build=True)
     build_or_autobuild("preview", port=port, sphinx_autobuild=True)
 
@@ -182,10 +294,9 @@ def cyr2lat():
     """
     sourcePath = os.getcwd()
     print(sourcePath)
-    if (sourcePath.endswith('Cyrl')):
+    if sourcePath.endswith('Cyrl'):
         destinationPath = Path(sourcePath.split('Cyrl')[0] + "Lat")
         print(destinationPath)
         cyr2latTranslate(sourcePath, destinationPath)
     else:
         print('Folder name must end with Cyrl')
-    
