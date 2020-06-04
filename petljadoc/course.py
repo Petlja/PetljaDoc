@@ -1,15 +1,25 @@
 from pathlib import Path
+class ExternalLink:
+    def __init__(self,text,link):
+        self.text = text
+        self.link = link
 
 class Activity:
     def __init__(self,activity_type,title,src,guid,description):
         self.activity_type = activity_type
         self.title = title
         self.src = src
-        self.guid = guid
+        tmp_guid = guid.rsplit('/')
+        self.guid = tmp_guid[0]
+        self.alias = ''
+        if len(tmp_guid)>1:
+            self.alias = tmp_guid[1]
         self.description = description
 
     def get_src_ext(self):
-        return self.src.rsplit('.')[1]
+        if len(self.src.rsplit('.'))>1:
+            return self.src.rsplit('.')[1]
+        return ''
 
 class Lesson:
     def __init__(self,title,guid,description,archived_activities,active_activities):
@@ -21,7 +31,8 @@ class Lesson:
 
 
 class Course:
-    def __init__(self,courseId,lang,title,willlearn,requirements,toc,extranalLinks,archived_lessons,active_lessons):
+    def __init__(self,courseId,lang,title,willlearn,requirements,toc,extranalLinks,
+                 archived_lessons,active_lessons):
         self.courseId = courseId
         self.lang = lang
         self.title = title
@@ -34,16 +45,17 @@ class Course:
 
 
     def guid_check(self):
-        active_lessons_guids = []
-        active_activities = []
+        guid_list = self.archived_lessons
         for lesson in self.active_lessons:
-            active_lessons_guids.append(lesson.guid)
+            guid_lists = guid_list + lesson.archived_activities
+            guid_lists.append(lesson.guid)
             for activity in lesson.active_activies:
-                active_activities.append(activity.guid)
-
-        return len(self.archived_lessons) == len(set(self.archived_lessons)) and len(active_lessons_guids) == len(set(active_lessons_guids)) and len(active_activities) == len(set(active_activities))
+                guid_list.append(activity.guid)
+        guid_list = duplicates(guid_list)
+        return len(guid_list)==0,guid_list
 
     def source_check(self):
+        missing_activities_src = []
         missing_activities = []
         missing_flag = True
         for lesson in self.active_lessons:
@@ -51,33 +63,59 @@ class Course:
                 if activity.activity_type in ['reading','quiz']:
                     if activity.get_src_ext() == 'rst':
                         if not Path('_sources/'+lesson.title+'/'+activity.src).is_file():
-                            missing_activities.append('_sources/'+lesson.title+'/'+activity.src)
+                            missing_activities_src.append('_sources/'+lesson.title+'/'+activity.src)
+                            missing_activities.append(activity.title)
                             missing_flag = False
                     if activity.get_src_ext() == 'pdf':
-                        if not Path('_static/'+activity.src):
-                            missing_activities.append('_static/'+activity.src)
+                        if not Path('_static/'+activity.src).is_file():
+                            missing_activities_src.append('_static/'+activity.src)
+                            missing_activities.append(activity.title)
                             missing_flag = False
-        return missing_flag, missing_activities
+        return missing_flag, missing_activities , missing_activities_src
 
 class PetljadocError:
-    ERROR_ID = 'Petljadoc INDEX structure error: No courseId found.'
-    ERROR_LANG = 'Petljadoc INDEX structure error: No lang found.'
-    ERROR_TITLE ='Petljadoc INDEX structure error: No title found.'
-    ERROR_DESC = 'Petljadoc INDEX structure error: No description found.'
-    ERROR_WILL_LEARN = 'willLearn','Petljadoc INDEX structure error: No willLearn found.'
-    ERROR_REQUIREMENTS = 'Petljadoc INDEX structure error: No requirements found.'
-    ERROR_TOC = 'Petljadoc INDEX structure error: No table of content found.'
-    ERROR_LESSONS = 'Petljadoc INDEX structure error: No lessons section found.'
-    ERROR_LESSON_TITLE = 'Petljadoc INDEX structure error: Lesson {} is missing the titile.'
-    ERROR_LESSON_GUID = 'Petljadoc INDEX structure error: guid missing in lesson {}.'
-    ERROR_LESSON_ACTIVITIES = 'Petljadoc INDEX structure error: activities missing in lesson {}.'
-    ERROR_UNKNOWN_ACTIVITY = 'Petljadoc INDEX structure error: Unknown activity in lesson {}.'
-    ERROR_ACTIVITY_TITLE = 'Petljadoc INDEX structure error:\
-         In Lesson {} - activity {} is missing the titile.'
-    ERROR_ACTIVITY_GUID = 'Petljadoc INDEX structure error:\
-         In Lesson {} - activity {} is missing the guid.'
-    ERROR_ACTIVITY_SRC = 'Petljadoc INDEX structure error:\
-         In Lesson {} - activity {} is missing the source(file or url).'
-    ERROR_DUPLICATE_GUID = 'Petljadoc INDEX structure error: Duplicate guid.'
-    ERROR_SOURCE_MISSING = 'Some activities are missing srouce files. Location checked:'
+    ERROR_ID = 'Missing courseId (Top level).'
+    ERROR_LANG = 'Missing lang (Top level).'
+    ERROR_TITLE ='Missing title (Top level).'
+    ERROR_DESC = 'Missing description (Top level).'
+
+    ERROR_WILL_LEARN ='In description (line: {}). Missing willLearn.'
+    ERROR_REQUIREMENTS = 'In description (line: {}). Missing requirements.'
+    ERROR_TOC = 'In description (line: {}). Missing toc (Table of content).'
+
+    ERROR_EXTERNAL_LINKS_TEXT = 'In externalLinks (line: {}). External link {} missing text data.'
+    ERROR_EXTERNAL_LINKS_LINK = 'In externalLinks (line: {}). External link {} missing link data.'
+
+    ERROR_LESSONS = 'Lessons missing (Top level).'
+
+    ERROR_ARCHIVED_LESSON = 'In archived lessons (line: {}). Lesson {} missing guid.'
+
+    ERROR_LESSON_TITLE = 'In lessons (line: {}). Lesson {} is missing the titile.'
+    ERROR_LESSON_GUID = 'In lessons (line: {}). Lesson {} is missing the guid.'
+    ERROR_LESSON_ACTIVITIES = 'In lessons (line: {}). Lesson {} is missing the activities.'
+
+    ERROR_ACTIVITY_TYPE= 'In lesson {}. Activity {} (line: {}) is missing the type.'
+    ERROR_ACTIVITY_TITLE = 'In lesson {}. Activity {} (line: {}) is missing the title.'
+    ERROR_ACTIVITY_GUID = 'In lesson {}. Activity {} (line: {}) is missing the guid.'
+    ERROR_ACTIVITY_SRC = 'In lesson {}. Activity {} (line: {}) is missing source(file or url).'
+
+    ERROR_ARCHIVED_ACTIVITY = 'In archived activity {} (line: {}) is missing guid.'
+
+    ERROR_DUPLICATE_GUID = 'Duplicate GUID found: {}.'
+
+    ERROR_SOURCE_MISSING = 'Activity {} source missing.\n File should be here: {}'
     ERROR_MSG_BUILD = 'Build stopped.'
+    ERROR_MSG_YAML = 'Invalid Yaml'
+
+def duplicates(guid_list):
+    seen = {}
+    dupes = []
+
+    for el in guid_list:
+        if el not in seen:
+            seen[el] = 1
+        else:
+            if seen[el] == 1:
+                dupes.append(el)
+            seen[el] += 1
+    return dupes
