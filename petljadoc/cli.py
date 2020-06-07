@@ -11,10 +11,15 @@ from yaml.loader import SafeLoader
 from colorama import Fore,init,Style
 from pkg_resources import resource_filename
 from paver.easy import sh
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
+from watchdog.events import FileSystemEventHandler
+from livereload import Server
 from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity,Lesson,Course,PetljadocError,ExternalLink
+
 
 
 class SafeLineLoader(SafeLoader):
@@ -59,7 +64,7 @@ def init_template_arguments(template_dir, defaults,project_type):
     ta['use_services'] = "false"
     ta['author'] = _prompt("Author's name", default=getpass.getuser(), force_default=defaults)
     ta['project_title'] = _prompt("Project title",
-                                  default=f"Petlja course {os.path.basename(os.getcwd())}",
+                                  default=f"Petlja - {os.path.basename(os.getcwd())}",
                                   force_default=defaults)
     ta['python3'] ="true"
     ta['default_ac_lang'] = _prompt("Default ActiveCode language", default="python",
@@ -106,23 +111,31 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
                         prompt_suffix=prompt_suffix, show_default=show_default, err=err,
                         show_choices=show_choices)
 
-def parse_yaml(path):
+def parse_yaml(path,first_build=True):
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
-        except:
-            print_error(PetljadocError.ERROR_MSG_YAML)
-            exit(1)
+        except yaml.YAMLError as exc:
+            print_error('Yaml structure error:')
+            if hasattr(exc, 'problem_mark'):
+                if exc.context:
+                    print_error(str(exc.problem_mark) + '\n  ' + str(exc.problem) + ' ' + str(exc.context))
+                else:
+                    print_error(str(exc.problem_mark) + '\n  ' + str(exc.problem))
+            else:
+                print_error(PetljadocError.ERROR_MSG_YAML)
+            exit(-1)
         else:
             course = check_structure(data)
-            intermediate_path = Path('_intermediate/')
-            build_path = Path('_build')
-            #hack till _source is src_dir for live update
-            if intermediate_path.exists():
-                shutil.rmtree('_intermediate/')
-                os.mkdir('_intermediate/')
-            if build_path.exists():
-                shutil.rmtree('_build/')
+            if first_build:
+                intermediate_path = Path('_intermediate/')
+                build_path = Path('_build')
+                #hack till _source is src_dir for live update
+                if intermediate_path.exists():
+                    shutil.rmtree('_intermediate/')
+                    os.mkdir('_intermediate/')
+                if build_path.exists():
+                    shutil.rmtree('_build/')
             index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
             write_to_index(index,course)
             path = path.joinpath('_intermediate')
@@ -159,7 +172,7 @@ def prebuild():
         raise click.ClickException("index.yaml is not present in source directory")
     if not p.joinpath('_intermediate').exists():
         os.mkdir('_intermediate')
-    parse_yaml(p)
+    parse_yaml(p,False)
 
 
 @click.group()
@@ -175,7 +188,7 @@ def main():
 @click.option("--defaults", is_flag=True, help="Always select the default answer.")
 def init_course(yes, defaults):
     """
-    Create a new Runestone project in your current directory
+    Create a new Course project in your current directory
     """
     template_dir = resource_filename('petljadoc', 'project-templates/course')
     print("This will create a new Runestone project in your current directory.")
@@ -255,6 +268,7 @@ def preview(port):
             data = json.load(f)
             if data["project_type"] == "course":
                 prebuild()
+                watch_server(os.path.realpath('_sources'))
     build_or_autobuild("preview", port=port, sphinx_build=True)
     build_or_autobuild("preview", port=port, sphinx_autobuild=True)
 
@@ -326,19 +340,24 @@ def check_structure(data):
     error_log['lang'], lang = check_component(data, 'lang', PetljadocError.ERROR_LANG)
     error_log['title'], title_course = check_component(data, 'title', PetljadocError.ERROR_TITLE)
     error_log['description'],_ = check_component(data, 'description', PetljadocError.ERROR_DESC)
+
     if error_log['description']:
         current_level = data['description']['__line__']
         error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
         error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
         error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
         error_log['externalLinks'], externalLinks = check_component(data['description'],'externalLinks','',False)
+
         if externalLinks != '':
+
             for i,external_link in enumerate(externalLinks,start=1):
                 current_level = external_link['__line__']
                 error_log[str(i)+'link_text'], text = check_component(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
                 error_log[str(i)+'link_href'], link = check_component(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
                 external_links.append(ExternalLink(text,link))
+
     error_log['lessons'], _ = check_component(data, 'lessons', PetljadocError.ERROR_LESSONS)
+
     if error_log['lessons']:
         error_log['archived-lessons'], archived_lessons_list = check_component(data,'archived-lessons','',False)
         if archived_lessons_list != '':
@@ -346,10 +365,12 @@ def check_structure(data):
                 current_level = archived_lesson['__line__']
                 error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
                 archived_lessons.append(archived_lesson_guid)
+
         for i,lesson in enumerate(data['lessons'],start=1):
             active_activies = []
             archived_activities = []
             current_level = lesson['__line__']
+
             error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
             error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
             error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
@@ -368,20 +389,26 @@ def check_structure(data):
                     error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
                     error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(activity,'description','',False)
                     error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'file','')
+
                     if not error_log[str(i)+'_'+str(j)+'_activity_src']:
                         error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
+
                     active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
+
             active_lessons.append(Lesson(title,guid,description,archived_activities,active_activies))
+
     course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
     error_log['guid_integrity'],guid_list = course.guid_check()
+
     if not error_log['guid_integrity']:
         for guid in guid_list:
             print_error(PetljadocError.ERROR_DUPLICATE_GUID.format(guid))
     error_log['source_integrity'], missing_src_title ,missing_src = course.source_check()
+
     if not error_log['source_integrity']:
         for titile,src in zip(missing_src_title,missing_src):
             print_error(PetljadocError.ERROR_SOURCE_MISSING.format(titile,src))
-        print()
+
     if False in error_log.values():
         print_error(PetljadocError.ERROR_MSG_BUILD)
         exit(-1)
@@ -431,3 +458,62 @@ def print_error(error):
     init()
     print(Fore.RED, error)
     print(Style.RESET_ALL)
+
+
+
+class _WatchdogHandler(FileSystemEventHandler):
+
+    def __init__(self, watcher):
+        super(_WatchdogHandler, self).__init__()
+        self._watcher = watcher
+
+    def on_any_event(self, event):
+        if event.is_directory:
+            return
+        prebuild()
+
+
+class LivereloadWatchdogWatcher(object):
+    """
+    File system watch dog.
+    """
+    def __init__(self, use_polling=False):
+        super(LivereloadWatchdogWatcher, self).__init__()
+        self._changed = False
+
+        # Allows the LivereloadWatchdogWatcher
+        # instance to set the file which was
+        # modified. Used for output purposes only.
+        self._action_file = None
+        if use_polling:
+            self._observer = PollingObserver()
+        else:
+            self._observer = Observer()
+        self._observer.start()
+
+        # Compatibility with livereload's builtin watcher
+
+        # Accessed by LiveReloadHandler's on_message method to decide if a task
+        # has to be added to watch the cwd.
+        self._tasks = True
+
+        # Accessed by LiveReloadHandler's watch_task method. When set to a
+        # boolean false value, everything is reloaded in the browser ('*').
+        self.filepath = None
+
+        # Accessed by Server's serve method to set reload time to 0 in
+        # LiveReloadHandler's poll_tasks method.
+        self._changes = []
+
+
+    def watch(self, path, *args, **kwargs):
+
+        event_handler = _WatchdogHandler(self)
+        self._observer.schedule(event_handler, path=path, recursive=True)
+
+
+def watch_server(srcdir):
+    server = Server(
+        watcher=LivereloadWatchdogWatcher(use_polling=True),
+    )
+    server.watch(srcdir)
