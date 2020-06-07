@@ -47,9 +47,9 @@ class Course:
     def guid_check(self):
         guid_list = self.archived_lessons
         for lesson in self.active_lessons:
-            guid_lists = guid_list + lesson.archived_activities
-            guid_lists.append(lesson.guid)
-            for activity in lesson.active_activies:
+            guid_list = guid_list + lesson.archived_activities
+            guid_list.append(lesson.guid)
+            for activity  in lesson.active_activies:
                 guid_list.append(activity.guid)
         guid_list = duplicates(guid_list)
         return len(guid_list)==0,guid_list
@@ -74,38 +74,38 @@ class Course:
         return missing_flag, missing_activities , missing_activities_src
 
 class PetljadocError:
-    ERROR_ID = 'Missing courseId (Top level).'
-    ERROR_LANG = 'Missing lang (Top level).'
-    ERROR_TITLE ='Missing title (Top level).'
-    ERROR_DESC = 'Missing description (Top level).'
+    ERROR_ID = 'Missing required attribute "courseId" (Top level).'
+    ERROR_LANG = 'Missing required attribute "lang" (Top level).'
+    ERROR_TITLE ='Missing required attribute "title" (Top level).'
+    ERROR_DESC = 'Missing required attribute "description" (Top level).'
 
-    ERROR_WILL_LEARN ='In description (line: {}). Missing willLearn.'
-    ERROR_REQUIREMENTS = 'In description (line: {}). Missing requirements.'
-    ERROR_TOC = 'In description (line: {}). Missing toc (Table of content).'
+    ERROR_WILL_LEARN ='In "description" (line: {}). Missing required attribute "willLearn".'
+    ERROR_REQUIREMENTS = 'In "description" (line: {}). Missing required attribute "requirements".'
+    ERROR_TOC = 'In "description" (line: {}). Missing required attribute "toc" (Table of content).'
 
-    ERROR_EXTERNAL_LINKS_TEXT = 'In externalLinks (line: {}). External link {} missing text data.'
-    ERROR_EXTERNAL_LINKS_LINK = 'In externalLinks (line: {}). External link {} missing link data.'
+    ERROR_EXTERNAL_LINKS_TEXT = 'In "externalLinks" (line: {}). External link {} is missing required attribute "text".'
+    ERROR_EXTERNAL_LINKS_LINK = 'In "externalLinks" (line: {}). External link {} is missing required attribute "link".'
 
-    ERROR_LESSONS = 'Lessons missing (Top level).'
+    ERROR_LESSONS = 'Missing required attribute "lessons"  (Top level).'
 
-    ERROR_ARCHIVED_LESSON = 'In archived lessons (line: {}). Lesson {} missing guid.'
+    ERROR_ARCHIVED_LESSON = 'In "archived-lessons" (line: {}). Lesson {} is missing required attribute "guid".'
 
-    ERROR_LESSON_TITLE = 'In lessons (line: {}). Lesson {} is missing the titile.'
-    ERROR_LESSON_GUID = 'In lessons (line: {}). Lesson {} is missing the guid.'
-    ERROR_LESSON_ACTIVITIES = 'In lessons (line: {}). Lesson {} is missing the activities.'
+    ERROR_LESSON_TITLE = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "title".'
+    ERROR_LESSON_GUID = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "guid".'
+    ERROR_LESSON_ACTIVITIES = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "activities".'
 
-    ERROR_ACTIVITY_TYPE= 'In lesson {}. Activity {} (line: {}) is missing the type.'
-    ERROR_ACTIVITY_TITLE = 'In lesson {}. Activity {} (line: {}) is missing the title.'
-    ERROR_ACTIVITY_GUID = 'In lesson {}. Activity {} (line: {}) is missing the guid.'
-    ERROR_ACTIVITY_SRC = 'In lesson {}. Activity {} (line: {}) is missing source(file or url).'
+    ERROR_ACTIVITY_TYPE= 'In "lesson" {}. Activity {} (line: {}) is missing the required attribute "type".'
+    ERROR_ACTIVITY_TITLE = 'In "lesson" {}. Activity {} (line: {}) is missing the required attribute "title".'
+    ERROR_ACTIVITY_GUID = 'In "lesson" {}. Activity {} (line: {}) is missing the required attribute "guid".'
+    ERROR_ACTIVITY_SRC = 'In "lesson" {}. Activity {} (line: {}) is missing required attribute source (file or url).'
 
-    ERROR_ARCHIVED_ACTIVITY = 'In archived activity {} (line: {}) is missing guid.'
+    ERROR_ARCHIVED_ACTIVITY = 'In "archived-activities" {} (line: {}) missing required attribute "guid".'
 
-    ERROR_DUPLICATE_GUID = 'Duplicate GUID found: {}.'
+    ERROR_DUPLICATE_GUID = 'Duplicated GUID found: {}.'
 
-    ERROR_SOURCE_MISSING = 'Activity {} source missing.\n File should be here: {}'
+    ERROR_SOURCE_MISSING = 'Activity "{}" source missing. File should be here:\n > {}'
     ERROR_MSG_BUILD = 'Build stopped.'
-    ERROR_MSG_YAML = 'Invalid Yaml'
+    ERROR_MSG_YAML = 'Yaml could not be loaded.'
 
 def duplicates(guid_list):
     seen = {}
