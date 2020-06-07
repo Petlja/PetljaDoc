@@ -1,4 +1,5 @@
 from pathlib import Path
+
 class ExternalLink:
     def __init__(self,text,link):
         self.text = text
@@ -119,3 +120,14 @@ def duplicates(guid_list):
                 dupes.append(el)
             seen[el] += 1
     return dupes
+
+
+class LanguagePick:
+    CourseDescripiton = {'sr-Cyrl':{'willLearn':'Шта ће те научити:\n','requirements':'Потребно:\n','toc':'Садржај:\n','externalLinks':'Додатни линкови:\n'},
+                         'sr-Latn':{'willLearn':'Sta ćete naučiti:\n','requirements':'Potrebno:\n','toc':'Sadržaj:\n','externalLinks':'Dodatni linkovi:\n'},
+                         'en':{'willLearn':'Things you will learn:\n','requirements':'Required:\n','toc':'Table of content:\n','externalLinks':'External links:\n'}}
+    def __init__(self,lang):
+        self.strings = self.CourseDescripiton[lang]
+
+    def __call__(self,literal):
+        return self.strings[literal]

@@ -18,7 +18,7 @@ from livereload import Server
 from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
-from .course import Activity,Lesson,Course,PetljadocError,ExternalLink
+from .course import Activity,Lesson,Course,PetljadocError,ExternalLink,LanguagePick
 
 
 
@@ -51,7 +51,7 @@ PDF_TEMPLATE = '''
   <embed src="{}" width="100%" height="700px" type="application/pdf">
 '''
 
-def init_template_arguments(template_dir, defaults,project_type):
+def init_template_arguments(template_dir, defaults, project_type):
     ta = default_template_arguments()
     default_project_name = re.sub(r'\s+', '-', os.path.basename(os.getcwd()))
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
@@ -430,24 +430,25 @@ def check_component(dictionary,component,error_msg,required = True):
 
 
 def write_to_index(index,course):
+    lang_picker = LanguagePick(course.lang)
     index.write("="*len(course.title)+'\n'+
                 course.title+'\n'+
                 "="*len(course.title)+'\n')
     index.write('\n')
-    index.write('Sta cete nauciti:\n')
+    index.write(lang_picker('willLearn'))
     for willlearn in course.willlearn:
         index.write(' '*4+'- '+willlearn+'\n')
     index.write('\n')
-    index.write('Potrebon:\n')
+    index.write(lang_picker('requirements'))
     for requirements in course.requirements:
         index.write(' '*4+'- '+requirements+'\n')
     index.write('\n')
-    index.write('Sadrzaj kursa:'+'\n')
+    index.write(lang_picker('toc'))
     for toc in course.toc:
         index.write(' '*4+'- '+toc+'\n')
     index.write('\n')
     if course.externalLinks:
-        index.write('Dodatni linkovi:'+'\n')
+        index.write(lang_picker('externalLinks'))
         for external in course.externalLinks:
             index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
         index.write('\n')
