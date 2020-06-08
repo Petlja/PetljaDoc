@@ -9,13 +9,18 @@ class Activity:
     def __init__(self,activity_type,title,src,guid,description):
         self.activity_type = activity_type
         self.title = title
-        self.src = src
+        self.description = description
+
+        if self.activity_type == 'video':
+            self.src = video_url(src)
+        else:
+            self.src = src
+
         tmp_guid = guid.rsplit('/')
         self.guid = tmp_guid[0]
         self.alias = ''
         if len(tmp_guid)>1:
             self.alias = tmp_guid[1]
-        self.description = description
 
     def get_src_ext(self):
         if len(self.src.rsplit('.'))>1:
@@ -85,9 +90,9 @@ class PetljadocError:
     ERROR_TOC = 'In "description" (line: {}). Missing required attribute "toc" (Table of content).'
 
     ERROR_EXTERNAL_LINKS_TEXT = 'In "externalLinks" (line: {}). External link {} is missing required attribute "text".'
-    ERROR_EXTERNAL_LINKS_LINK = 'In "externalLinks" (line: {}). External link {} is missing required attribute "link".'
+    ERROR_EXTERNAL_LINKS_LINK = 'In "externalLinks" (line: {}). External link {} is missing required attribute "href".'
 
-    ERROR_LESSONS = 'Missing required attribute "lessons"  (Top level).'
+    ERROR_LESSONS = 'Missing required attribute "lessons" (Top level).'
 
     ERROR_ARCHIVED_LESSON = 'In "archived-lessons" (line: {}). Lesson {} is missing required attribute "guid".'
 
@@ -107,6 +112,18 @@ class PetljadocError:
     ERROR_SOURCE_MISSING = 'Activity "{}" source missing. File should be here:\n > {}'
     ERROR_MSG_BUILD = 'Build stopped.'
     ERROR_MSG_YAML = 'Yaml could not be loaded.'
+    ERROR_STOP_SERVER = 'Press Ctrl+C to stop server'
+    ERROR_YAML_TYPE_ERROR = 'Yaml stucture error.'
+
+class LanguagePick:
+    CourseDescripiton = {'sr-Cyrl':{'willLearn':'Шта ће те научити:\n','requirements':'Потребно:\n','toc':'Садржај:\n','externalLinks':'Додатни линкови:\n'},
+                         'sr-Latn':{'willLearn':'Sta ćete naučiti:\n','requirements':'Potrebno:\n','toc':'Sadržaj:\n','externalLinks':'Dodatni linkovi:\n'},
+                         'en':{'willLearn':'Things you will learn:\n','requirements':'Required:\n','toc':'Table of content:\n','externalLinks':'External links:\n'}}
+    def __init__(self,lang):
+        self.strings = self.CourseDescripiton[lang]
+
+    def __call__(self,literal):
+        return self.strings[literal]
 
 def duplicates(guid_list):
     seen = {}
@@ -121,13 +138,13 @@ def duplicates(guid_list):
             seen[el] += 1
     return dupes
 
+def video_url(src):
+    if len(src) > 11:
+        pos = src.find('v=')
+        if pos == -1:
+            src = ''
+        else:
+            pos = pos + 2
+            src = src[pos:pos+11]
 
-class LanguagePick:
-    CourseDescripiton = {'sr-Cyrl':{'willLearn':'Шта ће те научити:\n','requirements':'Потребно:\n','toc':'Садржај:\n','externalLinks':'Додатни линкови:\n'},
-                         'sr-Latn':{'willLearn':'Sta ćete naučiti:\n','requirements':'Potrebno:\n','toc':'Sadržaj:\n','externalLinks':'Dodatni linkovi:\n'},
-                         'en':{'willLearn':'Things you will learn:\n','requirements':'Required:\n','toc':'Table of content:\n','externalLinks':'External links:\n'}}
-    def __init__(self,lang):
-        self.strings = self.CourseDescripiton[lang]
-
-    def __call__(self,literal):
-        return self.strings[literal]
+    return src

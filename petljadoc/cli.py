@@ -126,7 +126,7 @@ def parse_yaml(path,first_build=True):
                 print_error(PetljadocError.ERROR_MSG_YAML)
             exit(-1)
         else:
-            course = check_structure(data)
+            course = check_structure(data, first_build)
             if first_build:
                 intermediate_path = Path('_intermediate/')
                 build_path = Path('_build')
@@ -163,16 +163,16 @@ def parse_yaml(path,first_build=True):
                         video_rst = open('_intermediate/'+lesson.title+'/'+activity.title+'.rst',
                                          mode = 'w+',encoding='utf-8')
                         video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
-                        video_rst.write(YOUTUBE_TEMPLATE.format(activity.src.rsplit('/',1)[1]))
+                        video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                         section_index.write(' '*4+activity.title+'.rst\n')
 
-def prebuild():
+def prebuild(first_build = True):
     p = Path(os.getcwd())
     if not p.joinpath('_sources/index.yaml').exists():
         raise click.ClickException("index.yaml is not present in source directory")
     if not p.joinpath('_intermediate').exists():
         os.mkdir('_intermediate')
-    parse_yaml(p,False)
+    parse_yaml(p,first_build)
 
 
 @click.group()
@@ -327,7 +327,7 @@ def cyr2lat():
     else:
         print('Folder name must end with Cyrl')
 
-def check_structure(data):
+def check_structure(data, first_build):
     error_log = {}
     archived_lessons = []
     active_lessons = []
@@ -335,85 +335,93 @@ def check_structure(data):
     willLearn = []
     requirements = []
     toc = []
+    try:
+        error_log['courseId'], courseId = check_component(data,'courseId',PetljadocError.ERROR_ID)
+        error_log['lang'], lang = check_component(data, 'lang', PetljadocError.ERROR_LANG)
+        error_log['title'], title_course = check_component(data, 'title', PetljadocError.ERROR_TITLE)
+        error_log['description'],_ = check_component(data, 'description', PetljadocError.ERROR_DESC)
 
-    error_log['courseId'], courseId = check_component(data,'courseId',PetljadocError.ERROR_ID)
-    error_log['lang'], lang = check_component(data, 'lang', PetljadocError.ERROR_LANG)
-    error_log['title'], title_course = check_component(data, 'title', PetljadocError.ERROR_TITLE)
-    error_log['description'],_ = check_component(data, 'description', PetljadocError.ERROR_DESC)
+        if error_log['description']:
+            current_level = data['description']['__line__']
+            error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
+            error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
+            error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
+            error_log['externalLinks'], externalLinks = check_component(data['description'],'externalLinks','',False)
 
-    if error_log['description']:
-        current_level = data['description']['__line__']
-        error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
-        error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
-        error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
-        error_log['externalLinks'], externalLinks = check_component(data['description'],'externalLinks','',False)
+            if externalLinks != '':
 
-        if externalLinks != '':
+                for i,external_link in enumerate(externalLinks,start=1):
+                    current_level = external_link['__line__']
+                    error_log[str(i)+'link_text'], text = check_component(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
+                    error_log[str(i)+'link_href'], link = check_component(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
+                    external_links.append(ExternalLink(text,link))
 
-            for i,external_link in enumerate(externalLinks,start=1):
-                current_level = external_link['__line__']
-                error_log[str(i)+'link_text'], text = check_component(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
-                error_log[str(i)+'link_href'], link = check_component(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
-                external_links.append(ExternalLink(text,link))
+        error_log['lessons'], _ = check_component(data, 'lessons', PetljadocError.ERROR_LESSONS)
 
-    error_log['lessons'], _ = check_component(data, 'lessons', PetljadocError.ERROR_LESSONS)
+        if error_log['lessons']:
+            error_log['archived-lessons'], archived_lessons_list = check_component(data,'archived-lessons','',False)
+            if archived_lessons_list != '':
+                for j,archived_lesson in enumerate(archived_lessons_list,start=1):
+                    current_level = archived_lesson['__line__']
+                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
+                    archived_lessons.append(archived_lesson_guid)
 
-    if error_log['lessons']:
-        error_log['archived-lessons'], archived_lessons_list = check_component(data,'archived-lessons','',False)
-        if archived_lessons_list != '':
-            for j,archived_lesson in enumerate(archived_lessons_list,start=1):
-                current_level = archived_lesson['__line__']
-                error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
-                archived_lessons.append(archived_lesson_guid)
+            for i,lesson in enumerate(data['lessons'],start=1):
+                active_activies = []
+                archived_activities = []
+                current_level = lesson['__line__']
 
-        for i,lesson in enumerate(data['lessons'],start=1):
-            active_activies = []
-            archived_activities = []
-            current_level = lesson['__line__']
+                error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
+                error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
+                error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
+                error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
+                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = check_component(lesson,'archived-activities','',False)
+                if lesson_archived_activities != '':
+                    for j,archived_activity in enumerate(lesson_archived_activities,start=1):
+                        current_level_archived = archived_activity['__line__']
+                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = check_component(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
+                        archived_activities.append(archived_activity_guid)
+                if error_log[str(i)+'_lesson_activities']:
+                    for j,activity in enumerate(lesson_activities,start=1):
+                        current_level_activity = activity['__line__']
+                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = check_component(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = check_component(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(activity,'description','',False)
+                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'file','')
 
-            error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
-            error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
-            error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
-            error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
-            error_log[str(i)+'_lesson_activities'], lesson_archived_activities = check_component(lesson,'archived-activities','',False)
-            if lesson_archived_activities != '':
-                for j,archived_activity in enumerate(lesson_archived_activities,start=1):
-                    current_level_archived = archived_activity['__line__']
-                    error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = check_component(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
-                    archived_activities.append(archived_activity_guid)
-            if error_log[str(i)+'_lesson_activities']:
-                for j,activity in enumerate(lesson_activities,start=1):
-                    current_level_activity = activity['__line__']
-                    error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = check_component(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
-                    error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = check_component(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
-                    error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
-                    error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(activity,'description','',False)
-                    error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'file','')
+                        if not error_log[str(i)+'_'+str(j)+'_activity_src']:
+                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
 
-                    if not error_log[str(i)+'_'+str(j)+'_activity_src']:
-                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
+                        active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
 
-                    active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
+                active_lessons.append(Lesson(title,guid,description,archived_activities,active_activies))
 
-            active_lessons.append(Lesson(title,guid,description,archived_activities,active_activies))
+        course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
+        error_log['guid_integrity'],guid_list = course.guid_check()
 
-    course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
-    error_log['guid_integrity'],guid_list = course.guid_check()
+        if not error_log['guid_integrity']:
+            for guid in guid_list:
+                print_error(PetljadocError.ERROR_DUPLICATE_GUID.format(guid))
+        error_log['source_integrity'], missing_src_title ,missing_src = course.source_check()
 
-    if not error_log['guid_integrity']:
-        for guid in guid_list:
-            print_error(PetljadocError.ERROR_DUPLICATE_GUID.format(guid))
-    error_log['source_integrity'], missing_src_title ,missing_src = course.source_check()
+        if not error_log['source_integrity']:
+            for titile,src in zip(missing_src_title,missing_src):
+                print_error(PetljadocError.ERROR_SOURCE_MISSING.format(titile,src))
 
-    if not error_log['source_integrity']:
-        for titile,src in zip(missing_src_title,missing_src):
-            print_error(PetljadocError.ERROR_SOURCE_MISSING.format(titile,src))
+        if False in error_log.values():
+            print_error(PetljadocError.ERROR_MSG_BUILD)
+            if not first_build:
+                print_error(PetljadocError.ERROR_STOP_SERVER)
+            exit(-1)
 
-    if False in error_log.values():
-        print_error(PetljadocError.ERROR_MSG_BUILD)
+        return course
+
+    except TypeError:
+        print_error(PetljadocError.ERROR_YAML_TYPE_ERROR)
+        if not first_build:
+            print_error(PetljadocError.ERROR_STOP_SERVER)
         exit(-1)
-
-    return course
 
 def check_component(dictionary,component,error_msg,required = True):
     try:
@@ -471,7 +479,7 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        prebuild()
+        prebuild(False)
 
 
 class LivereloadWatchdogWatcher(object):
