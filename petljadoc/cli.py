@@ -479,14 +479,20 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        prebuild(False)
+        if(len(event.src_path.rsplit('.'))>1):
+            if event.event_type == 'modified' and event.src_path.rsplit('.')[1] == 'rst':
+                shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
+        #if event.event_type == 'created' and event.src_path.rsplit('.')[1] == 'rst':
+            #shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
+        else:
+            prebuild(False)
 
 
 class LivereloadWatchdogWatcher(object):
     """
     File system watch dog.
     """
-    def __init__(self, use_polling=False):
+    def __init__(self):
         super(LivereloadWatchdogWatcher, self).__init__()
         self._changed = False
 
@@ -494,10 +500,7 @@ class LivereloadWatchdogWatcher(object):
         # instance to set the file which was
         # modified. Used for output purposes only.
         self._action_file = None
-        if use_polling:
-            self._observer = PollingObserver()
-        else:
-            self._observer = Observer()
+        self._observer = PollingObserver()
         self._observer.start()
 
         # Compatibility with livereload's builtin watcher
@@ -523,6 +526,6 @@ class LivereloadWatchdogWatcher(object):
 
 def watch_server(srcdir):
     server = Server(
-        watcher=LivereloadWatchdogWatcher(use_polling=True),
+        watcher=LivereloadWatchdogWatcher(),
     )
     server.watch(srcdir)
