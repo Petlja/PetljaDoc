@@ -438,30 +438,36 @@ def check_component(dictionary,component,error_msg,required = True):
 
 
 def write_to_index(index,course):
-    lang_picker = LanguagePick(course.lang)
-    index.write("="*len(course.title)+'\n'+
-                course.title+'\n'+
-                "="*len(course.title)+'\n')
-    index.write('\n')
-    index.write(lang_picker('willLearn'))
-    for willlearn in course.willlearn:
-        index.write(' '*4+'- '+willlearn+'\n')
-    index.write('\n')
-    index.write(lang_picker('requirements'))
-    for requirements in course.requirements:
-        index.write(' '*4+'- '+requirements+'\n')
-    index.write('\n')
-    index.write(lang_picker('toc'))
-    for toc in course.toc:
-        index.write(' '*4+'- '+toc+'\n')
-    index.write('\n')
-    if course.externalLinks:
-        index.write(lang_picker('externalLinks'))
-        for external in course.externalLinks:
-            index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
+    try:
+        lang_picker = LanguagePick(course.lang)
+        index.write("="*len(course.title)+'\n'+
+                    course.title+'\n'+
+                    "="*len(course.title)+'\n')
         index.write('\n')
-    index.write(INDEX_TEMPLATE_HIDDEN.format(3))
-
+        index.write(lang_picker('willLearn'))
+        for willlearn in course.willlearn:
+            index.write(' '*4+'- '+willlearn+'\n')
+        index.write('\n')
+        index.write(lang_picker('requirements'))
+        for requirements in course.requirements:
+            index.write(' '*4+'- '+requirements+'\n')
+        index.write('\n')
+        index.write(lang_picker('toc'))
+        for toc in course.toc:
+            index.write(' '*4+'- '+toc+'\n')
+        index.write('\n')
+        if course.externalLinks:
+            index.write(lang_picker('externalLinks'))
+            for external in course.externalLinks:
+                index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
+            index.write('\n')
+        index.write(INDEX_TEMPLATE_HIDDEN.format(3))
+    except NameError:
+        print_error(PetljadocError.ERROR_DESC_NONE_TYPE)
+        exit(-1)
+    except TypeError:
+        print_error(PetljadocError.ERROR_DESC_NONE_TYPE)
+        exit(-1)
 
 def print_error(error):
     init()

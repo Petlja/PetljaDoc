@@ -85,6 +85,8 @@ class PetljadocError:
     ERROR_TITLE ='Missing required attribute "title" (Top level).'
     ERROR_DESC = 'Missing required attribute "description" (Top level).'
 
+    ERROR_DESC_NONE_TYPE = 'Error in "descripiton". Check for empty attributes'
+
     ERROR_WILL_LEARN ='In "description" (line: {}). Missing required attribute "willLearn".'
     ERROR_REQUIREMENTS = 'In "description" (line: {}). Missing required attribute "requirements".'
     ERROR_TOC = 'In "description" (line: {}). Missing required attribute "toc" (Table of content).'
