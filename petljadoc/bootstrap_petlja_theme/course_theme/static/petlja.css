@@ -143,9 +143,19 @@ div.modal-header {
   margin-top: 72px;
 }
 
+div.sphinxsidebar {
+  float: left;
+  width: 25% !important;
+  margin-left: -100%;
+  font-size: 90%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin-top: 15px !important;
+}
 
-
-
+div.sphinxsidebar ul ul, div.sphinxsidebar ul.want-points {
+  margin-left: 0px !important;
+}
 @media only screen and (max-width: 900px) {
     .course-content {
         padding: 5px;
