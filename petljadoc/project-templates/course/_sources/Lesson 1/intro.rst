@@ -1,38 +1,17 @@
 =====================
-This Is A New Project
+This Is A New Course
 =====================
-
-.. Here is were you specify the content and order of your new book.
-
-.. Each section heading (e.g. "SECTION 1: A Random Section") will be
-   a heading in the table of contents. Source files that should be
-   generated and included in that section should be placed on individual
-   lines, with one line separating the first source filename and the
-   :maxdepth: line.
-
-.. Sources can also be included from subfolders of this directory.
-   (e.g. "DataStructures/queues.rst").
 
 SECTION 1: Introduction
 :::::::::::::::::::::::
 
-Congratulations!   If you can see this file you have probably successfully run the ``petljadoc init-runestone`` command.  
+Congratulations!   If you can see this file you have probably successfully run the ``petljadoc init-course`` command.  
 
 If you are looking at this as a source file you should now run ``petljadoc preview``  to generate html files and preview 
 them in your browser.
 
-This is just a sample of what you can do.  The index.rst file is the table of contents for your entire project.
- You can put all of your writing in the index, or  you can include additional rst files. 
- Those files may even be in subdirectories that you can reference using a relative path.
+This is just a sample of what you can do.  The index.yaml file is the table of contents for your entire project.
 
-
-::
-
-
-   .. toctree::
-      :maxdepth: 2
-
-      some/path/myfile.rst
 
 
 Section 2: Links
@@ -66,21 +45,5 @@ ActiveCode
        total = total + num
    print(total)
 
-Multiple Choice
----------------
-
-.. mchoice:: question1_2
-    :multiple_answers:
-    :correct: a,b,d
-    :answer_a: red
-    :answer_b: yellow
-    :answer_c: black
-    :answer_d: green
-    :feedback_a: Red is a definitely on of the colors.
-    :feedback_b: Yes, yellow is correct.
-    :feedback_c: Remember the acronym...ROY G BIV.  B stands for blue.
-    :feedback_d: Yes, green is one of the colors.
-
-    Which colors might be found in a rainbow? (choose all that are correct)
 
 Now feel free to modify this file to start creating your own interactive page.
