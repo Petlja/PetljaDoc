@@ -23,6 +23,7 @@ lessons:
   - title: Lesson 1
     guid: c2c651cd-53d9-4a3d-ba4f-650b8422f0bc
     description: Your first lesson. Description is not required attribute
+    folder: 1_Lesson
     activities:
       - type: reading
         title: Intro

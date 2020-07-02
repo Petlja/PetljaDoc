@@ -140,9 +140,9 @@ def parse_yaml(path,first_build=True):
             write_to_index(index,course)
             path = path.joinpath('_intermediate')
             for lesson in course.active_lessons:
-                copy_dir('_sources/'+lesson.title,'_intermediate/'+lesson.title)
-                index.write(' '*4+ lesson.title +'/index\n')
-                section_index = open(path.joinpath(lesson.title).joinpath('index.rst'),
+                copy_dir('_sources/'+lesson.folder,'_intermediate/'+lesson.folder)
+                index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
+                section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
                                      mode = 'w+',
                                      encoding='utf-8')
                 section_index.write("="*len(lesson.title)+'\n'+
@@ -154,13 +154,13 @@ def parse_yaml(path,first_build=True):
                         if activity.get_src_ext() == 'rst':
                             section_index.write(' '*4+activity.src+'\n')
                         if activity.get_src_ext() == 'pdf':
-                            pdf_rst = open('_intermediate/'+lesson.title+'/'+activity.title+'.rst',
+                            pdf_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
                                            mode = 'w+',encoding='utf-8')
                             pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                             pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
                             section_index.write(' '*4+activity.title+'.rst\n')
                     if activity.activity_type == 'video':
-                        video_rst = open('_intermediate/'+lesson.title+'/'+activity.title+'.rst',
+                        video_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
                                          mode = 'w+',encoding='utf-8')
                         video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                         video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
@@ -372,6 +372,7 @@ def check_structure(data, first_build):
                 current_level = lesson['__line__']
 
                 error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
+                error_log[str(i)+'_lesson_folder'], folder = check_component(lesson,'folder',PetljadocError.ERROR_LESSON_FOLDER.format(current_level ,i))
                 error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
                 error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
                 error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
@@ -395,7 +396,7 @@ def check_structure(data, first_build):
 
                         active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
 
-                active_lessons.append(Lesson(title,guid,description,archived_activities,active_activies))
+                active_lessons.append(Lesson(title,folder,guid,description,archived_activities,active_activies))
 
         course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
         error_log['guid_integrity'],guid_list = course.guid_check()
@@ -485,11 +486,11 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        if(len(event.src_path.rsplit('.'))>1):
+        if len(event.src_path.rsplit('.'))>1:
             if event.event_type == 'modified' and event.src_path.rsplit('.')[1] == 'rst':
                 shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
-        #if event.event_type == 'created' and event.src_path.rsplit('.')[1] == 'rst':
-            #shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
+            else:
+                prebuild(False)    
         else:
             prebuild(False)
 

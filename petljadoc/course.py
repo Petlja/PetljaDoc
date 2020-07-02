@@ -28,7 +28,8 @@ class Activity:
         return ''
 
 class Lesson:
-    def __init__(self,title,guid,description,archived_activities,active_activities):
+    def __init__(self,title,folder,guid,description,archived_activities,active_activities):
+        self.folder = folder if folder else '_missing_folder_name'
         self.title = title
         self.guid = guid
         self.description = description
@@ -68,8 +69,8 @@ class Course:
             for activity in lesson.active_activies:
                 if activity.activity_type in ['reading','quiz']:
                     if activity.get_src_ext() == 'rst':
-                        if not Path('_sources/'+lesson.title+'/'+activity.src).is_file():
-                            missing_activities_src.append('_sources/'+lesson.title+'/'+activity.src)
+                        if not Path('_sources/'+lesson.folder+'/'+activity.src).is_file():
+                            missing_activities_src.append('_sources/'+lesson.folder+'/'+activity.src)
                             missing_activities.append(activity.title)
                             missing_flag = False
                     if activity.get_src_ext() == 'pdf':
@@ -99,6 +100,7 @@ class PetljadocError:
     ERROR_ARCHIVED_LESSON = 'In "archived-lessons" (line: {}). Lesson {} is missing required attribute "guid".'
 
     ERROR_LESSON_TITLE = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "title".'
+    ERROR_LESSON_FOLDER = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "folder".'
     ERROR_LESSON_GUID = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "guid".'
     ERROR_LESSON_ACTIVITIES = 'In "lessons" (line: {}). Lesson {} is missing the required attribute "activities".'
 
