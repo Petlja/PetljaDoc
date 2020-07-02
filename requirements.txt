@@ -4,3 +4,4 @@ sphinx-autobuild>=0.7.1
 runestone @ https://github.com/Petlja/RunestoneComponents-Petlja/archive/master.zip
 click>=7.0
 cyrtranslit>=0.4
+colorama>= 0.4.1
