@@ -136,6 +136,8 @@ def parse_yaml(path,first_build=True):
                     os.mkdir('_intermediate/')
                 if build_path.exists():
                     shutil.rmtree('_build/')
+                    os.mkdir('_build/')
+            course.create_YAML('_build/index.yaml')
             index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
             write_to_index(index,course)
             path = path.joinpath('_intermediate')
@@ -343,6 +345,8 @@ def check_structure(data, first_build):
 
         if error_log['description']:
             current_level = data['description']['__line__']
+            error_log['longDescription'] ,longDesc = check_component(data['description'],'longDescription',PetljadocError.ERROR_LONG_DESC.format(current_level))
+            error_log['shortDescription'],shortDesc = check_component(data['description'],'shortDescription',PetljadocError.ERROR_SHORT_DESC.format(current_level))
             error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
             error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
             error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
@@ -398,7 +402,7 @@ def check_structure(data, first_build):
 
                 active_lessons.append(Lesson(title,folder,guid,description,archived_activities,active_activies))
 
-        course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
+        course = Course(courseId,lang,title_course,longDesc,shortDesc,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
         error_log['guid_integrity'],guid_list = course.guid_check()
 
         if not error_log['guid_integrity']:

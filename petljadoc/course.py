@@ -1,5 +1,6 @@
 from pathlib import Path
-
+from docutils.core import publish_parts
+import yaml
 class ExternalLink:
     def __init__(self,text,link):
         self.text = text
@@ -9,7 +10,7 @@ class Activity:
     def __init__(self,activity_type,title,src,guid,description):
         self.activity_type = activity_type
         self.title = title
-        self.description = description
+        self.description = description if description else ''
 
         if self.activity_type == 'video':
             self.src = video_url(src)
@@ -38,7 +39,7 @@ class Lesson:
 
 
 class Course:
-    def __init__(self,courseId,lang,title,willlearn,requirements,toc,extranalLinks,
+    def __init__(self,courseId,lang,title,longDesc,shortDesc,willlearn,requirements,toc,extranalLinks,
                  archived_lessons,active_lessons):
         self.courseId = courseId
         self.lang = lang
@@ -49,7 +50,9 @@ class Course:
         self.externalLinks = extranalLinks
         self.archived_lessons = archived_lessons
         self.active_lessons = active_lessons
-
+        self.longDesc = longDesc
+        self.shortDesc = shortDesc
+        self.dict = {}
 
     def guid_check(self):
         guid_list = self.archived_lessons
@@ -79,6 +82,47 @@ class Course:
                             missing_activities.append(activity.title)
                             missing_flag = False
         return missing_flag, missing_activities , missing_activities_src
+    
+    def create_YAML(self,desc):
+        self.dict['courseId'] = self.courseId
+        self.dict['title'] = self.title
+        self.dict['description'] = {}
+        self.dict['description']['willlearn'] = self.willlearn
+        self.dict['description']['shortDesc'] = self.shortDesc
+        self.dict['description']['longDesc'] =  publish_parts(self.longDesc, writer_name='html')['html_body'] if self.longDesc.find('\n') != -1 else self.longDesc
+        self.dict['description']['requirements'] = self.requirements
+        self.dict['description']['toc'] = self.toc
+        self.dict['description']['externalLinks'] = []
+        for el in self.externalLinks:
+            self.dict['description']['externalLinks'].append({'text':el.text,'href':el.link})
+        self.dict['lessons'] = []
+        for lesson in self.active_lessons:
+            tmp_activities=[]
+            for activity in lesson.active_activies:
+                tmp_activities.append({ 'type':activity.activity_type,
+                                        'title':activity.title,
+                                        'file':activity.src,
+                                        'description': activity.description,
+                                        'guid':activity.guid}
+                )
+            tmp_archived = []
+            for activity in lesson.archived_activities:
+                tmp_archived.append({'guid':activity}
+                )
+            self.dict['lessons'].append({'title':lesson.title,
+                                         'guid':lesson.guid,
+                                         'description':  lesson.description,
+                                         'folder':lesson.folder,
+                                         'activites':tmp_activities,
+                                         'archived-activities':tmp_archived}
+            )
+            self.dict['archived-lessons'] = []
+            for al in self.archived_lessons:
+                self.dict['archived-lessons'].append({'guid':al})
+
+        with open(desc, 'w',encoding='utf-8') as outfile:
+            yaml.dump(self.dict, outfile, default_flow_style=False,encoding='utf-8',allow_unicode=True)
+
 
 class PetljadocError:
     ERROR_ID = 'Missing required attribute "courseId" (Top level).'
@@ -91,6 +135,8 @@ class PetljadocError:
     ERROR_WILL_LEARN ='In "description" (line: {}). Missing required attribute "willLearn".'
     ERROR_REQUIREMENTS = 'In "description" (line: {}). Missing required attribute "requirements".'
     ERROR_TOC = 'In "description" (line: {}). Missing required attribute "toc" (Table of content).'
+    ERROR_SHORT_DESC = 'In "description" (line: {}). Missing required attribute "shortDescription".'
+    ERROR_LONG_DESC = 'In "description" (line: {}). Missing required attribute "longDescription".'
 
     ERROR_EXTERNAL_LINKS_TEXT = 'In "externalLinks" (line: {}). External link {} is missing required attribute "text".'
     ERROR_EXTERNAL_LINKS_LINK = 'In "externalLinks" (line: {}). External link {} is missing required attribute "href".'
