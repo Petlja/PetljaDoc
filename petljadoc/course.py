@@ -88,8 +88,8 @@ class Course:
         self.dict['title'] = self.title
         self.dict['description'] = {}
         self.dict['description']['willlearn'] = self.willlearn
-        self.dict['description']['shortDesc'] = self.shortDesc
-        self.dict['description']['longDesc'] =  publish_parts(self.longDesc, writer_name='html')['html_body'] if self.longDesc.find('\n') != -1 else self.longDesc
+        self.dict['description']['shortDescription'] = self.shortDesc
+        self.dict['description']['longDescription'] =  publish_parts(self.longDesc, writer_name='html')['html_body'] if self.longDesc.find('\n') != -1 else self.longDesc
         self.dict['description']['requirements'] = self.requirements
         self.dict['description']['toc'] = self.toc
         self.dict['description']['externalLinks'] = []
