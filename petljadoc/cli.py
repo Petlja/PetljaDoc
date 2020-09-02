@@ -133,10 +133,10 @@ def parse_yaml(path,first_build=True):
                 #hack till _source is src_dir for live update
                 if intermediate_path.exists():
                     shutil.rmtree('_intermediate/')
-                    os.mkdir('_intermediate/')
+                os.mkdir('_intermediate/')
                 if build_path.exists():
                     shutil.rmtree('_build/')
-                    os.mkdir('_build/')
+                os.mkdir('_build/')
             course.create_YAML('_build/index.yaml')
             index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
             write_to_index(index,course)
