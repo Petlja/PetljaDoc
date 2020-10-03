@@ -239,7 +239,7 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     args = []
     if sphinx_autobuild:
         args.append(f'--port {port}')
-        args.append('-B')
+        args.append('--open-browser')
         args.append('--no-initial')
         build_module = "sphinx_autobuild"
     if sphinx_build:
