@@ -19,6 +19,7 @@ from petljadoc import bootstrap_petlja_theme
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity,Lesson,Course,PetljadocError,ExternalLink,LanguagePick
+import jinja2
 
 
 
@@ -111,7 +112,7 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
                         prompt_suffix=prompt_suffix, show_default=show_default, err=err,
                         show_choices=show_choices)
 
-def parse_yaml(path,first_build=True):
+def build_intermediate(path,first_build=True):
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
@@ -167,6 +168,7 @@ def parse_yaml(path,first_build=True):
                         video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                         video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                         section_index.write(' '*4+activity.title+'.rst\n')
+            generate_toc(course)
 
 def prebuild(first_build = True):
     p = Path(os.getcwd())
@@ -174,7 +176,7 @@ def prebuild(first_build = True):
         raise click.ClickException("index.yaml is not present in source directory")
     if not p.joinpath('_intermediate').exists():
         os.mkdir('_intermediate')
-    parse_yaml(p,first_build)
+    build_intermediate(p,first_build)
 
 
 @click.group()
@@ -449,6 +451,8 @@ def write_to_index(index,course):
                     course.title+'\n'+
                     "="*len(course.title)+'\n')
         index.write('\n')
+        index.write(course.longDesc)
+        index.write('\n')
         index.write(lang_picker('willLearn'))
         for willlearn in course.willlearn:
             index.write(' '*4+'- '+willlearn+'\n')
@@ -466,12 +470,10 @@ def write_to_index(index,course):
             for external in course.externalLinks:
                 index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
             index.write('\n')
-        index.write(lang_picker('longDesc'))
-        index.write(' '*4+'- '+course.longDesc)
-        index.write('\n')
         index.write(lang_picker('shortDesc'))
         index.write(' '*4+'- '+course.shortDesc)
         index.write('\n')
+
         index.write(INDEX_TEMPLATE_HIDDEN.format(3))
     except NameError:
         print_error(PetljadocError.ERROR_DESC_NONE_TYPE)
@@ -485,7 +487,14 @@ def print_error(error):
     print(Fore.RED, error)
     print(Style.RESET_ALL)
 
-
+def generate_toc(course):
+    template_path = './_templates/plugin_layouts/custom_theme/'
+    if course:
+        jinjaEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path),
+                                trim_blocks=True, lstrip_blocks=True)
+        toc = jinjaEnv.get_template('petlja_globaltoc.html').render(course = course)
+        with open(template_path+'globaltoc.html', mode='w', encoding='utf8') as file:
+            file.write(toc)
 
 class _WatchdogHandler(FileSystemEventHandler):
 

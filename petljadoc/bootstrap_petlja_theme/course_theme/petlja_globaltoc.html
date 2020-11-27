@@ -1,0 +1,19 @@
+<ul>
+    {% for lesson in course.active_lessons %}
+    <div>{{lesson.title}}</div>
+        {% for activity in lesson.active_activies %}
+        <div>
+            <div>
+                {% if "reading" ==  activity.activity_type  %}
+                <i>1</i>
+                {% elif  "video" == activity.activity_type %}
+                <i>2</i>
+                {%else%}
+                <i>3</i>
+                {% endif %}
+                <a href=/{{lesson.folder_url}}/{{activity.toc_url}}.html>{{activity.title}}</a>
+            </div>
+        </diV>
+        {% endfor %}
+    {% endfor %}
+</ul>

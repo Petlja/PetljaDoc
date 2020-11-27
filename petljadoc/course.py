@@ -16,7 +16,7 @@ class Activity:
             self.src = video_url(src)
         else:
             self.src = src
-
+        self.toc_url =src.split('.')[0].replace(" ","%20") if activity_type != 'video' else self.title.replace(" ","%20")
         tmp_guid = guid.rsplit('/')
         self.guid = tmp_guid[0]
         self.alias = ''
@@ -31,6 +31,7 @@ class Activity:
 class Lesson:
     def __init__(self,title,folder,guid,description,archived_activities,active_activities):
         self.folder = folder if folder else '_missing_folder_name'
+        self.folder_url = self.folder.replace(" ","%20")
         self.title = title
         self.guid = guid
         self.description = description
