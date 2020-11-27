@@ -166,9 +166,9 @@ class PetljadocError:
     ERROR_YAML_TYPE_ERROR = 'Yaml stucture error.'
 
 class LanguagePick:
-    CourseDescripiton = {'sr-Cyrl':{'willLearn':'Шта ћете научити:\n','requirements':'Потребно:\n','toc':'Садржај:\n','externalLinks':'Додатни линкови:\n'},
-                         'sr-Latn':{'willLearn':'Sta ćete naučiti:\n','requirements':'Potrebno:\n','toc':'Sadržaj:\n','externalLinks':'Dodatni linkovi:\n'},
-                         'en':{'willLearn':'Things you will learn:\n','requirements':'Required:\n','toc':'Table of content:\n','externalLinks':'External links:\n'}}
+    CourseDescripiton = {'sr-Cyrl':{'willLearn':'Шта ћете научити:\n','requirements':'Потребно:\n','toc':'Садржај:\n','externalLinks':'Додатни линкови:\n','longDesc':'Dug opis:\n','shortDesc':'Kratak opis:\n'},
+                         'sr-Latn':{'willLearn':'Sta ćete naučiti:\n','requirements':'Potrebno:\n','toc':'Sadržaj:\n','externalLinks':'Dodatni linkovi:\n','longDesc':'Дуг опис:\n','shortDesc':'Кратак опис:\n'},
+                         'en':{'willLearn':'Things you will learn:\n','requirements':'Required:\n','toc':'Table of content:\n','externalLinks':'External links:\n','longDesc':'Long description:\n','shortDesc':'Short description:\n'}}
     def __init__(self,lang):
         self.strings = self.CourseDescripiton[lang]
 

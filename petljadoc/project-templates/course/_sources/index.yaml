@@ -17,6 +17,9 @@ description:
       href: https://github.com/Petlja/PetljaDoc/blob/master/README.md
     - text: Runestone Interactive
       href: https://github.com/RunestoneInteractive/overview
+  longDescription: |
+    Long description
+  shortDescription: Shrot description
 
 
 lessons:

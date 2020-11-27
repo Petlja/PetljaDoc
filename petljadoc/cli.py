@@ -466,6 +466,12 @@ def write_to_index(index,course):
             for external in course.externalLinks:
                 index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
             index.write('\n')
+        index.write(lang_picker('longDesc'))
+        index.write(' '*4+'- '+course.longDesc)
+        index.write('\n')
+        index.write(lang_picker('shortDesc'))
+        index.write(' '*4+'- '+course.shortDesc)
+        index.write('\n')
         index.write(INDEX_TEMPLATE_HIDDEN.format(3))
     except NameError:
         print_error(PetljadocError.ERROR_DESC_NONE_TYPE)
