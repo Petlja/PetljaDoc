@@ -1,19 +1,21 @@
 <ul>
     {% for lesson in course.active_lessons %}
-    <div>{{lesson.title}}</div>
+    <div class="lecture-div">{{lesson.title}}</div>
+    
+    <div>
         {% for activity in lesson.active_activies %}
-        <div>
-            <div>
+            <div class="activity-div">
                 {% if "reading" ==  activity.activity_type  %}
-                <i>1</i>
+                <i class="fas fa-file-alt activity-icon"></i>
                 {% elif  "video" == activity.activity_type %}
-                <i>2</i>
+                <i class="fas fa-film activity-icon"></i>
                 {%else%}
-                <i>3</i>
+                <i class="far fa-question-circle activity-icon"></i>
                 {% endif %}
                 <a href=/{{lesson.folder_url}}/{{activity.toc_url}}.html>{{activity.title}}</a>
             </div>
-        </diV>
         {% endfor %}
+        
+    </diV>
     {% endfor %}
 </ul>

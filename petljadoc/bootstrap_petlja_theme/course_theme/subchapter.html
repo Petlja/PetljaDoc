@@ -1,10 +1,15 @@
-<div class="col-md-12">
+<div class="col-md-12 lecture-switcher">
+    <div class="petljadoc-resources">
+            <span class="pull-left">&copy; 2019 Petlja (Created using  <a href="https://pypi.org/project/Sphinx/">Swinx</a>, <a href="http://runestoneinteractive.org/">RunestoneComponents</a> and <a href="https://github.com/Petlja/PetljaDoc">PetljaDoc</a>)</span>
+    </div>
 <ul class="pager">
     {%- if prev %}
-    <li id="relations-prev" title='Previous chapter - {{ prev.title }}' data-toggle="tooltip"><a href="{{ prev.link|e }}"><i class="fas fa-arrow-left"></i></a></li>
+    <a href="{{ prev.link|e }}"><div id="prevLecture" class="lecture-toggler-arrows"><i class="fas fa-arrow-left fa"></i></div></a>
+    {%else%}
+    <a href="#" class="invisible"><div id="prevLecture" class="lecture-toggler-arrows"><i class="fas fa-arrow-left fa"></i></div></a>
     {% endif %}
     {%- if next %}
-        <li id="relations-next" title='Next chapter - {{ next.title }}' data-toggle="tooltip"><a href="{{ next.link|e }}"><i class="fas fa-arrow-right"></i></a></li>
+       <a href="{{ next.link|e }}"><div id="nextLecture" class="lecture-toggler-arrows lecture-toggler-arrows-next"> <i class="fas fa-arrow-right fa"></i></div></a>
     {%- endif %}
 </ul>
 
