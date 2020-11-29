@@ -1,8 +1,8 @@
 /* Stickey footer */
 html {
 	position: relative;
-  max-height: 100vh;
-  width: 100vw;
+	max-height: 100vh;
+	width: 100vw;
 }
 
 .modal-body {
@@ -11,7 +11,7 @@ html {
 }
 
 a:hover {
-  text-decoration: none !important;
+	text-decoration: none !important;
 }
 
 /* Box */
@@ -143,7 +143,6 @@ div.modal-header {
 	border: none !important;
 }
 
-
 div.sphinxsidebar {
 	float: left;
 	width: 100% !important;
@@ -158,8 +157,8 @@ div.sphinxsidebar {
 	overflow-y: scroll;
 	position: relative;
 	scroll-behavior: smooth;
-  color: white !important;
-  border: none;
+	color: white !important;
+	border: none;
 }
 
 div.sphinxsidebar a {
@@ -202,10 +201,32 @@ ul:first-child {
 		max-width: 100%;
 	}
 }
-.lecture-div{ 
-  font-size: 18px;
-  font-weight: 700;
+.lecture-div {
+	font-size: 18px;
+	font-weight: 700;
+	cursor: pointer;
+	position: relative;
+	padding: 6px 10px 6px 10px;
+	user-select: none;
 }
+
+.lecture-div h5 {
+	margin: 0 0 0 15px !important;
+    font-size: 18px;
+}
+
+.lecture-div i {
+	position: absolute;
+    top: 6px;
+    left: 5px;
+    font-size: 21px;
+}
+
+.lecture-div:hover {
+	text-shadow: 0 0 3px;
+}
+
+
 .activity-div {
 	width: 100%;
 	padding-left: 20px;
@@ -213,75 +234,85 @@ ul:first-child {
 	padding-bottom: 7px;
 	font-size: 16px;
 	line-break: auto;
-  vertical-align: middle;
-  cursor: pointer;
+	vertical-align: middle;
+	cursor: pointer;
+	user-select: none;
+}
+
+.activity-div.active {
+	background-color: #20c997;
+}
+
+.activity-div i{
+	width: 20px;
+}
+
+.activity-div:hover {
+	text-shadow: 0 0 3px;
 }
 
 #main-content::before {
-  display: none !important;
+	display: none !important;
 }
 #main-content {
-  width: 80vw !important;
-  max-width: none !important;
-  margin-top: 65px;
-  overflow: hidden;
-  overflow-y: scroll;
+	width: 80vw !important;
+	max-width: none !important;
+	margin-top: 65px;
+	overflow: hidden;
+	overflow-y: scroll;
 }
 
 #main-content > div:first-of-type {
-  width: calc(80vw - 60px) !important;
-  height: 100%;
+	width: calc(80vw - 60px) !important;
+	height: 100%;
 }
 
 .lecture-switcher {
-  width: 100%;
-  height: 50px;
-  background-color: #179c74;
-  padding: 0 !important;
+	width: 100%;
+	height: 50px;
+	background-color: #179c74;
+	padding: 0 !important;
 }
 
-.lecture-switcher>.pager {
-  margin: 0px !important;
+.lecture-switcher > .pager {
+	margin: 0px !important;
 }
-
-
 
 .lecture-toggler-arrows {
-  text-align: center;
-  cursor: pointer;
-  color: #fff;
-  padding: 2px 10px;
-  height: 40px;
-  width: 80px;
-  margin-top: 5px;
-  margin-left: 45%;
-  border: 1px solid #fff;
-  float: left;
-  border-radius: 10px;
-  font-size: 22px;
+	text-align: center;
+	cursor: pointer;
+	color: #fff;
+	padding: 2px 10px;
+	height: 40px;
+	width: 80px;
+	margin-top: 5px;
+	margin-left: 45%;
+	border: 1px solid #fff;
+	float: left;
+	border-radius: 10px;
+	font-size: 22px;
 }
 
 .lecture-toggler-arrows:hover {
-  background-color: white;
-  color: #179c74;
+	background-color: white;
+	color: #179c74;
 }
 
 .lecture-toggler-arrows-next {
-
-  margin-left: 50px;
+	margin-left: 50px;
 }
 
 .petljadoc-resources {
-  width: 500px;
-  float: left;
-  color: white;
-  position: absolute;
-  left: 0;
-  top: 15px;
+	width: 500px;
+	float: left;
+	color: white;
+	position: absolute;
+	left: 0;
+	top: 15px;
 }
 
 .petljadoc-resources a {
-  color: white;
-  font-weight: 700;
-  font-style: italic;
+	color: white;
+	font-weight: 700;
+	font-style: italic;
 }
