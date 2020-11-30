@@ -506,7 +506,7 @@ class _WatchdogHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         if len(event.src_path.rsplit('.'))>1:
-            if event.event_type == 'modified' and event.src_path.rsplit('.')[1] == 'rst':
+            if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
                 shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
             else:
                 prebuild(False)    
