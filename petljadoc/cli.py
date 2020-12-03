@@ -15,11 +15,12 @@ from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from livereload import Server
-from petljadoc import bootstrap_petlja_theme
+from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity,Lesson,Course,PetljadocError,ExternalLink,LanguagePick
-import jinja2
+
+
 
 
 
@@ -82,18 +83,21 @@ def init_template_arguments(template_dir, defaults, project_type):
     ta['templates_path'] = '_templates'
     ta['html_theme_path'] = '_templates/plugin_layouts'
     custom_theme = _prompt("Copy HTML theme into project",type=bool,
-                           default="yes", force_default=defaults)
+                           default=False, force_default=defaults)
     if custom_theme:
         ta['html_theme'] = 'custom_theme'
     else:
-        ta['html_theme'] = 'bootstrap_petlja_theme'
+        if project_type == 'runestone':
+            ta['html_theme'] = 'petljadoc_runestone_theme'
+        if project_type == 'course':
+            ta['html_theme'] = 'petljadoc_course_theme'
     apply_template_dir(template_dir, '.', ta)
     if custom_theme:
         if project_type == 'runestone':
-            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+            theme_path = os.path.join(themes.runestone_theme.get_html_theme_path(),
                                       'runestone_theme')
         else:
-            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+            theme_path = os.path.join(themes.runestone_theme.get_html_theme_path(),
                                       'course_theme')
         apply_template_dir(theme_path,
                            os.path.join(ta['html_theme_path'], ta['html_theme']), {},
@@ -131,7 +135,6 @@ def build_intermediate(path,first_build=True):
             if first_build:
                 intermediate_path = Path('_intermediate/')
                 build_path = Path('_build')
-                #hack till _source is src_dir for live update
                 if intermediate_path.exists():
                     shutil.rmtree('_intermediate/')
                 os.mkdir('_intermediate/')
@@ -168,7 +171,7 @@ def build_intermediate(path,first_build=True):
                         video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                         video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                         section_index.write(' '*4+activity.title+'.rst\n')
-            generate_toc(course)
+            template_toc(course)
 
 def prebuild(first_build = True):
     p = Path(os.getcwd())
@@ -487,14 +490,9 @@ def print_error(error):
     print(Fore.RED, error)
     print(Style.RESET_ALL)
 
-def generate_toc(course):
-    template_path = './_templates/plugin_layouts/custom_theme/'
-    if course:
-        jinjaEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path),
-                                trim_blocks=True, lstrip_blocks=True)
-        toc = jinjaEnv.get_template('petlja_globaltoc.html').render(course = course)
-        with open(template_path+'globaltoc.html', mode='w', encoding='utf8') as file:
-            file.write(toc)
+def template_toc(course):
+   with open('course', mode='w', encoding='utf8') as file:
+           file.write(json.dumps(course.toDict()))
 
 class _WatchdogHandler(FileSystemEventHandler):
 
@@ -555,3 +553,8 @@ def watch_server(srcdir):
         watcher=LivereloadWatchdogWatcher(),
     )
     server.watch(srcdir)
+
+def read_course():
+    with open('course', mode='r', encoding='utf8') as file:
+        course = json.load(file)
+        return course

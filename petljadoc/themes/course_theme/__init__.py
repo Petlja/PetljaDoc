@@ -8,4 +8,4 @@ def get_html_theme_path():
 
 
 def setup(app):
-    app.add_html_theme('bootstrap_petlja_theme', path.abspath(path.dirname(__file__)))
+    app.add_html_theme('petljadoc_course_theme', path.abspath(path.dirname(__file__)))

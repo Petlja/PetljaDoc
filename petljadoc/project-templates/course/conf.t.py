@@ -113,6 +113,7 @@ rst_prolog = (
 
 # -- Options for HTML output ---------------------------------------------------
 
+
 html_context = {'course_id': '{{project_name}}',
                 'login_required':'{{login_req}}',
                 'appname': "{{master_app}}",
@@ -128,7 +129,8 @@ html_context = {'course_id': '{{project_name}}',
                 'proxy_uri_files': '/jobe/index.php/restapi/files/',
                 'downloads_enabled': '{{downloads_enabled}}',
                 'enable_chatcodes': '{{enable_chatcodes}}',
-                'runestone_version': pkg_resources.require("runestone")[0].version
+                'runestone_version': pkg_resources.require("runestone")[0].version,
+                'course':petljadoc.cli.read_course()
                }
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

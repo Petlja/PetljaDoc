@@ -123,7 +123,22 @@ class Course:
 
         with open(desc, 'w',encoding='utf-8') as outfile:
             yaml.dump(self.dict, outfile, default_flow_style=False,encoding='utf-8',allow_unicode=True)
-
+    def toDict(self):
+        course_dict = dict()
+        course_dict['active_lessons'] = []   
+        for lesson in self.active_lessons:
+            lesson_dict = dict()
+            lesson_dict['title'] = lesson.title
+            lesson_dict['folder_url'] = lesson.folder_url
+            lesson_dict['active_activies'] =[]            
+            for activity in lesson.active_activies:
+                 activity_dict = dict()
+                 activity_dict['toc_url'] = activity.toc_url
+                 activity_dict['activity_type']   = activity.activity_type
+                 activity_dict['title'] = activity.title
+                 lesson_dict['active_activies'].append(activity_dict)
+            course_dict['active_lessons'].append(lesson_dict)
+        return course_dict
 
 class PetljadocError:
     ERROR_ID = 'Missing required attribute "courseId" (Top level).'
