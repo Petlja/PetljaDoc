@@ -131,7 +131,7 @@ def build_intermediate(path,first_build=True):
                 print_error(PetljadocError.ERROR_MSG_YAML)
             exit(-1)
         else:
-            course = check_structure(data, first_build)
+            course = createCourse(data, first_build)
             if first_build:
                 intermediate_path = Path('_intermediate/')
                 build_path = Path('_build')
@@ -141,37 +141,9 @@ def build_intermediate(path,first_build=True):
                 if build_path.exists():
                     shutil.rmtree('_build/')
                 os.mkdir('_build/')
-            course.create_YAML('_build/index.yaml')
-            index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
-            write_to_index(index,course)
-            path = path.joinpath('_intermediate')
-            for lesson in course.active_lessons:
-                copy_dir('_sources/'+lesson.folder,'_intermediate/'+lesson.folder)
-                index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
-                section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
-                                     mode = 'w+',
-                                     encoding='utf-8')
-                section_index.write("="*len(lesson.title)+'\n'+
-                                    lesson.title+'\n'+
-                                    "="*len(lesson.title)+'\n')
-                section_index.write(INDEX_TEMPLATE.format(1))
-                for activity in lesson.active_activies:
-                    if activity.activity_type in ['reading','quiz']:
-                        if activity.get_src_ext() == 'rst':
-                            section_index.write(' '*4+activity.src+'\n')
-                        if activity.get_src_ext() == 'pdf':
-                            pdf_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
-                                           mode = 'w+',encoding='utf-8')
-                            pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
-                            pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
-                            section_index.write(' '*4+activity.title+'.rst\n')
-                    if activity.activity_type == 'video':
-                        video_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
-                                         mode = 'w+',encoding='utf-8')
-                        video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
-                        video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
-                        section_index.write(' '*4+activity.title+'.rst\n')
-            template_toc(course)
+            course.createYAML('_build/index.yaml')
+            createIndexRST(course,path)
+            templateToc(course)
 
 def prebuild(first_build = True):
     p = Path(os.getcwd())
@@ -334,7 +306,7 @@ def cyr2lat():
     else:
         print('Folder name must end with Cyrl')
 
-def check_structure(data, first_build):
+def createCourse(data, first_build):
     error_log = {}
     archived_lessons = []
     active_lessons = []
@@ -343,36 +315,35 @@ def check_structure(data, first_build):
     requirements = []
     toc = []
     try:
-        error_log['courseId'], courseId = check_component(data,'courseId',PetljadocError.ERROR_ID)
-        error_log['lang'], lang = check_component(data, 'lang', PetljadocError.ERROR_LANG)
-        error_log['title'], title_course = check_component(data, 'title', PetljadocError.ERROR_TITLE)
-        error_log['description'],_ = check_component(data, 'description', PetljadocError.ERROR_DESC)
+        error_log['courseId'], courseId = checkComponent(data,'courseId',PetljadocError.ERROR_ID)
+        error_log['lang'], lang = checkComponent(data, 'lang', PetljadocError.ERROR_LANG)
+        error_log['title'], title_course = checkComponent(data, 'title', PetljadocError.ERROR_TITLE)
+        error_log['description'],_ = checkComponent(data, 'description', PetljadocError.ERROR_DESC)
 
         if error_log['description']:
             current_level = data['description']['__line__']
-            error_log['longDescription'] ,longDesc = check_component(data['description'],'longDescription',PetljadocError.ERROR_LONG_DESC.format(current_level))
-            error_log['shortDescription'],shortDesc = check_component(data['description'],'shortDescription',PetljadocError.ERROR_SHORT_DESC.format(current_level))
-            error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
-            error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
-            error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
-            error_log['externalLinks'], externalLinks = check_component(data['description'],'externalLinks','',False)
+            error_log['longDescription'] ,longDesc = checkComponent(data['description'],'longDescription',PetljadocError.ERROR_LONG_DESC.format(current_level))
+            error_log['shortDescription'],shortDesc = checkComponent(data['description'],'shortDescription',PetljadocError.ERROR_SHORT_DESC.format(current_level))
+            error_log['willLearn'] ,willLearn = checkComponent(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
+            error_log['requirements'] ,requirements = checkComponent(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
+            error_log['toc'], toc = checkComponent(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
+            error_log['externalLinks'], externalLinks = checkComponent(data['description'],'externalLinks','',False)
 
             if externalLinks != '':
-
                 for i,external_link in enumerate(externalLinks,start=1):
                     current_level = external_link['__line__']
-                    error_log[str(i)+'link_text'], text = check_component(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
-                    error_log[str(i)+'link_href'], link = check_component(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
+                    error_log[str(i)+'link_text'], text = checkComponent(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
+                    error_log[str(i)+'link_href'], link = checkComponent(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
                     external_links.append(ExternalLink(text,link))
 
-        error_log['lessons'], _ = check_component(data, 'lessons', PetljadocError.ERROR_LESSONS)
+        error_log['lessons'], _ = checkComponent(data, 'lessons', PetljadocError.ERROR_LESSONS)
 
         if error_log['lessons']:
-            error_log['archived-lessons'], archived_lessons_list = check_component(data,'archived-lessons','',False)
+            error_log['archived-lessons'], archived_lessons_list = checkComponent(data,'archived-lessons','',False)
             if archived_lessons_list != '':
                 for j,archived_lesson in enumerate(archived_lessons_list,start=1):
                     current_level = archived_lesson['__line__']
-                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
+                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = checkComponent(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
                     archived_lessons.append(archived_lesson_guid)
 
             for i,lesson in enumerate(data['lessons'],start=1):
@@ -380,28 +351,28 @@ def check_structure(data, first_build):
                 archived_activities = []
                 current_level = lesson['__line__']
 
-                error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
-                error_log[str(i)+'_lesson_folder'], folder = check_component(lesson,'folder',PetljadocError.ERROR_LESSON_FOLDER.format(current_level ,i))
-                error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
-                error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
-                error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
-                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = check_component(lesson,'archived-activities','',False)
+                error_log[str(i)+'_lesson_title'], title = checkComponent(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
+                error_log[str(i)+'_lesson_folder'], folder = checkComponent(lesson,'folder',PetljadocError.ERROR_LESSON_FOLDER.format(current_level ,i))
+                error_log[str(i)+'_lesson_guid'],guid = checkComponent(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
+                error_log[str(i)+'_lesson_description'], description = checkComponent(lesson,'description','',False)
+                error_log[str(i)+'_lesson_activities'], lesson_activities = checkComponent(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
+                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = checkComponent(lesson,'archived-activities','',False)
                 if lesson_archived_activities != '':
                     for j,archived_activity in enumerate(lesson_archived_activities,start=1):
                         current_level_archived = archived_activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = check_component(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
+                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = checkComponent(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
                         archived_activities.append(archived_activity_guid)
                 if error_log[str(i)+'_lesson_activities']:
                     for j,activity in enumerate(lesson_activities,start=1):
                         current_level_activity = activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = check_component(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = check_component(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(activity,'description','',False)
-                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'file','')
+                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = checkComponent(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = checkComponent(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = checkComponent(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = checkComponent(activity,'description','',False)
+                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  checkComponent(activity,'file','')
 
                         if not error_log[str(i)+'_'+str(j)+'_activity_src']:
-                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
+                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  checkComponent(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
 
                         active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
 
@@ -433,7 +404,7 @@ def check_structure(data, first_build):
             print_error(PetljadocError.ERROR_STOP_SERVER)
         exit(-1)
 
-def check_component(dictionary,component,error_msg,required = True):
+def checkComponent(dictionary,component,error_msg,required = True):
     try:
         item = dictionary[component]
     except KeyError:
@@ -457,23 +428,28 @@ def write_to_index(index,course):
         index.write(course.longDesc)
         index.write('\n')
         index.write(lang_picker('willLearn'))
+        index.write('\n')
         for willlearn in course.willlearn:
             index.write(' '*4+'- '+willlearn+'\n')
         index.write('\n')
         index.write(lang_picker('requirements'))
+        index.write('\n')
         for requirements in course.requirements:
             index.write(' '*4+'- '+requirements+'\n')
         index.write('\n')
         index.write(lang_picker('toc'))
-        for toc in course.toc:
-            index.write(' '*4+'- '+toc+'\n')
+        index.write('\n')
+        for i,toc in enumerate(course.toc):
+            index.write('{}. '.format(i+1)+toc+'\n')
         index.write('\n')
         if course.externalLinks:
             index.write(lang_picker('externalLinks'))
+            index.write('\n')
             for external in course.externalLinks:
                 index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
             index.write('\n')
         index.write(lang_picker('shortDesc'))
+        index.write('\n')
         index.write(' '*4+'- '+course.shortDesc)
         index.write('\n')
 
@@ -490,9 +466,44 @@ def print_error(error):
     print(Fore.RED, error)
     print(Style.RESET_ALL)
 
-def template_toc(course):
+def templateToc(course):
    with open('course', mode='w', encoding='utf8') as file:
            file.write(json.dumps(course.toDict()))
+
+def createIndexRST(course,path):
+    index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
+    write_to_index(index,course)
+    path = path.joinpath('_intermediate')
+    createCourseToc(course,index,path)
+
+def createCourseToc(course,index,path):
+    for lesson in course.active_lessons:
+        copy_dir('_sources/'+lesson.folder,'_intermediate/'+lesson.folder)
+        index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
+        section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
+                                mode = 'w+',
+                                encoding='utf-8')
+        section_index.write("="*len(lesson.title)+'\n'+
+                            lesson.title+'\n'+
+                            "="*len(lesson.title)+'\n')
+        section_index.write(INDEX_TEMPLATE.format(1))
+        for activity in lesson.active_activies:
+            if activity.activity_type in ['reading','quiz']:
+                if activity.get_src_ext() == 'rst':
+                    section_index.write(' '*4+activity.src+'\n')
+                if activity.get_src_ext() == 'pdf':
+                    pdf_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
+                                    mode = 'w+',encoding='utf-8')
+                    pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
+                    pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
+                    section_index.write(' '*4+activity.title+'.rst\n')
+            if activity.activity_type == 'video':
+                video_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
+                                    mode = 'w+',encoding='utf-8')
+                video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
+                video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
+                section_index.write(' '*4+activity.title+'.rst\n')
+
 
 class _WatchdogHandler(FileSystemEventHandler):
 
