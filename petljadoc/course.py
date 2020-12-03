@@ -89,12 +89,12 @@ class Course:
 
     def toDict(self):
         course_dict = dict()
-        course_dict['active_lessons'] = []   
+        course_dict['active_lessons'] = []
         for lesson in self.active_lessons:
             lesson_dict = dict()
             lesson_dict['title'] = lesson.title
             lesson_dict['folder_url'] = lesson.folder_url
-            lesson_dict['active_activies'] =[]            
+            lesson_dict['active_activies'] =[]
             for activity in lesson.active_activies:
                 activity_dict = dict()
                 activity_dict['toc_url'] = activity.toc_url
@@ -126,7 +126,7 @@ class Activity:
             self.toc_url =  self.title.replace(" ","%20")
         else:
             self.src = src
-            self.toc_url =src.split('.')[0].replace(" ","%20") 
+            self.toc_url =src.split('.')[0].replace(" ","%20")
         if guid.find('/') == -1:
             self.guid = guid
             self.alias = ''

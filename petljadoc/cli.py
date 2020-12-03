@@ -12,7 +12,6 @@ from yaml.loader import SafeLoader
 from colorama import Fore,init,Style
 from pkg_resources import resource_filename
 from paver.easy import sh
-from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from livereload import Server
@@ -123,6 +122,7 @@ def build_intermediate(rootPath,first_build=True):
             exit(-1)
         else:
             course = createCourse(data, first_build)
+            templateToc(course)
             if first_build:
                 intermediate_path = Path('_intermediate/')
                 build_path = Path('_build')
@@ -133,16 +133,15 @@ def build_intermediate(rootPath,first_build=True):
                     shutil.rmtree('_build/')
                 os.mkdir('_build/')
                 createIntermediateFolder(course,rootPath,'_intermediate/')
-                templateToc(course)
                 course.createYAML('_build/index.yaml')
             else:
-                templateToc(course)
                 intermediate_path = Path('_tmp/')
                 if intermediate_path.exists():
                     shutil.rmtree('_tmp/')
                 os.mkdir('_tmp/')
                 createIntermediateFolder(course,rootPath,'_tmp/')
                 smartReload('_tmp/','_intermediate/')
+                shutil.rmtree('_tmp/')
 
 
 def prebuild(first_build = True):
@@ -465,8 +464,8 @@ def print_error(error):
     print(Style.RESET_ALL)
 
 def templateToc(course):
-   with open('course', mode='w', encoding='utf8') as file:
-           file.write(json.dumps(course.toDict()))
+    with open('course', mode='w', encoding='utf8') as file:
+        file.write(json.dumps(course.toDict()))
 
 def createIntermediateFolder(course,path,intermediatPath):
     index = open(intermediatPath+'index.rst',mode = 'w+',encoding='utf-8')
@@ -479,8 +478,8 @@ def createActiviryRST(course,index,path,intermediatPath):
         copy_dir('_sources/'+lesson.folder,intermediatPath+lesson.folder)
         index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
         section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
-                                mode = 'w+',
-                                encoding='utf-8')
+                             mode = 'w+',
+                             encoding='utf-8')
         section_index.write("="*len(lesson.title)+'\n'+
                             lesson.title+'\n'+
                             "="*len(lesson.title)+'\n')
@@ -491,13 +490,13 @@ def createActiviryRST(course,index,path,intermediatPath):
                     section_index.write(' '*4+activity.src+'\n')
                 if activity.get_src_ext() == 'pdf':
                     pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
-                                    mode = 'w+',encoding='utf-8')
+                                   mode = 'w+',encoding='utf-8')
                     pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                     pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'video':
                 video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
-                                    mode = 'w+',encoding='utf-8')
+                                 mode = 'w+',encoding='utf-8')
                 video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
@@ -527,7 +526,7 @@ class _WatchdogHandler(FileSystemEventHandler):
             if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
                 shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
             else:
-                prebuild(False)    
+                prebuild(False)
         else:
             prebuild(False)
 
@@ -542,7 +541,7 @@ def smartReload(root_src_dir,root_dst_dir):
             if os.path.exists(dst_file):
                 # in case of the src and dst are the same file
                 if not filecmp.cmp(src_file, dst_file):
-                    shutil.move(os.path.join(Path(os.getcwd()),src_file),os.path.join(Path(os.getcwd()), dst_file))               
+                    shutil.move(os.path.join(Path(os.getcwd()),src_file),os.path.join(Path(os.getcwd()), dst_file))
             else:
             #shutil.move(src_file, dst_dir)
                 shutil.move(src_file, dst_dir)
@@ -579,11 +578,8 @@ class LivereloadWatchdogWatcher(object):
 
 
     def watch(self, path, *args, **kwargs):
-
         event_handler = _WatchdogHandler(self)
         self._observer.schedule(event_handler, path=path, recursive=True)
-
-        
 
 class SafeLineLoader(SafeLoader):
     def construct_mapping(self, node, deep=False):
