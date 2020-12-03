@@ -5,6 +5,7 @@ import shutil
 import json
 from pathlib import Path
 import getpass
+import filecmp
 import click
 import yaml
 from yaml.loader import SafeLoader
@@ -19,16 +20,6 @@ from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity,Lesson,Course,PetljadocError,ExternalLink,LanguagePick
-
-
-
-
-
-class SafeLineLoader(SafeLoader):
-    def construct_mapping(self, node, deep=False):
-        mapping = super(SafeLineLoader, self).construct_mapping(node, deep=deep)
-        mapping['__line__'] = node.start_mark.line + 1
-        return mapping
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -116,7 +107,7 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
                         prompt_suffix=prompt_suffix, show_default=show_default, err=err,
                         show_choices=show_choices)
 
-def build_intermediate(path,first_build=True):
+def build_intermediate(rootPath,first_build=True):
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
@@ -141,17 +132,24 @@ def build_intermediate(path,first_build=True):
                 if build_path.exists():
                     shutil.rmtree('_build/')
                 os.mkdir('_build/')
-            course.createYAML('_build/index.yaml')
-            createIndexRST(course,path)
-            templateToc(course)
+                createIntermediateFolder(course,rootPath,'_intermediate/')
+                templateToc(course)
+                course.createYAML('_build/index.yaml')
+            else:
+                templateToc(course)
+                intermediate_path = Path('_tmp/')
+                if intermediate_path.exists():
+                    shutil.rmtree('_tmp/')
+                os.mkdir('_tmp/')
+                createIntermediateFolder(course,rootPath,'_tmp/')
+                smartReload('_tmp/','_intermediate/')
+
 
 def prebuild(first_build = True):
-    p = Path(os.getcwd())
-    if not p.joinpath('_sources/index.yaml').exists():
+    rootPath = Path(os.getcwd())
+    if not rootPath.joinpath('_sources/index.yaml').exists():
         raise click.ClickException("index.yaml is not present in source directory")
-    if not p.joinpath('_intermediate').exists():
-        os.mkdir('_intermediate')
-    build_intermediate(p,first_build)
+    build_intermediate(rootPath,first_build)
 
 
 @click.group()
@@ -418,7 +416,7 @@ def checkComponent(dictionary,component,error_msg,required = True):
         return [True,item]
 
 
-def write_to_index(index,course):
+def writeToIndex(index,course):
     try:
         lang_picker = LanguagePick(course.lang)
         index.write("="*len(course.title)+'\n'+
@@ -470,15 +468,15 @@ def templateToc(course):
    with open('course', mode='w', encoding='utf8') as file:
            file.write(json.dumps(course.toDict()))
 
-def createIndexRST(course,path):
-    index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
-    write_to_index(index,course)
-    path = path.joinpath('_intermediate')
-    createCourseToc(course,index,path)
+def createIntermediateFolder(course,path,intermediatPath):
+    index = open(intermediatPath+'index.rst',mode = 'w+',encoding='utf-8')
+    writeToIndex(index,course)
+    path = path.joinpath(intermediatPath)
+    createActiviryRST(course,index,path,intermediatPath)
 
-def createCourseToc(course,index,path):
+def createActiviryRST(course,index,path,intermediatPath):
     for lesson in course.active_lessons:
-        copy_dir('_sources/'+lesson.folder,'_intermediate/'+lesson.folder)
+        copy_dir('_sources/'+lesson.folder,intermediatPath+lesson.folder)
         index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
         section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
                                 mode = 'w+',
@@ -492,17 +490,28 @@ def createCourseToc(course,index,path):
                 if activity.get_src_ext() == 'rst':
                     section_index.write(' '*4+activity.src+'\n')
                 if activity.get_src_ext() == 'pdf':
-                    pdf_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
+                    pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                     mode = 'w+',encoding='utf-8')
                     pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                     pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'video':
-                video_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
+                video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                     mode = 'w+',encoding='utf-8')
                 video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
+
+def watch_server(srcdir):
+    server = Server(
+        watcher=LivereloadWatchdogWatcher(),
+    )
+    server.watch(srcdir)
+
+def read_course():
+    with open('course', mode='r', encoding='utf8') as file:
+        course = json.load(file)
+        return course
 
 
 class _WatchdogHandler(FileSystemEventHandler):
@@ -521,6 +530,22 @@ class _WatchdogHandler(FileSystemEventHandler):
                 prebuild(False)    
         else:
             prebuild(False)
+
+def smartReload(root_src_dir,root_dst_dir):
+    for src_dir, _, files in os.walk(root_src_dir):
+        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        for file_ in files:
+            src_file = os.path.join(src_dir, file_)
+            dst_file = os.path.join(dst_dir, file_)
+            if os.path.exists(dst_file):
+                # in case of the src and dst are the same file
+                if not filecmp.cmp(src_file, dst_file):
+                    shutil.move(os.path.join(Path(os.getcwd()),src_file),os.path.join(Path(os.getcwd()), dst_file))               
+            else:
+            #shutil.move(src_file, dst_dir)
+                shutil.move(src_file, dst_dir)
 
 
 class LivereloadWatchdogWatcher(object):
@@ -558,14 +583,10 @@ class LivereloadWatchdogWatcher(object):
         event_handler = _WatchdogHandler(self)
         self._observer.schedule(event_handler, path=path, recursive=True)
 
+        
 
-def watch_server(srcdir):
-    server = Server(
-        watcher=LivereloadWatchdogWatcher(),
-    )
-    server.watch(srcdir)
-
-def read_course():
-    with open('course', mode='r', encoding='utf8') as file:
-        course = json.load(file)
-        return course
+class SafeLineLoader(SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        mapping = super(SafeLineLoader, self).construct_mapping(node, deep=deep)
+        mapping['__line__'] = node.start_mark.line + 1
+        return mapping
