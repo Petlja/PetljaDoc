@@ -244,7 +244,7 @@ def preview(port):
             data = json.load(f)
             if data["project_type"] == "course":
                 prebuild()
-                watch_server(os.path.realpath('_sources'))
+                watch_server([os.path.realpath('_sources'),os.path.realpath('_images')])
     build_or_autobuild("preview", port=port, sphinx_build=True)
     build_or_autobuild("preview", port=port, sphinx_autobuild=True)
 
@@ -501,34 +501,18 @@ def createActiviryRST(course,index,path,intermediatPath):
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
 
-def watch_server(srcdir):
+def watch_server(srcdirList):
     server = Server(
         watcher=LivereloadWatchdogWatcher(),
     )
-    server.watch(srcdir)
+    for srcdir in srcdirList:
+        server.watch(srcdir)
 
 def read_course():
     with open('course', mode='r', encoding='utf8') as file:
         course = json.load(file)
         return course
 
-
-class _WatchdogHandler(FileSystemEventHandler):
-
-    def __init__(self, watcher):
-        super(_WatchdogHandler, self).__init__()
-        self._watcher = watcher
-
-    def on_any_event(self, event):
-        if event.is_directory:
-            return
-        if len(event.src_path.rsplit('.'))>1:
-            if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
-                shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
-            else:
-                prebuild(False)
-        else:
-            prebuild(False)
 
 def smartReload(root_src_dir,root_dst_dir):
     for src_dir, _, files in os.walk(root_src_dir):
@@ -546,6 +530,30 @@ def smartReload(root_src_dir,root_dst_dir):
             #shutil.move(src_file, dst_dir)
                 shutil.move(src_file, dst_dir)
 
+class _WatchdogHandler(FileSystemEventHandler):
+
+    def __init__(self, watcher):
+        super(_WatchdogHandler, self).__init__()
+        self._watcher = watcher
+
+    def on_any_event(self, event):
+        if event.is_directory:
+            return
+        if len(event.src_path.rsplit('.'))>1:
+            if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
+                shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
+            elif os.path.split(os.path.split(event.src_path)[0])[1] == '_images':
+                print(event.event_type)
+                if event.event_type == 'created':
+                    print(event.src_path)
+                    shutil.move(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images'+os.path.split(event.src_path)[1])))
+                if event.event_type == 'modified':
+                    print(event.src_path)
+                    shutil.move(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
+            else:
+                prebuild(False)
+        else:
+            prebuild(False)
 
 class LivereloadWatchdogWatcher(object):
     """
