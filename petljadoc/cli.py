@@ -523,11 +523,10 @@ def smartReload(root_src_dir,root_dst_dir):
             src_file = os.path.join(src_dir, file_)
             dst_file = os.path.join(dst_dir, file_)
             if os.path.exists(dst_file):
-                # in case of the src and dst are the same file
                 if not filecmp.cmp(src_file, dst_file):
-                    shutil.move(os.path.join(Path(os.getcwd()),src_file),os.path.join(Path(os.getcwd()), dst_file))
+                    current_path = Path(os.getcwd())
+                    shutil.move(os.path.join(current_path,src_file),os.path.join(current_path, dst_file))
             else:
-            #shutil.move(src_file, dst_dir)
                 shutil.move(src_file, dst_dir)
 
 class _WatchdogHandler(FileSystemEventHandler):
@@ -539,21 +538,20 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        if len(event.src_path.rsplit('.'))>1:
-            if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
-                shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
-            elif os.path.split(os.path.split(event.src_path)[0])[1] == '_images':
-                print(event.event_type)
-                if event.event_type == 'created':
-                    print(event.src_path)
-                    shutil.move(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images'+os.path.split(event.src_path)[1])))
-                if event.event_type == 'modified':
-                    print(event.src_path)
-                    shutil.move(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
-            else:
-                prebuild(False)
+        if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
+            shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
+        elif os.path.split(os.path.split(event.src_path)[0])[1] == '_images':
+            if event.event_type == 'created':
+                if os.path.exists(os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1])):
+                    os.remove(os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
+                shutil.copy(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
+            if event.event_type == 'modified':
+                if os.path.exists(os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1])):
+                    os.remove(os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
+                shutil.copy(event.src_path, os.path.join(Path(os.getcwd()),'_build/_images/'+os.path.split(event.src_path)[1]))
         else:
             prebuild(False)
+
 
 class LivereloadWatchdogWatcher(object):
     """
