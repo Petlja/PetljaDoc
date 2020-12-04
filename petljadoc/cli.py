@@ -5,28 +5,20 @@ import shutil
 import json
 from pathlib import Path
 import getpass
+import filecmp
 import click
 import yaml
 from yaml.loader import SafeLoader
 from colorama import Fore,init,Style
 from pkg_resources import resource_filename
 from paver.easy import sh
-from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from livereload import Server
-from petljadoc import bootstrap_petlja_theme
+from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity,Lesson,Course,PetljadocError,ExternalLink,LanguagePick
-
-
-
-class SafeLineLoader(SafeLoader):
-    def construct_mapping(self, node, deep=False):
-        mapping = super(SafeLineLoader, self).construct_mapping(node, deep=deep)
-        mapping['__line__'] = node.start_mark.line + 1
-        return mapping
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -81,18 +73,21 @@ def init_template_arguments(template_dir, defaults, project_type):
     ta['templates_path'] = '_templates'
     ta['html_theme_path'] = '_templates/plugin_layouts'
     custom_theme = _prompt("Copy HTML theme into project",type=bool,
-                           default="yes", force_default=defaults)
+                           default=False, force_default=defaults)
     if custom_theme:
         ta['html_theme'] = 'custom_theme'
     else:
-        ta['html_theme'] = 'bootstrap_petlja_theme'
+        if project_type == 'runestone':
+            ta['html_theme'] = 'petljadoc_runestone_theme'
+        if project_type == 'course':
+            ta['html_theme'] = 'petljadoc_course_theme'
     apply_template_dir(template_dir, '.', ta)
     if custom_theme:
         if project_type == 'runestone':
-            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+            theme_path = os.path.join(themes.runestone_theme.get_html_theme_path(),
                                       'runestone_theme')
         else:
-            theme_path = os.path.join(bootstrap_petlja_theme.runestone_theme.get_html_theme_path(),
+            theme_path = os.path.join(themes.runestone_theme.get_html_theme_path(),
                                       'course_theme')
         apply_template_dir(theme_path,
                            os.path.join(ta['html_theme_path'], ta['html_theme']), {},
@@ -111,7 +106,7 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
                         prompt_suffix=prompt_suffix, show_default=show_default, err=err,
                         show_choices=show_choices)
 
-def parse_yaml(path,first_build=True):
+def build_intermediate(rootPath,first_build=True):
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
@@ -126,53 +121,34 @@ def parse_yaml(path,first_build=True):
                 print_error(PetljadocError.ERROR_MSG_YAML)
             exit(-1)
         else:
-            course = check_structure(data, first_build)
+            course = createCourse(data, first_build)
+            templateToc(course)
             if first_build:
                 intermediate_path = Path('_intermediate/')
                 build_path = Path('_build')
-                #hack till _source is src_dir for live update
                 if intermediate_path.exists():
                     shutil.rmtree('_intermediate/')
-                    os.mkdir('_intermediate/')
+                os.mkdir('_intermediate/')
                 if build_path.exists():
                     shutil.rmtree('_build/')
-            index = open('_intermediate/index.rst',mode = 'w+',encoding='utf-8')
-            write_to_index(index,course)
-            path = path.joinpath('_intermediate')
-            for lesson in course.active_lessons:
-                copy_dir('_sources/'+lesson.folder,'_intermediate/'+lesson.folder)
-                index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
-                section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
-                                     mode = 'w+',
-                                     encoding='utf-8')
-                section_index.write("="*len(lesson.title)+'\n'+
-                                    lesson.title+'\n'+
-                                    "="*len(lesson.title)+'\n')
-                section_index.write(INDEX_TEMPLATE.format(1))
-                for activity in lesson.active_activies:
-                    if activity.activity_type in ['reading','quiz']:
-                        if activity.get_src_ext() == 'rst':
-                            section_index.write(' '*4+activity.src+'\n')
-                        if activity.get_src_ext() == 'pdf':
-                            pdf_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
-                                           mode = 'w+',encoding='utf-8')
-                            pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
-                            pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
-                            section_index.write(' '*4+activity.title+'.rst\n')
-                    if activity.activity_type == 'video':
-                        video_rst = open('_intermediate/'+lesson.folder+'/'+activity.title+'.rst',
-                                         mode = 'w+',encoding='utf-8')
-                        video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
-                        video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
-                        section_index.write(' '*4+activity.title+'.rst\n')
+                os.mkdir('_build/')
+                createIntermediateFolder(course,rootPath,'_intermediate/')
+                course.createYAML('_build/index.yaml')
+            else:
+                intermediate_path = Path('_tmp/')
+                if intermediate_path.exists():
+                    shutil.rmtree('_tmp/')
+                os.mkdir('_tmp/')
+                createIntermediateFolder(course,rootPath,'_tmp/')
+                smartReload('_tmp/','_intermediate/')
+                shutil.rmtree('_tmp/')
+
 
 def prebuild(first_build = True):
-    p = Path(os.getcwd())
-    if not p.joinpath('_sources/index.yaml').exists():
+    rootPath = Path(os.getcwd())
+    if not rootPath.joinpath('_sources/index.yaml').exists():
         raise click.ClickException("index.yaml is not present in source directory")
-    if not p.joinpath('_intermediate').exists():
-        os.mkdir('_intermediate')
-    parse_yaml(p,first_build)
+    build_intermediate(rootPath,first_build)
 
 
 @click.group()
@@ -327,7 +303,7 @@ def cyr2lat():
     else:
         print('Folder name must end with Cyrl')
 
-def check_structure(data, first_build):
+def createCourse(data, first_build):
     error_log = {}
     archived_lessons = []
     active_lessons = []
@@ -336,34 +312,35 @@ def check_structure(data, first_build):
     requirements = []
     toc = []
     try:
-        error_log['courseId'], courseId = check_component(data,'courseId',PetljadocError.ERROR_ID)
-        error_log['lang'], lang = check_component(data, 'lang', PetljadocError.ERROR_LANG)
-        error_log['title'], title_course = check_component(data, 'title', PetljadocError.ERROR_TITLE)
-        error_log['description'],_ = check_component(data, 'description', PetljadocError.ERROR_DESC)
+        error_log['courseId'], courseId = checkComponent(data,'courseId',PetljadocError.ERROR_ID)
+        error_log['lang'], lang = checkComponent(data, 'lang', PetljadocError.ERROR_LANG)
+        error_log['title'], title_course = checkComponent(data, 'title', PetljadocError.ERROR_TITLE)
+        error_log['description'],_ = checkComponent(data, 'description', PetljadocError.ERROR_DESC)
 
         if error_log['description']:
             current_level = data['description']['__line__']
-            error_log['willLearn'] ,willLearn = check_component(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
-            error_log['requirements'] ,requirements = check_component(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
-            error_log['toc'], toc = check_component(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
-            error_log['externalLinks'], externalLinks = check_component(data['description'],'externalLinks','',False)
+            error_log['longDescription'] ,longDesc = checkComponent(data['description'],'longDescription',PetljadocError.ERROR_LONG_DESC.format(current_level))
+            error_log['shortDescription'],shortDesc = checkComponent(data['description'],'shortDescription',PetljadocError.ERROR_SHORT_DESC.format(current_level))
+            error_log['willLearn'] ,willLearn = checkComponent(data['description'],'willLearn',PetljadocError.ERROR_WILL_LEARN.format(current_level))
+            error_log['requirements'] ,requirements = checkComponent(data['description'],'requirements',PetljadocError.ERROR_REQUIREMENTS.format(current_level))
+            error_log['toc'], toc = checkComponent(data['description'],'toc',PetljadocError.ERROR_TOC.format(current_level))
+            error_log['externalLinks'], externalLinks = checkComponent(data['description'],'externalLinks','',False)
 
             if externalLinks != '':
-
                 for i,external_link in enumerate(externalLinks,start=1):
                     current_level = external_link['__line__']
-                    error_log[str(i)+'link_text'], text = check_component(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
-                    error_log[str(i)+'link_href'], link = check_component(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
+                    error_log[str(i)+'link_text'], text = checkComponent(external_link,'text',PetljadocError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level,i))
+                    error_log[str(i)+'link_href'], link = checkComponent(external_link,'href',PetljadocError.ERROR_EXTERNAL_LINKS_LINK.format(current_level,i))
                     external_links.append(ExternalLink(text,link))
 
-        error_log['lessons'], _ = check_component(data, 'lessons', PetljadocError.ERROR_LESSONS)
+        error_log['lessons'], _ = checkComponent(data, 'lessons', PetljadocError.ERROR_LESSONS)
 
         if error_log['lessons']:
-            error_log['archived-lessons'], archived_lessons_list = check_component(data,'archived-lessons','',False)
+            error_log['archived-lessons'], archived_lessons_list = checkComponent(data,'archived-lessons','',False)
             if archived_lessons_list != '':
                 for j,archived_lesson in enumerate(archived_lessons_list,start=1):
                     current_level = archived_lesson['__line__']
-                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
+                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = checkComponent(archived_lesson,'guid',PetljadocError.ERROR_ARCHIVED_LESSON.format(current_level,j))
                     archived_lessons.append(archived_lesson_guid)
 
             for i,lesson in enumerate(data['lessons'],start=1):
@@ -371,34 +348,34 @@ def check_structure(data, first_build):
                 archived_activities = []
                 current_level = lesson['__line__']
 
-                error_log[str(i)+'_lesson_title'], title = check_component(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
-                error_log[str(i)+'_lesson_folder'], folder = check_component(lesson,'folder',PetljadocError.ERROR_LESSON_FOLDER.format(current_level ,i))
-                error_log[str(i)+'_lesson_guid'],guid = check_component(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
-                error_log[str(i)+'_lesson_description'], description = check_component(lesson,'description','',False)
-                error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
-                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = check_component(lesson,'archived-activities','',False)
+                error_log[str(i)+'_lesson_title'], title = checkComponent(lesson,'title',PetljadocError.ERROR_LESSON_TITLE.format(current_level ,i))
+                error_log[str(i)+'_lesson_folder'], folder = checkComponent(lesson,'folder',PetljadocError.ERROR_LESSON_FOLDER.format(current_level ,i))
+                error_log[str(i)+'_lesson_guid'],guid = checkComponent(lesson,'guid',PetljadocError.ERROR_LESSON_GUID.format(current_level ,i))
+                error_log[str(i)+'_lesson_description'], description = checkComponent(lesson,'description','',False)
+                error_log[str(i)+'_lesson_activities'], lesson_activities = checkComponent(lesson,'activities',PetljadocError.ERROR_LESSON_ACTIVITIES.format(current_level ,i))
+                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = checkComponent(lesson,'archived-activities','',False)
                 if lesson_archived_activities != '':
                     for j,archived_activity in enumerate(lesson_archived_activities,start=1):
                         current_level_archived = archived_activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = check_component(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
+                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = checkComponent(archived_activity,'guid',PetljadocError.ERROR_ARCHIVED_ACTIVITY.format(j,current_level_archived))
                         archived_activities.append(archived_activity_guid)
                 if error_log[str(i)+'_lesson_activities']:
                     for j,activity in enumerate(lesson_activities,start=1):
                         current_level_activity = activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = check_component(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = check_component(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(activity,'description','',False)
-                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'file','')
+                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = checkComponent(activity,'type',PetljadocError.ERROR_ACTIVITY_TYPE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = checkComponent(activity,'title',PetljadocError.ERROR_ACTIVITY_TITLE.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = checkComponent(activity,'guid',PetljadocError.ERROR_ACTIVITY_GUID.format(i,j,current_level_activity))
+                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = checkComponent(activity,'description','',False)
+                        error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  checkComponent(activity,'file','')
 
                         if not error_log[str(i)+'_'+str(j)+'_activity_src']:
-                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  check_component(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
+                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src =  checkComponent(activity,'url',PetljadocError.ERROR_ACTIVITY_SRC.format(i,j,current_level_activity))
 
                         active_activies.append(Activity(activity_type,activity_title,activity_src,activity_guid,activity_description))
 
                 active_lessons.append(Lesson(title,folder,guid,description,archived_activities,active_activies))
 
-        course = Course(courseId,lang,title_course,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
+        course = Course(courseId,lang,title_course,longDesc,shortDesc,willLearn,requirements,toc,external_links,archived_lessons,active_lessons)
         error_log['guid_integrity'],guid_list = course.guid_check()
 
         if not error_log['guid_integrity']:
@@ -424,7 +401,7 @@ def check_structure(data, first_build):
             print_error(PetljadocError.ERROR_STOP_SERVER)
         exit(-1)
 
-def check_component(dictionary,component,error_msg,required = True):
+def checkComponent(dictionary,component,error_msg,required = True):
     try:
         item = dictionary[component]
     except KeyError:
@@ -438,30 +415,41 @@ def check_component(dictionary,component,error_msg,required = True):
         return [True,item]
 
 
-def write_to_index(index,course):
+def writeToIndex(index,course):
     try:
         lang_picker = LanguagePick(course.lang)
         index.write("="*len(course.title)+'\n'+
                     course.title+'\n'+
                     "="*len(course.title)+'\n')
         index.write('\n')
+        index.write(course.longDesc)
+        index.write('\n')
         index.write(lang_picker('willLearn'))
+        index.write('\n')
         for willlearn in course.willlearn:
             index.write(' '*4+'- '+willlearn+'\n')
         index.write('\n')
         index.write(lang_picker('requirements'))
+        index.write('\n')
         for requirements in course.requirements:
             index.write(' '*4+'- '+requirements+'\n')
         index.write('\n')
         index.write(lang_picker('toc'))
-        for toc in course.toc:
-            index.write(' '*4+'- '+toc+'\n')
+        index.write('\n')
+        for i,toc in enumerate(course.toc):
+            index.write('{}. '.format(i+1)+toc+'\n')
         index.write('\n')
         if course.externalLinks:
             index.write(lang_picker('externalLinks'))
+            index.write('\n')
             for external in course.externalLinks:
                 index.write(' '*4+'- '+ '`'+external.text+' <'+ external.link+ '>`_'+'\n')
             index.write('\n')
+        index.write(lang_picker('shortDesc'))
+        index.write('\n')
+        index.write(' '*4+'- '+course.shortDesc)
+        index.write('\n')
+
         index.write(INDEX_TEMPLATE_HIDDEN.format(3))
     except NameError:
         print_error(PetljadocError.ERROR_DESC_NONE_TYPE)
@@ -475,6 +463,54 @@ def print_error(error):
     print(Fore.RED, error)
     print(Style.RESET_ALL)
 
+def templateToc(course):
+    with open('course', mode='w', encoding='utf8') as file:
+        file.write(json.dumps(course.toDict()))
+
+def createIntermediateFolder(course,path,intermediatPath):
+    index = open(intermediatPath+'index.rst',mode = 'w+',encoding='utf-8')
+    writeToIndex(index,course)
+    path = path.joinpath(intermediatPath)
+    createActiviryRST(course,index,path,intermediatPath)
+
+def createActiviryRST(course,index,path,intermediatPath):
+    for lesson in course.active_lessons:
+        copy_dir('_sources/'+lesson.folder,intermediatPath+lesson.folder)
+        index.write(' '*4+lesson.title+' <'+ lesson.folder +'/index>\n')
+        section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
+                             mode = 'w+',
+                             encoding='utf-8')
+        section_index.write("="*len(lesson.title)+'\n'+
+                            lesson.title+'\n'+
+                            "="*len(lesson.title)+'\n')
+        section_index.write(INDEX_TEMPLATE.format(1))
+        for activity in lesson.active_activies:
+            if activity.activity_type in ['reading','quiz']:
+                if activity.get_src_ext() == 'rst':
+                    section_index.write(' '*4+activity.src+'\n')
+                if activity.get_src_ext() == 'pdf':
+                    pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                                   mode = 'w+',encoding='utf-8')
+                    pdf_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
+                    pdf_rst.write(PDF_TEMPLATE.format('/_static/'+activity.src))
+                    section_index.write(' '*4+activity.title+'.rst\n')
+            if activity.activity_type == 'video':
+                video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                                 mode = 'w+',encoding='utf-8')
+                video_rst.write(activity.title+'\n'+"="*len(activity.title)+'\n')
+                video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
+                section_index.write(' '*4+activity.title+'.rst\n')
+
+def watch_server(srcdir):
+    server = Server(
+        watcher=LivereloadWatchdogWatcher(),
+    )
+    server.watch(srcdir)
+
+def read_course():
+    with open('course', mode='r', encoding='utf8') as file:
+        course = json.load(file)
+        return course
 
 
 class _WatchdogHandler(FileSystemEventHandler):
@@ -490,9 +526,25 @@ class _WatchdogHandler(FileSystemEventHandler):
             if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
                 shutil.copyfile(event.src_path,event.src_path.replace('_sources','_intermediate'))
             else:
-                prebuild(False)    
+                prebuild(False)
         else:
             prebuild(False)
+
+def smartReload(root_src_dir,root_dst_dir):
+    for src_dir, _, files in os.walk(root_src_dir):
+        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        for file_ in files:
+            src_file = os.path.join(src_dir, file_)
+            dst_file = os.path.join(dst_dir, file_)
+            if os.path.exists(dst_file):
+                # in case of the src and dst are the same file
+                if not filecmp.cmp(src_file, dst_file):
+                    shutil.move(os.path.join(Path(os.getcwd()),src_file),os.path.join(Path(os.getcwd()), dst_file))
+            else:
+            #shutil.move(src_file, dst_dir)
+                shutil.move(src_file, dst_dir)
 
 
 class LivereloadWatchdogWatcher(object):
@@ -526,13 +578,11 @@ class LivereloadWatchdogWatcher(object):
 
 
     def watch(self, path, *args, **kwargs):
-
         event_handler = _WatchdogHandler(self)
         self._observer.schedule(event_handler, path=path, recursive=True)
 
-
-def watch_server(srcdir):
-    server = Server(
-        watcher=LivereloadWatchdogWatcher(),
-    )
-    server.watch(srcdir)
+class SafeLineLoader(SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        mapping = super(SafeLineLoader, self).construct_mapping(node, deep=deep)
+        mapping['__line__'] = node.start_mark.line + 1
+        return mapping

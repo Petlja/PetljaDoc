@@ -5,3 +5,5 @@ runestone @ https://github.com/Petlja/RunestoneComponents-Petlja/archive/master.
 click>=7.0
 cyrtranslit>=0.4
 colorama>= 0.4.1
+PyYAML==5.1.2
+watchdog==0.9.0
