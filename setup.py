@@ -38,6 +38,9 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [ 'petljadoc = petljadoc.cli:main' ],
-        'sphinx.html_themes': [ 'bootstrap_petlja_theme = petljadoc.bootstrap_petlja_theme' ]
+        'sphinx.html_themes': [ 'bootstrap_petlja_theme = petljadoc.themes.runestone_theme',
+                                'petljadoc_runestone_theme = petljadoc.themes.runestone_theme',
+                                'petljadoc_course_theme = petljadoc.themes.course_theme'
+                              ]
     }
 )
