@@ -43,6 +43,12 @@ PDF_TEMPLATE = '''
 
   <embed src="{}" width="100%" height="700px" type="application/pdf">
 '''
+META_DATA = '''
+..
+  {}
+  {}
+
+'''
 
 
 def init_template_arguments(template_dir, defaults, project_type):
@@ -247,7 +253,7 @@ def cyr2lat():
 
 
 def build_intermediate(rootPath, first_build=True):
-    data = load_data_from_YAML()
+    data = load_data_from_YAML(first_build)
     course = create_course(data, first_build)
     template_toc(course)
     if first_build:
@@ -269,14 +275,14 @@ def create_or_recreate_dir(file):
     os.mkdir(file)
 
 
-def load_data_from_YAML():
+def load_data_from_YAML(first_build):
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
             return data
         except yaml.YAMLError as exc:
             # pylint: disable=E1101
-            print_error('Yaml structure error:')
+            print_error(PetljadocCurseYAMLError.ERROR_YAML_TYPE_ERROR)
             if hasattr(exc, 'problem_mark'):
                 if exc.context:
                     print_error(str(exc.problem_mark) + '\n  ' +
@@ -286,6 +292,8 @@ def load_data_from_YAML():
                                 '\n  ' + str(exc.problem))
             else:
                 print_error(PetljadocCurseYAMLError.ERROR_MSG_YAML)
+            if not first_build:
+                print_error(PetljadocCurseYAMLError.ERROR_STOP_SERVER)
             exit(-1)
 
 
@@ -531,6 +539,11 @@ def create_activity_RST(course, index, path, intermediatPath):
             if activity.activity_type in ['reading', 'quiz']:
                 if activity.get_src_ext() == 'rst':
                     section_index.write(' '*4+activity.src+'\n')
+                    with open(intermediatPath+lesson.folder+'/'+activity.src, mode='r+', encoding='utf8') as file:
+                        content = file.read()
+                        file.seek(0, 0)
+                        file.write(META_DATA.format(activity.title,
+                                                    activity.activity_type) + content)
                 if activity.get_src_ext() == 'pdf':
                     pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                    mode='w+', encoding='utf-8')
@@ -555,6 +568,13 @@ def read_course():
 
 
 def smart_reload(root_src_dir, root_dst_dir):
+    for src_dir, _, files in os.walk(root_dst_dir):
+        dst_dir = src_dir.replace(root_dst_dir, root_src_dir, 1)
+        for file_ in files:
+            src_file = os.path.join(src_dir, file_)
+            dst_file = os.path.join(dst_dir, file_)
+            if not os.path.exists(dst_file):
+                os.remove(src_file)
     for src_dir, _, files in os.walk(root_src_dir):
         dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
         if not os.path.exists(dst_dir):
