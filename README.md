@@ -15,11 +15,11 @@ PetljaDoc currently depends on forked RunestoneComonents, but we are gradually c
 
 Use `pip` to `install` PetljaDoc:
 
-`pip3 install https://github.com/Petlja/PetljaDoc/archive/master.zip`
+`pip3 install petljadoc`
 
 If you use Windows and previous command does not work, try:
 
-`py -3 -m pip install https://github.com/Petlja/PetljaDoc/archive/master.zip`
+`py -3 -m pip install petljadoc`
 
 ## CLI usage
 

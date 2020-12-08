@@ -3,7 +3,7 @@ import sys
 import paver
 from paver.easy import options, Bunch
 import paver.setuputils
-import pkg_resources
+
 #pylint: disable=unused-import
 from runestone import build  # build is called implicitly by the paver driver.
 
@@ -16,7 +16,6 @@ master_url = '{{master_url}}'
 master_app = '{{master_app}}'
 serving_dir = "{{build_dir}}"
 dest = "{{dest}}"
-version = pkg_resources.require("runestone")[0].version
 
 options(
     sphinx = Bunch(docroot=".",),
