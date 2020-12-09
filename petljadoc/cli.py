@@ -10,7 +10,7 @@ import filecmp
 import click
 import yaml
 from yaml.loader import SafeLoader
-from colorama import Fore, init, Style
+from colorama import Fore, init, Style, deinit, reinit
 from pkg_resources import resource_filename, working_set
 from paver.easy import sh
 from watchdog.observers.polling import PollingObserver
@@ -59,6 +59,8 @@ INDEX_META_DATA = '''
     {}
 
 '''
+
+COLORAMA_INIT = True
 
 
 def check_for_runestone_package():
@@ -495,9 +497,15 @@ def write_to_index(index, course):
 
 
 def print_error(error):
-    init()
+    global COLORAMA_INIT
+    if(COLORAMA_INIT):
+        init()
+        COLORAMA_INIT = False
+    else:
+        reinit()
     print(Fore.RED, error)
     print(Style.RESET_ALL)
+    deinit()
 
 
 def template_toc(course):
