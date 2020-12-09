@@ -57,6 +57,7 @@ INDEX_META_DATA = '''
     {}
     {}
     {}
+    {}
 
 '''
 
@@ -486,7 +487,7 @@ def check_component(dictionary, component, error_msg, required=True):
 def write_to_index(index, course):
     try:
         index.write(INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
-                                           course.shortDesc, course.willlearn, course.requirements, course.toc))
+                                           course.shortDesc, course.willlearn, course.requirements, course.toc, course.externalLinks))
         index.write(INDEX_TEMPLATE_HIDDEN.format(3))
     except NameError:
         print_error(PetljadocCurseYAMLError.ERROR_DESC_NONE_TYPE)

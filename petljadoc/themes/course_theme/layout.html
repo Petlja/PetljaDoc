@@ -122,6 +122,7 @@
 <div class="long-desc">
   {{ course.longDesc}}
 </div>
+{% if( course.willlearn|length > 0) %}
 <div>
   <div class="label-course">
     {{_('You will learn:')}}
@@ -129,7 +130,9 @@
   {% for el in course.willlearn %}
   <p class="p-course"> {{el}}</p>
   {% endfor %}
+  {% endif %}
 </div>
+{% if( course.requirements|length > 0) %}
 <div>
   <div class="label-course">
     {{_('Required:')}}
@@ -138,6 +141,8 @@
   <p class="p-course"> {{el}}</p>
   {% endfor %}
 </div>
+{% endif %}
+{% if( course.toc|length > 0) %}
 <div>
   <div class="label-course">
     {{_('Table of content:')}}
@@ -146,6 +151,8 @@
   <p class="p-course">{{el}}</p>
   {% endfor %}
 </div>
+{% endif %}
+{% if( course.externalLinkTexts|length > 0) %}
 <div>
   <div class="label-course">
     {{_('Extern links:')}}
@@ -154,6 +161,7 @@
   <a style="margin-left: 50px" href="{{course.externalLinkLinks[n]}}">{{course.externalLinkTexts[n]}}</a><br>
   {% endfor %}
 </div>
+{% endif %}
 
 </div>
 </div>
