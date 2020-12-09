@@ -67,7 +67,7 @@ COLORAMA_INIT = True
 def check_for_runestone_package():
     #pylint: disable=E1133
     if 'runestone' in {pkg.key for pkg in working_set}:
-        print('Please remove package runestone from your working enviremant in order to use Petljadoc.')
+        print('Please remove package runestone from your working environment in order to use Petljadoc.')
         exit(-1)
 
 
