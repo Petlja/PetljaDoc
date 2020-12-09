@@ -102,6 +102,8 @@ class Course:
         course_dict['requirements'] = self.requirements
         course_dict['toc'] = self.toc
         course_dict['title'] = self.title
+        course_dict['externalLinkTexts'] = [el.text for el in self.externalLinks]
+        course_dict['externalLinkLinks'] = [el.link for el in self.externalLinks]
         for lesson in self.active_lessons:
             lesson_dict = dict()
             lesson_dict['title'] = lesson.title

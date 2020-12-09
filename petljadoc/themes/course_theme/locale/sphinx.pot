@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-08 17:45+0100\n"
+"POT-Creation-Date: 2020-12-09 10:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
-"X-Generator: Poedit 2.4.2\n"
 
 #: layout.html:127
 msgid "You will learn:"
@@ -28,6 +27,10 @@ msgstr ""
 
 #: layout.html:143
 msgid "Table of content:"
+msgstr ""
+
+#: layout.html:151
+msgid "Extern links:"
 msgstr ""
 
 #: localtoc.html:2
@@ -45,3 +48,4 @@ msgstr ""
 #: sourcelink.html:3
 msgid "Source"
 msgstr ""
+

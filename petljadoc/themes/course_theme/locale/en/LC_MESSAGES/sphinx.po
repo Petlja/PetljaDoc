@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-08 17:45+0100\n"
-"PO-Revision-Date: 2020-12-08 17:49+0100\n"
+"POT-Creation-Date: 2020-12-09 10:24+0100\n"
+"PO-Revision-Date: 2020-12-09 10:25+0100\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,6 +30,10 @@ msgstr "Required:"
 #: layout.html:143
 msgid "Table of content:"
 msgstr "Table of content:"
+
+#: layout.html:151
+msgid "Extern links:"
+msgstr "Extern links:"
 
 #: localtoc.html:2
 msgid "Page"

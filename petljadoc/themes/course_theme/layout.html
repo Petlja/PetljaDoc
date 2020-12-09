@@ -146,6 +146,14 @@
   <p class="p-course">{{el}}</p>
   {% endfor %}
 </div>
+<div>
+  <div class="label-course">
+    {{_('Extern links:')}}
+  </div>
+  {% for n in range(course.externalLinkTexts| length) %}
+  <a style="margin-left: 50px" href="{{course.externalLinkLinks[n]}}">{{course.externalLinkTexts[n]}}</a><br>
+  {% endfor %}
+</div>
 
 </div>
 </div>
