@@ -59,10 +59,13 @@ INDEX_META_DATA = '''
     {}
 
 '''
-# pylint: disable=E1133
-# if 'runestone' in {pkg.key for pkg in working_set}:
-#    print('Please remove package runestone from your working enviremant in order to use Petljadoc.')
-#    exit(-1)
+
+
+def check_for_runestone_package():
+    #pylint: disable=E1133
+    if 'runestone' in {pkg.key for pkg in working_set}:
+        print('Please remove package runestone from your working enviremant in order to use Petljadoc.')
+        exit(-1)
 
 
 def init_template_arguments(template_dir, defaults, project_type):
@@ -71,7 +74,7 @@ def init_template_arguments(template_dir, defaults, project_type):
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
                                  default=default_project_name, force_default=defaults)
     ta['language'] = _prompt("Project language:",
-                                 default="en", force_default=defaults)
+                             default="en", force_default=defaults)
     while ' ' in ta['project_name']:
         ta['project_name'] = click.prompt(
             "Project name: (one word, NO SPACES)")
@@ -137,6 +140,7 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
 
 @click.group()
 def main():
+    check_for_runestone_package()
     """
     Petlja's command-line interface for learning content
 
