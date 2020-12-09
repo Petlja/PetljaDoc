@@ -1,0 +1,47 @@
+# Translations template for PROJECT.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-12-08 17:45+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+"X-Generator: Poedit 2.4.2\n"
+
+#: layout.html:127
+msgid "You will learn:"
+msgstr ""
+
+#: layout.html:135
+msgid "Required:"
+msgstr ""
+
+#: layout.html:143
+msgid "Table of content:"
+msgstr ""
+
+#: localtoc.html:2
+msgid "Page"
+msgstr ""
+
+#: relations.html:4
+msgid "Previous chapter"
+msgstr ""
+
+#: relations.html:7
+msgid "Next chapter"
+msgstr ""
+
+#: sourcelink.html:3
+msgid "Source"
+msgstr ""

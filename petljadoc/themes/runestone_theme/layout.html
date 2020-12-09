@@ -30,7 +30,9 @@
 {%- block doctype -%}
 <!DOCTYPE html>
 {%- endblock %}
-
+{%- block htmltitle %}
+<title>{{ title|striptags|e }}{{ titlesuffix }}</title>
+{%- endblock %}
 {# Sidebar: Rework into our Boostrap nav section. #}
 {% macro navBar() %}
 

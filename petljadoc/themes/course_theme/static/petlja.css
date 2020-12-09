@@ -316,3 +316,24 @@ ul:first-child {
 	font-weight: 700;
 	font-style: italic;
 }
+.course-title-index{
+	text-align: center;
+}
+.long-desc{
+	text-align: center;
+}
+.label-course{
+	font-size: 30px;
+}
+.p-course{
+	margin-left: 50px;
+	color: #18bc9c;
+	border: 1px solid #d3d3d3;
+	border-radius: 10px;
+	margin-top: 15px;
+	width: 90%;
+	padding: 5px 5px 5px 30px;
+}
+.course-index{
+	overflow: auto;
+}

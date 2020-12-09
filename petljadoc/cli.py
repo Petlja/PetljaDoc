@@ -11,7 +11,7 @@ import click
 import yaml
 from yaml.loader import SafeLoader
 from colorama import Fore, init, Style
-from pkg_resources import resource_filename
+from pkg_resources import resource_filename, working_set
 from paver.easy import sh
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
@@ -19,7 +19,7 @@ from livereload import Server
 from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
-from .course import Activity, Lesson, Course, PetljadocCurseYAMLError, ExternalLink, LanguagePick
+from .course import Activity, Lesson, Course, PetljadocCurseYAMLError, ExternalLink
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -49,6 +49,20 @@ META_DATA = '''
   {}
 
 '''
+INDEX_META_DATA = '''
+{}
+..  
+    {}
+    {}
+    {}
+    {}
+    {}
+
+'''
+# pylint: disable=E1133
+# if 'runestone' in {pkg.key for pkg in working_set}:
+#    print('Please remove package runestone from your working enviremant in order to use Petljadoc.')
+#    exit(-1)
 
 
 def init_template_arguments(template_dir, defaults, project_type):
@@ -56,6 +70,8 @@ def init_template_arguments(template_dir, defaults, project_type):
     default_project_name = re.sub(r'\s+', '-', os.path.basename(os.getcwd()))
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
                                  default=default_project_name, force_default=defaults)
+    ta['language'] = _prompt("Project language:",
+                                 default="en", force_default=defaults)
     while ' ' in ta['project_name']:
         ta['project_name'] = click.prompt(
             "Project name: (one word, NO SPACES)")
@@ -463,40 +479,8 @@ def check_component(dictionary, component, error_msg, required=True):
 
 def write_to_index(index, course):
     try:
-        lang_picker = LanguagePick(course.lang)
-        index.write("="*len(course.title)+'\n' +
-                    course.title+'\n' +
-                    "="*len(course.title)+'\n')
-        index.write('\n')
-        index.write(course.longDesc)
-        index.write('\n')
-        index.write(lang_picker('willLearn'))
-        index.write('\n')
-        for willlearn in course.willlearn:
-            index.write(' '*4+'- '+willlearn+'\n')
-        index.write('\n')
-        index.write(lang_picker('requirements'))
-        index.write('\n')
-        for requirements in course.requirements:
-            index.write(' '*4+'- '+requirements+'\n')
-        index.write('\n')
-        index.write(lang_picker('toc'))
-        index.write('\n')
-        for i, toc in enumerate(course.toc):
-            index.write('{}. '.format(i+1)+toc+'\n')
-        index.write('\n')
-        if course.externalLinks:
-            index.write(lang_picker('externalLinks'))
-            index.write('\n')
-            for external in course.externalLinks:
-                index.write(' '*4+'- ' + '`'+external.text +
-                            ' <' + external.link + '>`_'+'\n')
-            index.write('\n')
-        index.write(lang_picker('shortDesc'))
-        index.write('\n')
-        index.write(' '*4+'- '+course.shortDesc)
-        index.write('\n')
-
+        index.write(INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
+                                           course.shortDesc, course.willlearn, course.requirements, course.toc))
         index.write(INDEX_TEMPLATE_HIDDEN.format(3))
     except NameError:
         print_error(PetljadocCurseYAMLError.ERROR_DESC_NONE_TYPE)
@@ -531,9 +515,7 @@ def create_activity_RST(course, index, path, intermediatPath):
         section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
                              mode='w+',
                              encoding='utf-8')
-        section_index.write("="*len(lesson.title)+'\n' +
-                            lesson.title+'\n' +
-                            "="*len(lesson.title)+'\n')
+        section_index.write(rst_title(lesson.title))
         section_index.write(INDEX_TEMPLATE.format(1))
         for activity in lesson.active_activies:
             if activity.activity_type in ['reading', 'quiz']:
@@ -547,16 +529,14 @@ def create_activity_RST(course, index, path, intermediatPath):
                 if activity.get_src_ext() == 'pdf':
                     pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                    mode='w+', encoding='utf-8')
-                    pdf_rst.write(activity.title+'\n'+"=" *
-                                  len(activity.title)+'\n')
+                    pdf_rst.write(rst_title(activity.title))
                     pdf_rst.write(PDF_TEMPLATE.format(
                         '/_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'video':
                 video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                  mode='w+', encoding='utf-8')
-                video_rst.write(activity.title+'\n'+"=" *
-                                len(activity.title)+'\n')
+                video_rst.write(rst_title(activity.title))
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
 
@@ -606,6 +586,11 @@ def copy_dir(src_dir, dest_dir, filter_name=None):
             d = os.path.join(dest_dir, item)
             shutil.copyfile(s, d)
             #print(f"C {s} -> {d}")
+
+
+def rst_title(title):
+    title_bar = '='*len(title)+'\n'
+    return title_bar + title+'\n' + title_bar
 
 
 class _WatchdogHandler(FileSystemEventHandler):

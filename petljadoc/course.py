@@ -97,6 +97,11 @@ class Course:
     def to_dict(self):
         course_dict = dict()
         course_dict['active_lessons'] = []
+        course_dict['longDesc'] = self.longDesc
+        course_dict['willlearn'] = self.willlearn
+        course_dict['requirements'] = self.requirements
+        course_dict['toc'] = self.toc
+        course_dict['title'] = self.title
         for lesson in self.active_lessons:
             lesson_dict = dict()
             lesson_dict['title'] = lesson.title
@@ -193,43 +198,6 @@ class PetljadocCurseYAMLError:
     ERROR_MSG_YAML = 'Yaml could not be loaded.'
     ERROR_STOP_SERVER = 'Press Ctrl+C to stop server'
     ERROR_YAML_TYPE_ERROR = 'Yaml stucture error.'
-
-
-class LanguagePick:
-    CourseDescripiton = {
-        'sr-Cyrl':
-        {
-            'willLearn': 'Шта ћете научити:\n',
-            'requirements': 'Потребно:\n',
-            'toc': 'Садржај:\n',
-            'externalLinks': 'Додатни линкови:\n',
-            'longDesc': 'Dug opis:\n',
-            'shortDesc': 'Kratak opis:\n'
-        },
-        'sr-Latn':
-        {
-            'willLearn': 'Sta ćete naučiti:\n',
-            'requirements': 'Potrebno:\n',
-            'toc': 'Sadržaj:\n',
-            'externalLinks': 'Dodatni linkovi:\n',
-            'longDesc': 'Дуг опис:\n',
-            'shortDesc': 'Кратак опис:\n'
-        },
-        'en': {
-            'willLearn': 'Things you will learn:\n',
-            'requirements': 'Required:\n',
-            'toc': 'Table of content:\n',
-            'externalLinks': 'External links:\n',
-            'longDesc': 'Long description:\n',
-            'shortDesc': 'Short description:\n'
-        }
-    }
-
-    def __init__(self, lang):
-        self.strings = self.CourseDescripiton[lang]
-
-    def __call__(self, literal):
-        return self.strings[literal]
 
 
 def duplicates(guid_list):
