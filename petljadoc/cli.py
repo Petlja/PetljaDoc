@@ -143,12 +143,12 @@ def _prompt(text, default=None, hide_input=False, confirmation_prompt=False,
 
 @click.group()
 def main():
-    check_for_runestone_package()
     """
     Petlja's command-line interface for learning content
 
     For help on specific command, use: petljadoc [COMMAND] --help
     """
+    check_for_runestone_package()
 
 
 @main.command('init-course')
@@ -499,7 +499,7 @@ def write_to_index(index, course):
 
 def print_error(error):
     global COLORAMA_INIT
-    if(COLORAMA_INIT):
+    if COLORAMA_INIT:
         init()
         COLORAMA_INIT = False
     else:
