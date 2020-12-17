@@ -7,6 +7,7 @@ The tool is based on https://github.com/RunestoneInteractive/RunestoneComponents
 - additional ActiveCode features
 - customized Sphinx theme 
 - customized project template 
+- exteded online course format
 - ``petljadoc`` command line interface (CLI)
 
 PetljaDoc currently depends on forked RunestoneComonents, but we are gradually closing the gap with the upstream repository through pull requests.
@@ -29,8 +30,9 @@ Options:
   - `--help`&nbsp;&nbsp;&nbsp;&nbsp;Show help message 
 
 Commands:
+  - `init-course`&nbsp;&nbsp;&nbsp;&nbsp;Create a new online course project in your current directory
   - `init-runestone`&nbsp;&nbsp;&nbsp;&nbsp;Create a new Runestone project in your current directory
-  - `preview`&nbsp;&nbsp;&nbsp;&nbsp;Build a Runstone projec (like `runestone build --all`), open it in browser, watch for changes, rebuild changed files and refresh browser after rebuild (using [sphinx-autobuild](https://github.com/GaretJax/sphinx-autobuild))
+  - `preview`&nbsp;&nbsp;&nbsp;&nbsp;Build the project, open it in a web browser, watch for changes, rebuild changed files and refresh browser after rebuild (using [sphinx-autobuild](https://github.com/GaretJax/sphinx-autobuild))
   - `publish`&nbsp;&nbsp;&nbsp;&nbsp;Build a Runestone project (like `runestone build --all`) and copy produced content in `docs` subfolder (ready to be published using GitHub Pages)
 
 By using `petljadoc preview`, an author may keep opened a browser window for preview. Any saved changes will be updated in browser in about 5-10 seconds.
