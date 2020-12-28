@@ -1,5 +1,4 @@
-{% extends "basic/layout.html" %}
-
+{% extends "basic_layout.html" %}
 {% set script_files = ['_static/runestonebase.js'] + script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
@@ -14,7 +13,9 @@
     '_static'+'/jquery.idle-timer.js',
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
-    '_static'+'/jquery-migrate-1.2.1.min.js'
+    '_static'+'/jquery-migrate-1.2.1.min.js',
+    '_static'+'/course-errors.js',
+    '_static'+'/petlja.js'
   ]
 %}
 
@@ -29,6 +30,9 @@
 
 {%- block doctype -%}
 <!DOCTYPE html>
+{%- endblock %}
+{%- block lang -%}
+<html xmlns="http://www.w3.org/1999/xhtml" lang={{course.lang}}></html>
 {%- endblock %}
 
 {# Sidebar: Rework into our Boostrap nav section. #}
@@ -71,19 +75,18 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 <link rel="shortcut icon" href="{{pathto('_static/favicon.ico', 1)}}" type="image/ico" />
-<script type="text/javascript" src="/_static/petja.js"></script>
 <script type="text/javascript">
   eBookConfig = {};
   eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
   eBookConfig.app = eBookConfig.host + '/{{appname}}';
   eBookConfig.ajaxURL = eBookConfig.app + '/ajax/';
   eBookConfig.course = '{{course_id}}';
-  eBookConfig.logLevel = {{ loglevel }};
-  eBookConfig.loginRequired = {{ login_required }};
+  eBookConfig.logLevel = '{{ loglevel }}';
+  eBookConfig.loginRequired = '{{ login_required }}';
   eBookConfig.build_info = "{{build_info}}";
   eBookConfig.isLoggedIn = false;
-  eBookConfig.useRunestoneServices = {{ use_services }};
-  eBookConfig.python3 = {{ python3 }};
+  eBookConfig.useRunestoneServices = '{{ use_services }}';
+  eBookConfig.python3 = '{{ python3 }}';
   eBookConfig.basecourse = '{{ basecourse }}';
   eBookConfig.runestone_version = '{{ runestone_version }}';
   eBookConfig.imagesDir = '{{ pathto("_images/",1) }}';
@@ -114,6 +117,9 @@
 
 <div class="container col-md-12" id="continue-reading"></div>
 <div class="container" id="main-content" style="float: left;  padding-left: 20px; height: calc(100vh - 115px);">
+<div id="errors">
+
+</div>
 {% if pagename == 'index' %}
 <div class="course-index">
 <div class="course-title-index">

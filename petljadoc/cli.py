@@ -19,7 +19,7 @@ from livereload import Server
 from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
-from .course import Activity, Lesson, Course, PetljadocCurseYAMLError, ExternalLink
+from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -63,11 +63,20 @@ INDEX_META_DATA = '''
 
 COLORAMA_INIT = True
 
+TOP_LEVEL = 't'
+LESSON_LEVEL = 'l'
+ACTIVITY_LEVEL = 'a'
+
+ACTIVITY_TYPES = ['reading', 'video', 'quiz']
+
+# ISO Code : Sphinx language code https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language
+LANGUAGE_META_TAG = {'sr-Cyrl': 'sr_RS', 'sr-Latn': 'sr@latn'}
+
 
 def check_for_runestone_package():
     #pylint: disable=E1133
     if 'runestone' in {pkg.key for pkg in working_set}:
-        print('Please remove package runestone from your working environment in order to use Petljadoc.')
+        print('Please remove the runestone package from your working environment in order to use Petljadoc.')
         exit(-1)
 
 
@@ -76,8 +85,10 @@ def init_template_arguments(template_dir, defaults, project_type):
     default_project_name = re.sub(r'\s+', '-', os.path.basename(os.getcwd()))
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
                                  default=default_project_name, force_default=defaults)
-    ta['language'] = _prompt("Project language:",
+    ta['language'] = _prompt("Project language: (en, sr, sr-Cyrl, sr-Latn)",
                              default="en", force_default=defaults)
+    if ta['language'] in LANGUAGE_META_TAG:
+        ta['language'] = LANGUAGE_META_TAG[ta['language']]
     while ' ' in ta['project_name']:
         ta['project_name'] = click.prompt(
             "Project name: (one word, NO SPACES)")
@@ -252,10 +263,12 @@ def publish():
     click.echo(f'Publishing to {publishPath}')
 
     def filter_name(src_dir, item):
+        if item in {"course-errors.js"}:
+            return False
         if src_dir != publishPath:
             return True
         return item not in {"doctrees", "sources", ".buildinfo", "search.html",
-                            "searchindex.js", "objects.inv", "pavement.py"}
+                            "searchindex.js", "objects.inv", "pavement.py","course-errors.js"}
     copy_dir(buildPath, publishPath, filter_name)
     open(publishPath.joinpath(".nojekyll"), "w").close()
 
@@ -276,19 +289,23 @@ def cyr2lat():
 
 
 def build_intermediate(rootPath, first_build=True):
-    data = load_data_from_YAML(first_build)
-    course = create_course(data, first_build)
-    template_toc(course)
-    if first_build:
-        create_or_recreate_dir('_intermediate/')
-        create_or_recreate_dir('_build/')
-        create_intermediate_folder(course, rootPath, '_intermediate/')
+    course, errors = create_course()
+    course_errors = handle_errors(errors, first_build)
+    if not course_errors:
+        template_toc(course)
+        if first_build:
+            create_or_recreate_dir('_intermediate/')
+            create_or_recreate_dir('_build/')
+            create_intermediate_folder(course, rootPath, '_intermediate/')
+        else:
+            create_or_recreate_dir('_tmp/')
+            create_intermediate_folder(course, rootPath, '_tmp/')
+            smart_reload('_tmp/', '_intermediate/')
+            shutil.rmtree('_tmp/')
         course.create_YAML('_build/index.yaml')
     else:
-        create_or_recreate_dir('_tmp/')
-        create_intermediate_folder(course, rootPath, '_tmp/')
-        smart_reload('_tmp/', '_intermediate/')
-        shutil.rmtree('_tmp/')
+        if first_build:
+            exit(-1)
 
 
 def create_or_recreate_dir(file):
@@ -298,26 +315,20 @@ def create_or_recreate_dir(file):
     os.mkdir(file)
 
 
-def load_data_from_YAML(first_build):
+def load_data_from_YAML():
     with open('_sources/index.yaml', encoding='utf8') as f:
         try:
             data = yaml.load(f, Loader=SafeLineLoader)
-            return data
+            return {'data': data, 'error': {'status': True, 'atribute': None, 'error': None}}
         except yaml.YAMLError as exc:
             # pylint: disable=E1101
-            print_error(PetljadocCurseYAMLError.ERROR_YAML_TYPE_ERROR)
             if hasattr(exc, 'problem_mark'):
                 if exc.context:
-                    print_error(str(exc.problem_mark) + '\n  ' +
-                                str(exc.problem) + ' ' + str(exc.context))
+                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': str(exc.problem_mark) + str(exc.problem) + str(exc.context)}}
                 else:
-                    print_error(str(exc.problem_mark) +
-                                '\n  ' + str(exc.problem))
+                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': str(exc.problem_mark) + str(exc.problem)}}
             else:
-                print_error(PetljadocCurseYAMLError.ERROR_MSG_YAML)
-            if not first_build:
-                print_error(PetljadocCurseYAMLError.ERROR_STOP_SERVER)
-            exit(-1)
+                return {'data': None, 'error': {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_YAML_LOAD}}
 
 
 def prebuild(first_build=True):
@@ -338,7 +349,8 @@ def project_path():
         p = p.parent
 
 
-def create_course(data, first_build):
+def create_course():
+    global ACTIVITY_TYPES
     error_log = {}
     archived_lessons = []
     active_lessons = []
@@ -346,167 +358,186 @@ def create_course(data, first_build):
     willLearn = []
     requirements = []
     toc = []
-    try:
-        error_log['courseId'], courseId = check_component(
-            data, 'courseId', PetljadocCurseYAMLError.ERROR_ID)
-        error_log['lang'], lang = check_component(
-            data, 'lang', PetljadocCurseYAMLError.ERROR_LANG)
-        error_log['title'], title_course = check_component(
-            data, 'title', PetljadocCurseYAMLError.ERROR_TITLE)
-        error_log['description'], _ = check_component(
-            data, 'description', PetljadocCurseYAMLError.ERROR_DESC)
+    YAML_contet = load_data_from_YAML()
+    data, error_log[YamlLoger.YAML_PARSER_ERROR_MSG] = YAML_contet['data'], YAML_contet['error']
+    if data:
+        try:
+            error_log[YamlLoger.ATR_COURSE_ID], courseId = check_component(
+                data,TOP_LEVEL, YamlLoger.ATR_COURSE_ID)
+            error_log[YamlLoger.ATR_LANG], lang = check_component(
+                data,TOP_LEVEL, YamlLoger.ATR_LANG)
+            error_log[YamlLoger.ATR_TITLE], title_course = check_component(
+                data,TOP_LEVEL, YamlLoger.ATR_TITLE)
+            error_log[YamlLoger.ATR_DESC], _ = check_component(
+                data, TOP_LEVEL,YamlLoger.ATR_DESC)
+            if error_log[YamlLoger.ATR_DESC]['status']:
+                desc_line_number = data[YamlLoger.ATR_DESC]['__line__']
+                error_log[YamlLoger.ATR_LONG_DESC], longDesc = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_LONG_DESC, args=[desc_line_number])
+                error_log[YamlLoger.ATR_SHORT_DESC], shortDesc = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_SHORT_DESC, args=[desc_line_number])
+                error_log[YamlLoger.ATR_WILL_LEARN], willLearn = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_WILL_LEARN, args=[desc_line_number])
+                error_log[YamlLoger.ATR_REQUIREMENTS], requirements = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_REQUIREMENTS, args=[desc_line_number])
+                error_log[YamlLoger.ATR_TOC], toc = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_TOC, args=[desc_line_number])
+                error_log[YamlLoger.ATR_EXTERNAL_LINK], externalLinks = check_component(
+                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINK, required=False)
 
-        if error_log['description']:
-            current_level = data['description']['__line__']
-            error_log['longDescription'], longDesc = check_component(
-                data['description'], 'longDescription', PetljadocCurseYAMLError.ERROR_LONG_DESC.format(current_level))
-            error_log['shortDescription'], shortDesc = check_component(
-                data['description'], 'shortDescription', PetljadocCurseYAMLError.ERROR_SHORT_DESC.format(current_level))
-            error_log['willLearn'], willLearn = check_component(
-                data['description'], 'willLearn', PetljadocCurseYAMLError.ERROR_WILL_LEARN.format(current_level))
-            error_log['requirements'], requirements = check_component(
-                data['description'], 'requirements', PetljadocCurseYAMLError.ERROR_REQUIREMENTS.format(current_level))
-            error_log['toc'], toc = check_component(
-                data['description'], 'toc', PetljadocCurseYAMLError.ERROR_TOC.format(current_level))
-            error_log['externalLinks'], externalLinks = check_component(
-                data['description'], 'externalLinks', '', False)
+                if externalLinks != '':
+                    for i, external_link in enumerate(externalLinks, start=1):
+                        order_prefix = str(i)+'_'
+                        link_line_number = external_link['__line__']
+                        error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_TEXT], text = check_component(
+                            external_link,TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_TEXT, args=[link_line_number, i])
+                        error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_LINK], link = check_component(
+                            external_link,TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_LINK, args=[link_line_number, i])
+                        external_links.append(ExternalLink(text, link))
 
-            if externalLinks != '':
-                for i, external_link in enumerate(externalLinks, start=1):
-                    current_level = external_link['__line__']
-                    error_log[str(i)+'link_text'], text = check_component(external_link, 'text',
-                                                                          PetljadocCurseYAMLError.ERROR_EXTERNAL_LINKS_TEXT.format(current_level, i))
-                    error_log[str(i)+'link_href'], link = check_component(external_link, 'href',
-                                                                          PetljadocCurseYAMLError.ERROR_EXTERNAL_LINKS_LINK.format(current_level, i))
-                    external_links.append(ExternalLink(text, link))
+            error_log[YamlLoger.ATR_LESSONS], _ = check_component(
+                data,TOP_LEVEL, YamlLoger.ATR_LESSONS)
 
-        error_log['lessons'], _ = check_component(
-            data, 'lessons', PetljadocCurseYAMLError.ERROR_LESSONS)
+            if error_log[YamlLoger.ATR_LESSONS]['status']:
+                error_log[YamlLoger.ATR_ARCHIVED_LESSON], archived_lessons_list = check_component(
+                    data,TOP_LEVEL, YamlLoger.ATR_ARCHIVED_LESSON, required=False)
+                if archived_lessons_list != '':
+                    for j, archived_lesson in enumerate(archived_lessons_list, start=1):
+                        order_prefix = str(j)+'_'
+                        archived_lesson_line = archived_lesson['__line__']
+                        error_log[order_prefix+YamlLoger.ATR_ARCHIVED_LESSON_GUID], archived_lesson_guid = check_component(
+                            archived_lesson,TOP_LEVEL, YamlLoger.ATR_GUID, args=[archived_lesson_line, j])
+                        archived_lessons.append(archived_lesson_guid)
 
-        if error_log['lessons']:
-            error_log['archived-lessons'], archived_lessons_list = check_component(
-                data, 'archived-lessons', '', False)
-            if archived_lessons_list != '':
-                for j, archived_lesson in enumerate(archived_lessons_list, start=1):
-                    current_level = archived_lesson['__line__']
-                    error_log[str(j)+'_archived-lessons'], archived_lesson_guid = check_component(
-                        archived_lesson, 'guid', PetljadocCurseYAMLError.ERROR_ARCHIVED_LESSON.format(current_level, j))
-                    archived_lessons.append(archived_lesson_guid)
+                for i, lesson in enumerate(data['lessons'], start=1):
+                    active_activies = []
+                    archived_activities = []
+                    order_prefix_lesson = str(i)+'_'
+                    lesson_line = lesson['__line__']
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_TITLE], title = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_TITLE, args=[lesson_line, i])
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_FOLDER], folder = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_FOLDER, args=[lesson_line, i])
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_GUID], guid = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_DESC], description = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES], lesson_activities = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIES], lesson_archived_activities = check_component(
+                        lesson,LESSON_LEVEL, YamlLoger.ATR_ARCHIVED_ACTIVITY, required=False)
 
-            for i, lesson in enumerate(data['lessons'], start=1):
-                active_activies = []
-                archived_activities = []
-                current_level = lesson['__line__']
+                    if lesson_archived_activities != '':
+                        for j, archived_activity in enumerate(lesson_archived_activities, start=1):
+                            order_prefix_archived_lessons = str(
+                                i)+'_'+str(j)+'_'
+                            archived_activity_line = archived_activity['__line__']
+                            error_log[order_prefix_archived_lessons + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIE_GUID], archived_activity_guid = check_component(
+                                archived_activity,ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
+                            archived_activities.append(archived_activity_guid)
 
-                error_log[str(i)+'_lesson_title'], title = check_component(lesson,
-                                                                           'title', PetljadocCurseYAMLError.ERROR_LESSON_TITLE.format(current_level, i))
-                error_log[str(i)+'_lesson_folder'], folder = check_component(lesson,
-                                                                             'folder', PetljadocCurseYAMLError.ERROR_LESSON_FOLDER.format(current_level, i))
-                error_log[str(i)+'_lesson_guid'], guid = check_component(lesson,
-                                                                         'guid', PetljadocCurseYAMLError.ERROR_LESSON_GUID.format(current_level, i))
-                error_log[str(i)+'_lesson_description'], description = check_component(
-                    lesson, 'description', '', False)
-                error_log[str(i)+'_lesson_activities'], lesson_activities = check_component(
-                    lesson, 'activities', PetljadocCurseYAMLError.ERROR_LESSON_ACTIVITIES.format(current_level, i))
-                error_log[str(i)+'_lesson_activities'], lesson_archived_activities = check_component(
-                    lesson, 'archived-activities', '', False)
-                if lesson_archived_activities != '':
-                    for j, archived_activity in enumerate(lesson_archived_activities, start=1):
-                        current_level_archived = archived_activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_lesson_archived_activities'], archived_activity_guid = check_component(
-                            archived_activity, 'guid', PetljadocCurseYAMLError.ERROR_ARCHIVED_ACTIVITY.format(j, current_level_archived))
-                        archived_activities.append(archived_activity_guid)
-                if error_log[str(i)+'_lesson_activities']:
-                    for j, activity in enumerate(lesson_activities, start=1):
-                        current_level_activity = activity['__line__']
-                        error_log[str(i)+'_'+str(j)+'_activity_type'], activity_type = check_component(
-                            activity, 'type', PetljadocCurseYAMLError.ERROR_ACTIVITY_TYPE.format(i, j, current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_title'], activity_title = check_component(
-                            activity, 'title', PetljadocCurseYAMLError.ERROR_ACTIVITY_TITLE.format(i, j, current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_guid'], activity_guid = check_component(
-                            activity, 'guid', PetljadocCurseYAMLError.ERROR_ACTIVITY_GUID.format(i, j, current_level_activity))
-                        error_log[str(i)+'_'+str(j)+'_activity_descripiton'], activity_description = check_component(
-                            activity, 'description', '', False)
-                        error_log[str(
-                            i)+'_'+str(j)+'_activity_src'], activity_src = check_component(activity, 'file', '')
+                    if error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES]:
+                        for j, activity in enumerate(lesson_activities, start=1):
+                            order_prefix_activitie = str(i)+'_'+str(j)+'_'
+                            activity_line = activity['__line__']
+                            try:
+                                error_log[order_prefix_activitie +
+                                          YamlLoger.ATR_ACTIVITY_TYPE], activity_type = check_component(activity,LESSON_LEVEL,YamlLoger.ATR_TYPE, args=[i, j, activity_line])
+                                if activity_type not in ACTIVITY_TYPES:
+                                    raise ActivityTypeValueError(activity_type)
+                                error_log[order_prefix_activitie + YamlLoger.ATR_ACTIVITY_TITLE], activity_title = check_component(
+                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TITLE, args=[i, j, activity_line])
+                                error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_GUID], activity_guid = check_component(
+                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_GUID, args=[i, j, activity_line])
+                                error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_DESC], activity_description = check_component(
+                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_DESC, required=False)
+                                if error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['video']:
+                                    error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
+                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_URL, args=[i, j, activity_line])
+                                elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['reading', 'quiz']:
+                                    error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
+                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
 
-                        if not error_log[str(i)+'_'+str(j)+'_activity_src']:
-                            error_log[str(i)+'_'+str(j)+'_activity_src'], activity_src = check_component(
-                                activity, 'url', PetljadocCurseYAMLError.ERROR_ACTIVITY_SRC.format(i, j, current_level_activity))
+                            except ActivityTypeValueError as e:
+                                error_log[order_prefix_activitie +
+                                          YamlLoger.ATR_ACTIVITY_TYPE_VALUE] = {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[YamlLoger.ATR_ACTIVITY_TYPE_VALUE].format(e.message)}
+                                continue
 
-                        active_activies.append(Activity(
-                            activity_type, activity_title, activity_src, activity_guid, activity_description))
+                            else:
+                                active_activies.append(Activity(
+                                    activity_type, activity_title, activity_src, activity_guid, activity_description))
 
-                active_lessons.append(
-                    Lesson(title, folder, guid, description, archived_activities, active_activies))
+                    active_lessons.append(
+                        Lesson(title, folder, guid, description, archived_activities, active_activies))
 
-        course = Course(courseId, lang, title_course, longDesc, shortDesc, willLearn,
-                        requirements, toc, external_links, archived_lessons, active_lessons)
-        error_log['guid_integrity'], guid_list = course.guid_check()
+            course = Course(courseId, lang, title_course, longDesc, shortDesc, willLearn,
+                            requirements, toc, external_links, archived_lessons, active_lessons)
 
-        if not error_log['guid_integrity']:
-            for guid in guid_list:
-                print_error(
-                    PetljadocCurseYAMLError.ERROR_DUPLICATE_GUID.format(guid))
-        error_log['source_integrity'], missing_src_title, missing_src = course.source_check()
+            error_log[YamlLoger.DUPLICATE_GUID] = course.guid_check()
+            error_log[YamlLoger.SOURCE_MISSING] = course.source_check()
+            return course, error_log
 
-        if not error_log['source_integrity']:
-            for titile, src in zip(missing_src_title, missing_src):
-                print_error(
-                    PetljadocCurseYAMLError.ERROR_SOURCE_MISSING.format(titile, src))
-
-        if False in error_log.values():
-            print_error(PetljadocCurseYAMLError.ERROR_MSG_BUILD)
-            if not first_build:
-                print_error(PetljadocCurseYAMLError.ERROR_STOP_SERVER)
-            exit(-1)
-
-        return course
-
-    except TypeError:
-        print_error(PetljadocCurseYAMLError.ERROR_YAML_TYPE_ERROR)
-        if not first_build:
-            print_error(PetljadocCurseYAMLError.ERROR_STOP_SERVER)
-        exit(-1)
+        except TypeError:
+            error_log[YamlLoger.YAML_TYPE_ERROR] = {'status': False, 'atribute': None, 'error': YamlLoger.YAML_TYPE_ERROR}
+            return None, error_log
+    else:
+        return None, error_log
 
 
-def check_component(dictionary, component, error_msg, required=True):
+def check_component(dictionary,atr_type,component, required=True, args=None):
     try:
         item = dictionary[component]
     except KeyError:
         if required:
-            if error_msg != '':
-                print_error(error_msg)
-            return [False, '']
+            if args is None:
+                args = []
+            return {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[atr_type][component].format(*args)}, ''
         else:
-            return [True, '']
+            return {'status': True, 'atribute': None, 'error': None}, ''
     else:
-        return [True, item]
+        return {'status': True, 'atribute': item, 'error': None}, item
 
 
 def write_to_index(index, course):
-    try:
-        index.write(INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
-                                           course.shortDesc, course.willlearn, course.requirements, course.toc, course.externalLinks))
-        index.write(INDEX_TEMPLATE_HIDDEN.format(3))
-    except NameError:
-        print_error(PetljadocCurseYAMLError.ERROR_DESC_NONE_TYPE)
-        exit(-1)
-    except TypeError:
-        print_error(PetljadocCurseYAMLError.ERROR_DESC_NONE_TYPE)
-        exit(-1)
+    index.write(INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
+                                       course.shortDesc, course.willlearn, course.requirements, course.toc, course.externalLinks))
+    index.write(INDEX_TEMPLATE_HIDDEN.format(3))
 
 
-def print_error(error):
+def handle_errors(errors, first_build):
+    error_flag = False
+    error_log = []
+    for key, value in errors.items():
+        if not value['status']:
+            error_flag = True
+            if key == 'guid_integrity':
+                for guid in value['guid_duplicate_list']:
+                    error_log.append(YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.DUPLICATE_GUID].format(guid))
+            elif key == 'source_integrity':
+                for titile, src in zip(value['missing_activitie_titles'], value['missing_activitie_src']):
+                    error_log.append(YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.SOURCE_MISSING].format(titile,src))
+            else:
+                error_log.append(value['error'])
+    if error_flag:
+        error_log = "\n"+"\n".join(error_log)
+        print_error(error_log, first_build)
+    return  error_flag
+
+
+def print_error(error, first_build):
     global COLORAMA_INIT
-    if COLORAMA_INIT:
-        init()
-        COLORAMA_INIT = False
+    if first_build:
+        if COLORAMA_INIT:
+            init()
+            COLORAMA_INIT = False
+        else:
+            reinit()
+        print(Fore.RED, error)
+        print(Style.RESET_ALL)
+        deinit()
     else:
-        reinit()
-    print(Fore.RED, error)
-    print(Style.RESET_ALL)
-    deinit()
+        with open("_build/_static/error_log.txt", "w+") as f:
+            f.write(error)
 
 
 def template_toc(course):

@@ -1,4 +1,4 @@
-{% extends "basic/layout.html" %}
+{% extends "basic_layout.html" %}
 
 {% set script_files = ['_static/runestonebase.js'] + script_files + [
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
@@ -70,15 +70,15 @@
 <script type="text/javascript">
   eBookConfig = {};
   eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
-  eBookConfig.app = eBookConfig.host+'/{{appname}}';
-  eBookConfig.ajaxURL = eBookConfig.app+'/ajax/';
+  eBookConfig.app = eBookConfig.host + '/{{appname}}';
+  eBookConfig.ajaxURL = eBookConfig.app + '/ajax/';
   eBookConfig.course = '{{course_id}}';
-  eBookConfig.logLevel = {{loglevel}};
-  eBookConfig.loginRequired = {{login_required}};
+  eBookConfig.logLevel = '{{ loglevel }}';
+  eBookConfig.loginRequired = '{{ login_required }}';
   eBookConfig.build_info = "{{build_info}}";
   eBookConfig.isLoggedIn = false;
-  eBookConfig.useRunestoneServices = {{ use_services }};
-  eBookConfig.python3 = {{ python3 }};
+  eBookConfig.useRunestoneServices = '{{ use_services }}';
+  eBookConfig.python3 = '{{ python3 }}';
   eBookConfig.basecourse = '{{ basecourse }}';
   eBookConfig.runestone_version = '{{ runestone_version }}';
   eBookConfig.imagesDir = '{{ pathto("_images/",1) }}';

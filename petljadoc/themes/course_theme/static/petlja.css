@@ -262,7 +262,7 @@ ul:first-child {
 	overflow-y: scroll;
 }
 
-#main-content > div:first-of-type {
+#main-content > div:nth-of-type(2) {
 	width: calc(80vw - 60px) !important;
 	height: 100%;
 }
@@ -334,6 +334,10 @@ ul:first-child {
 	width: 90%;
 	padding: 5px 5px 5px 30px;
 }
-.course-index{
-	overflow: auto;
+#errors{
+	color: #D63301;
+	background-color: #FFCCBA;
+	font-size:1.2em;
+	border-radius: 25px;
+	padding-left: 1%;
 }

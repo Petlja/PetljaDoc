@@ -1,0 +1,36 @@
+# Translations template for PROJECT.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-12-08 02:18+0100\n"
+"PO-Revision-Date: 2020-12-21 19:36+0100\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+"X-Generator: Poedit 2.4.2\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Language: sr@latin\n"
+
+#: localtoc.html:2
+msgid "Page"
+msgstr "Strana"
+
+#: relations.html:4 subchapter.html:4
+msgid "Previous chapter"
+msgstr "Prethodno poglavlje"
+
+#: relations.html:7 subchapter.html:7
+msgid "Next chapter"
+msgstr "Sledeće poglavlje"
+
+#: sourcelink.html:3
+msgid "Source"
+msgstr "Izvor"
