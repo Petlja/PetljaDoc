@@ -141,6 +141,9 @@ class Activity:
         if self.activity_type == 'video':
             self.src = video_url(src)
             self.toc_url = self.title.replace(" ", "%20")
+        elif self.activity_type == 'coding-quiz':
+            self.toc_url =  self.title.replace(" ", "%20")
+            self.src = src
         else:
             self.src = src
             self.toc_url = src.split('.')[0].replace(" ", "%20")
@@ -150,7 +153,6 @@ class Activity:
         else:
             self.guid = guid.split('/')[0]
             self.alias = guid.split('/')[1]
-
     def get_src_ext(self):
         if len(self.src.rsplit('.')) > 1:
             return self.src.rsplit('.')[1]
@@ -187,7 +189,7 @@ class YamlLoger:
     ATR_EXTERNAL_LINKS_TEXT = 'text'
     ATR_EXTERNAL_LINKS_LINK = 'href'
     ATR_LESSONS = 'lessons'
-    ATR_ARCHIVED_LESSON = 'archived-lessons'
+    ATR_ARCHIVED_LESSON = 'archived-lessons'    
     ATR_ARCHIVED_LESSON_LINE = 'archived-lessons_line'
     ATR_ARCHIVED_LESSON_GUID = 'guid'
     ATR_LESSON_LINE = '_line'
@@ -206,6 +208,7 @@ class YamlLoger:
     ATR_ACTIVITY_DESC = 'descripiton'
     ATR_ACTIVITY_SRC = 'src'
     ATR_ACTIVITY_TYPE_VALUE = 'activity_type_value'
+    ATR_ACTIVITY_PROBLEMS = 'problems'
     DUPLICATE_GUID = 'guid_integrity'
     SOURCE_MISSING = 'source_integrity'
     YAML_PARSER_ERROR = 'yaml_parser_error'
@@ -245,6 +248,7 @@ class YamlLoger:
                     ATR_ACTIVITY_SRC : 'In "lesson" {}. Activity {} (line: {}) is missing the source("file" or "url").',
                     ATR_LESSON_ARCHIVED_ACTIVITIE_GUID : 'In Lesson {} "archived-activities" {} (line: {}) missing required attribute "guid".',
                     ATR_ACTIVITY_TYPE_VALUE : 'Unsupported activity type {}.',
+                    ATR_ACTIVITY_PROBLEMS : 'In "lesson" {}. Activity {} (line: {}) is missing "problems"',
                 }
     }
 

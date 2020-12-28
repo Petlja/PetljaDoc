@@ -67,7 +67,7 @@ TOP_LEVEL = 't'
 LESSON_LEVEL = 'l'
 ACTIVITY_LEVEL = 'a'
 
-ACTIVITY_TYPES = ['reading', 'video', 'quiz']
+ACTIVITY_TYPES = ['reading', 'video', 'quiz', 'coding-quiz']
 
 # ISO Code : Sphinx language code https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language
 LANGUAGE_META_TAG = {'sr-Cyrl': 'sr_RS', 'sr-Latn': 'sr@latn'}
@@ -457,6 +457,9 @@ def create_course():
                                 elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['reading', 'quiz']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
                                         activity,ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
+                                elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['coding-quiz']:
+                                    error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
+                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_PROBLEMS, args=[i, j, activity_line])
 
                             except ActivityTypeValueError as e:
                                 error_log[order_prefix_activitie +
@@ -475,6 +478,9 @@ def create_course():
 
             error_log[YamlLoger.DUPLICATE_GUID] = course.guid_check()
             error_log[YamlLoger.SOURCE_MISSING] = course.source_check()
+
+
+
             return course, error_log
 
         except TypeError:
@@ -583,6 +589,14 @@ def create_activity_RST(course, index, path, intermediatPath):
                 video_rst.write(rst_title(activity.title))
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
+            if activity.activity_type == 'coding-quiz':
+                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                                 mode='w+', encoding='utf-8')
+                coding_quiz_rst.write(rst_title(activity.title))
+                for s in activity.src:
+                    coding_quiz_rst.write(s + '\n\n')
+                section_index.write(' '*4+activity.title+'.rst\n')
+
 
 
 def read_course():
