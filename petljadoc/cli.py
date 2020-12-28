@@ -431,8 +431,7 @@ def create_course():
 
                     if lesson_archived_activities != '':
                         for j, archived_activity in enumerate(lesson_archived_activities, start=1):
-                            order_prefix_archived_lessons = str(
-                                i)+'_'+str(j)+'_'
+                            order_prefix_archived_lessons = str(i)+'_'+str(j)+'_'
                             archived_activity_line = archived_activity['__line__']
                             error_log[order_prefix_archived_lessons + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIE_GUID], archived_activity_guid = check_component(
                                 archived_activity, ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
