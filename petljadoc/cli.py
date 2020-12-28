@@ -43,6 +43,10 @@ PDF_TEMPLATE = '''
 
   <embed src="{}" width="100%" height="700px" type="application/pdf">
 '''
+LINK_TEMPLATE = '''
+    {}
+
+'''
 META_DATA = '''
 ..
   {}
@@ -85,7 +89,7 @@ def init_template_arguments(template_dir, defaults, project_type):
     default_project_name = re.sub(r'\s+', '-', os.path.basename(os.getcwd()))
     ta['project_name'] = _prompt("Project name: (one word, no spaces)",
                                  default=default_project_name, force_default=defaults)
-    ta['language'] = _prompt("Project language: (en, sr, sr-Cyrl, sr-Latn)",
+    ta['language'] = _prompt("Project language: (supported languages: en, sr, sr-Cyrl, sr-Latn)",
                              default="en", force_default=defaults)
     if ta['language'] in LANGUAGE_META_TAG:
         ta['language'] = LANGUAGE_META_TAG[ta['language']]
@@ -262,13 +266,11 @@ def publish():
     publishPath = path.joinpath("docs")
     click.echo(f'Publishing to {publishPath}')
 
-    def filter_name(src_dir, item):
-        if item in {"course-errors.js"}:
-            return False
-        if src_dir != publishPath:
+    def filter_name(item):
+        if item not in {"doctrees", "_sources", ".buildinfo", "search.html",
+                        "searchindex.js", "objects.inv", "pavement.py","course-errors.js"}:
             return True
-        return item not in {"doctrees", "sources", ".buildinfo", "search.html",
-                            "searchindex.js", "objects.inv", "pavement.py","course-errors.js"}
+
     copy_dir(buildPath, publishPath, filter_name)
     open(publishPath.joinpath(".nojekyll"), "w").close()
 
@@ -363,50 +365,50 @@ def create_course():
     if data:
         try:
             error_log[YamlLoger.ATR_COURSE_ID], courseId = check_component(
-                data,TOP_LEVEL, YamlLoger.ATR_COURSE_ID)
+                data, TOP_LEVEL, YamlLoger.ATR_COURSE_ID)
             error_log[YamlLoger.ATR_LANG], lang = check_component(
-                data,TOP_LEVEL, YamlLoger.ATR_LANG)
+                data, TOP_LEVEL, YamlLoger.ATR_LANG)
             error_log[YamlLoger.ATR_TITLE], title_course = check_component(
-                data,TOP_LEVEL, YamlLoger.ATR_TITLE)
+                data, TOP_LEVEL, YamlLoger.ATR_TITLE)
             error_log[YamlLoger.ATR_DESC], _ = check_component(
-                data, TOP_LEVEL,YamlLoger.ATR_DESC)
+                data, TOP_LEVEL, YamlLoger.ATR_DESC)
             if error_log[YamlLoger.ATR_DESC]['status']:
                 desc_line_number = data[YamlLoger.ATR_DESC]['__line__']
                 error_log[YamlLoger.ATR_LONG_DESC], longDesc = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_LONG_DESC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_LONG_DESC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_SHORT_DESC], shortDesc = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_SHORT_DESC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_SHORT_DESC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_WILL_LEARN], willLearn = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_WILL_LEARN, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_WILL_LEARN, args=[desc_line_number])
                 error_log[YamlLoger.ATR_REQUIREMENTS], requirements = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_REQUIREMENTS, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_REQUIREMENTS, args=[desc_line_number])
                 error_log[YamlLoger.ATR_TOC], toc = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_TOC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_TOC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_EXTERNAL_LINK], externalLinks = check_component(
-                    data[YamlLoger.ATR_DESC],TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINK, required=False)
+                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINK, required=False)
 
                 if externalLinks != '':
                     for i, external_link in enumerate(externalLinks, start=1):
                         order_prefix = str(i)+'_'
                         link_line_number = external_link['__line__']
                         error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_TEXT], text = check_component(
-                            external_link,TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_TEXT, args=[link_line_number, i])
+                            external_link, TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_TEXT, args=[link_line_number, i])
                         error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_LINK], link = check_component(
-                            external_link,TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_LINK, args=[link_line_number, i])
+                            external_link, TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_LINK, args=[link_line_number, i])
                         external_links.append(ExternalLink(text, link))
 
             error_log[YamlLoger.ATR_LESSONS], _ = check_component(
-                data,TOP_LEVEL, YamlLoger.ATR_LESSONS)
+                data, TOP_LEVEL, YamlLoger.ATR_LESSONS)
 
             if error_log[YamlLoger.ATR_LESSONS]['status']:
                 error_log[YamlLoger.ATR_ARCHIVED_LESSON], archived_lessons_list = check_component(
-                    data,TOP_LEVEL, YamlLoger.ATR_ARCHIVED_LESSON, required=False)
+                    data, TOP_LEVEL, YamlLoger.ATR_ARCHIVED_LESSON, required=False)
                 if archived_lessons_list != '':
                     for j, archived_lesson in enumerate(archived_lessons_list, start=1):
                         order_prefix = str(j)+'_'
                         archived_lesson_line = archived_lesson['__line__']
                         error_log[order_prefix+YamlLoger.ATR_ARCHIVED_LESSON_GUID], archived_lesson_guid = check_component(
-                            archived_lesson,TOP_LEVEL, YamlLoger.ATR_GUID, args=[archived_lesson_line, j])
+                            archived_lesson, TOP_LEVEL, YamlLoger.ATR_GUID, args=[archived_lesson_line, j])
                         archived_lessons.append(archived_lesson_guid)
 
                 for i, lesson in enumerate(data['lessons'], start=1):
@@ -415,17 +417,17 @@ def create_course():
                     order_prefix_lesson = str(i)+'_'
                     lesson_line = lesson['__line__']
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_TITLE], title = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_TITLE, args=[lesson_line, i])
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_TITLE, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_FOLDER], folder = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_FOLDER, args=[lesson_line, i])
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_FOLDER, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_GUID], guid = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_DESC], description = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES], lesson_activities = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIES], lesson_archived_activities = check_component(
-                        lesson,LESSON_LEVEL, YamlLoger.ATR_ARCHIVED_ACTIVITY, required=False)
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_ARCHIVED_ACTIVITY, required=False)
 
                     if lesson_archived_activities != '':
                         for j, archived_activity in enumerate(lesson_archived_activities, start=1):
@@ -433,7 +435,7 @@ def create_course():
                                 i)+'_'+str(j)+'_'
                             archived_activity_line = archived_activity['__line__']
                             error_log[order_prefix_archived_lessons + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIE_GUID], archived_activity_guid = check_component(
-                                archived_activity,ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
+                                archived_activity, ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
                             archived_activities.append(archived_activity_guid)
 
                     if error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES]:
@@ -442,28 +444,28 @@ def create_course():
                             activity_line = activity['__line__']
                             try:
                                 error_log[order_prefix_activitie +
-                                          YamlLoger.ATR_ACTIVITY_TYPE], activity_type = check_component(activity,LESSON_LEVEL,YamlLoger.ATR_TYPE, args=[i, j, activity_line])
+                                          YamlLoger.ATR_ACTIVITY_TYPE], activity_type = check_component(activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TYPE, args=[i, j, activity_line])
                                 if activity_type not in ACTIVITY_TYPES:
                                     raise ActivityTypeValueError(activity_type)
                                 error_log[order_prefix_activitie + YamlLoger.ATR_ACTIVITY_TITLE], activity_title = check_component(
-                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TITLE, args=[i, j, activity_line])
+                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TITLE, args=[i, j, activity_line])
                                 error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_GUID], activity_guid = check_component(
-                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_GUID, args=[i, j, activity_line])
+                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_GUID, args=[i, j, activity_line])
                                 error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_DESC], activity_description = check_component(
-                                    activity,ACTIVITY_LEVEL, YamlLoger.ATR_DESC, required=False)
+                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_DESC, required=False)
                                 if error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['video']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_URL, args=[i, j, activity_line])
+                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_URL, args=[i, j, activity_line])
                                 elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['reading', 'quiz']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
+                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
                                 elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['coding-quiz']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity,ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_PROBLEMS, args=[i, j, activity_line])
+                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_PROBLEMS, args=[i, j, activity_line])
 
                             except ActivityTypeValueError as e:
                                 error_log[order_prefix_activitie +
-                                          YamlLoger.ATR_ACTIVITY_TYPE_VALUE] = {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[YamlLoger.ATR_ACTIVITY_TYPE_VALUE].format(e.message)}
+                                          YamlLoger.ATR_ACTIVITY_TYPE_VALUE] = {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[ACTIVITY_LEVEL][YamlLoger.ATR_ACTIVITY_TYPE_VALUE].format(e.message)}
                                 continue
 
                             else:
@@ -479,18 +481,17 @@ def create_course():
             error_log[YamlLoger.DUPLICATE_GUID] = course.guid_check()
             error_log[YamlLoger.SOURCE_MISSING] = course.source_check()
 
-
-
             return course, error_log
 
         except TypeError:
-            error_log[YamlLoger.YAML_TYPE_ERROR] = {'status': False, 'atribute': None, 'error': YamlLoger.YAML_TYPE_ERROR}
+            error_log[YamlLoger.YAML_TYPE_ERROR] = {
+                'status': False, 'atribute': None, 'error': YamlLoger.YAML_TYPE_ERROR}
             return None, error_log
     else:
         return None, error_log
 
 
-def check_component(dictionary,atr_type,component, required=True, args=None):
+def check_component(dictionary, atr_type, component, required=True, args=None):
     try:
         item = dictionary[component]
     except KeyError:
@@ -518,16 +519,18 @@ def handle_errors(errors, first_build):
             error_flag = True
             if key == 'guid_integrity':
                 for guid in value['guid_duplicate_list']:
-                    error_log.append(YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.DUPLICATE_GUID].format(guid))
+                    error_log.append(
+                        YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.DUPLICATE_GUID].format(guid))
             elif key == 'source_integrity':
                 for titile, src in zip(value['missing_activitie_titles'], value['missing_activitie_src']):
-                    error_log.append(YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.SOURCE_MISSING].format(titile,src))
+                    error_log.append(
+                        YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.SOURCE_MISSING].format(titile, src))
             else:
                 error_log.append(value['error'])
     if error_flag:
         error_log = "\n"+"\n".join(error_log)
         print_error(error_log, first_build)
-    return  error_flag
+    return error_flag
 
 
 def print_error(error, first_build):
@@ -591,12 +594,11 @@ def create_activity_RST(course, index, path, intermediatPath):
                 section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'coding-quiz':
                 coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
-                                 mode='w+', encoding='utf-8')
+                                       mode='w+', encoding='utf-8')
                 coding_quiz_rst.write(rst_title(activity.title))
                 for s in activity.src:
-                    coding_quiz_rst.write(s + '\n\n')
+                    coding_quiz_rst.write(LINK_TEMPLATE.format(s))
                 section_index.write(' '*4+activity.title+'.rst\n')
-
 
 
 def read_course():
@@ -634,7 +636,7 @@ def copy_dir(src_dir, dest_dir, filter_name=None):
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
     for item in os.listdir(src_dir):
-        if filter_name and not filter_name(src_dir, item):
+        if filter_name and not filter_name(item):
             continue
         s = os.path.join(src_dir, item)
         if os.path.isdir(s):

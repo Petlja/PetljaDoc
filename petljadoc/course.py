@@ -189,7 +189,7 @@ class YamlLoger:
     ATR_EXTERNAL_LINKS_TEXT = 'text'
     ATR_EXTERNAL_LINKS_LINK = 'href'
     ATR_LESSONS = 'lessons'
-    ATR_ARCHIVED_LESSON = 'archived-lessons'    
+    ATR_ARCHIVED_LESSON = 'archived-lessons'
     ATR_ARCHIVED_LESSON_LINE = 'archived-lessons_line'
     ATR_ARCHIVED_LESSON_GUID = 'guid'
     ATR_LESSON_LINE = '_line'
