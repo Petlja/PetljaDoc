@@ -545,7 +545,7 @@ def print_error(error, first_build):
         print(Style.RESET_ALL)
         deinit()
     else:
-        with open("_build/_static/error_log.txt", "w+") as f:
+        with open("_build/_static/error_log.txt", "w+", encoding="utf-8") as f:
             f.write(error)
 
 
