@@ -249,6 +249,8 @@ class YamlLoger:
                     ATR_LESSON_ARCHIVED_ACTIVITIE_GUID : 'In Lesson {} "archived-activities" {} (line: {}) missing required attribute "guid".',
                     ATR_ACTIVITY_TYPE_VALUE : 'Unsupported activity type {}.',
                     ATR_ACTIVITY_PROBLEMS : 'In "lesson" {}. Activity {} (line: {}) is missing "problems"',
+                    ATR_FILE : 'In "lesson" {}. Activity {} (line: {}) is missing the source("file" or "url").',
+                    ATR_URL : 'In "lesson" {}. Activity {} (line: {}) is missing the source("file" or "url").',
                 }
     }
 

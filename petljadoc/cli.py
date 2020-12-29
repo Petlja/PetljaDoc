@@ -91,6 +91,7 @@ def init_template_arguments(template_dir, defaults, project_type):
                                  default=default_project_name, force_default=defaults)
     ta['language'] = _prompt("Project language: (supported languages: en, sr, sr-Cyrl, sr-Latn)",
                              default="en", force_default=defaults)
+    ta['language_meta'] =  ta['language']
     if ta['language'] in LANGUAGE_META_TAG:
         ta['language'] = LANGUAGE_META_TAG[ta['language']]
     while ' ' in ta['project_name']:
@@ -326,9 +327,9 @@ def load_data_from_YAML():
             # pylint: disable=E1101
             if hasattr(exc, 'problem_mark'):
                 if exc.context:
-                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': str(exc.problem_mark) + str(exc.problem) + str(exc.context)}}
+                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': ' '.join([str(exc.problem_mark),  str(exc.problem), str(exc.context)])}}
                 else:
-                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': str(exc.problem_mark) + str(exc.problem)}}
+                    return {'data': None, 'error': {'status': False, 'atribute': None, 'error': ' '.join([str(exc.problem_mark),  str(exc.problem)])}}
             else:
                 return {'data': None, 'error': {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_YAML_LOAD}}
 
@@ -484,7 +485,7 @@ def create_course():
 
         except TypeError:
             error_log[YamlLoger.YAML_TYPE_ERROR] = {
-                'status': False, 'atribute': None, 'error': YamlLoger.YAML_TYPE_ERROR}
+                'status': False, 'atribute': None, 'error':  YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.YAML_TYPE_ERROR]}
             return None, error_log
     else:
         return None, error_log

@@ -126,7 +126,8 @@ html_context = {'course_id': '{{project_name}}',
                 'proxy_uri_runs': '/jobe/index.php/restapi/runs/',
                 'proxy_uri_files': '/jobe/index.php/restapi/files/',
                 'downloads_enabled': '{{downloads_enabled}}',
-                'enable_chatcodes': '{{enable_chatcodes}}'
+                'enable_chatcodes': '{{enable_chatcodes}}',
+                'lang': '{{language_meta}}'
                }
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

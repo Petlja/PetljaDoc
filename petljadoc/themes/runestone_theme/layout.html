@@ -1,6 +1,21 @@
 {% extends "basic_layout.html" %}
 
 {% set script_files = ['_static/runestonebase.js'] + script_files + [
+    '_static'+ '/mchoice-i18n.sr-Cyrl.js',
+    '_static'+ '/mchoice-i18n.sr.js',
+    '_static'+ '/mchoice-i18n.sr-Latn.js',
+    '_static'+ '/dragndrop-i18n.sr-Cyrl.js',
+    '_static'+ '/dragndrop-i18n.sr.js',
+    '_static'+ '/dragndrop-i18n.sr-Latn.js',
+    '_static'+ '/fitb-i18n.sr-Cyrl.js',
+    '_static'+ '/fitb-i18n.sr.js',
+    '_static'+ '/fitb-i18n.sr-Latn.js',
+    '_static'+ '/parsons-i18n.sr-Cyrl.js',
+    '_static'+ '/parsons-i18n.sr.js',
+    '_static'+ '/parsons-i18n.sr-Latn.js',
+    '_static'+ '/activecode-i18n.sr-Cyrl.js',
+    '_static'+ '/activecode-i18n.sr.js',
+    '_static'+ '/activecode-i18n.sr-Latn.js',
     '_static'+'/jquery-ui-1.10.3.custom.min.js',
     '_static'+'/jquery-fix.js',
     '_static'+'/bootstrap-4.0.0-dist/js/bootstrap.min.js',
@@ -29,6 +44,9 @@
 
 {%- block doctype -%}
 <!DOCTYPE html>
+{%- endblock %}
+{%- block lang -%}
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{lang}}"></html>
 {%- endblock %}
 {%- block htmltitle %}
 <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
