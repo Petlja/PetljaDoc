@@ -146,7 +146,10 @@ class Activity:
             self.src = src
         else:
             self.src = src
-            self.toc_url = src.split('.')[0].replace(" ", "%20")
+            if self.get_src_ext() == 'pdf':
+                self.toc_url =  self.title.replace(" ", "%20")
+            else:
+                self.toc_url = src.split('.')[0].replace(" ", "%20")
         if guid.find('/') == -1:
             self.guid = guid
             self.alias = ''
