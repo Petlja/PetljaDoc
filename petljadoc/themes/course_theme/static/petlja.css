@@ -146,21 +146,21 @@ div.modal-header {
 }
 
 div.sphinxsidebar {
+	box-sizing: border-box;
+	height: calc(100% - 90px) !important;
 	float: left;
 	width: 20% !important;
-	height: 100% !important;
 	margin-left: 0 !important;
 	font-size: 17px;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	height: calc(100% - 65px);
 	background-color: #1db386;
-	overflow: auto;
-	overflow-y: scroll;
+	overflow:scroll;
 	position: fixed;
 	scroll-behavior: smooth;
 	color: white !important;
 	border: none;
+
 }
 
 div.sphinxsidebar a {
