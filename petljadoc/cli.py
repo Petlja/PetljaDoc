@@ -662,7 +662,6 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        print(event.event_type)
         if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
             try:
                 shutil.copyfile(event.src_path, event.src_path.replace(
