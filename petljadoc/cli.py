@@ -662,9 +662,13 @@ class _WatchdogHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
+        print(event.event_type)
         if event.event_type == 'modified' and event.src_path[-3:] == 'rst':
-            shutil.copyfile(event.src_path, event.src_path.replace(
-                '_sources', '_intermediate'))
+            try:
+                shutil.copyfile(event.src_path, event.src_path.replace(
+                    '_sources', '_intermediate'))
+            except FileNotFoundError:
+                pass
         elif os.path.split(os.path.split(event.src_path)[0])[1] == '_images':
             image_name = os.path.split(event.src_path)[1]
             project_root = Path(os.getcwd())
