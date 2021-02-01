@@ -263,8 +263,10 @@ ul:first-child {
 }
 
 #main-content > div:nth-of-type(2) {
-	width: calc(80vw - 60px) !important;
-	height: 100%;
+	max-width: 780px;
+	height: max-content;
+	padding-bottom: 60px;
+	margin:auto;
 }
 
 .lecture-switcher {
@@ -344,5 +346,6 @@ ul:first-child {
     margin-top: 8px;
     position: fixed;
     width: 75%;
-    opacity: 0.90;
+	opacity: 0.90;
+	z-index: 1;
 }
