@@ -1,5 +1,5 @@
 courseId: courseID 
-lang: en
+lang: {{language_meta}}
 title: Petljadoc Course
 description:
   willLearn: 

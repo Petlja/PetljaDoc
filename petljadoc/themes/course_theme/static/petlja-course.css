@@ -263,8 +263,10 @@ ul:first-child {
 }
 
 #main-content > div:nth-of-type(2) {
-	width: calc(80vw - 60px) !important;
-	height: 100%;
+	max-width: 780px;
+	height: max-content;
+	padding-bottom: 60px;
+	margin:auto;
 }
 
 .lecture-switcher {
@@ -335,10 +337,15 @@ ul:first-child {
 	padding: 5px 5px 5px 30px;
 }
 #errors{
-	color: #D63301;
-	background-color: #FFCCBA;
-	font-size:1.2em;
-	border-radius: 25px;
-	padding-left: 1%;
-	margin-top:5px;
+    color: #D63301;
+    background-color: #FFCCBA;
+    font-size: 1.2em;
+    border-radius: 25px;
+    padding-left: 1%;
+    margin-left: 1%;
+    margin-top: 8px;
+    position: fixed;
+    width: 75%;
+	opacity: 0.90;
+	z-index: 1;
 }
