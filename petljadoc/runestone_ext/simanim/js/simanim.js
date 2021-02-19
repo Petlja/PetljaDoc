@@ -1,0 +1,302 @@
+
+pythonInitialized = false;
+var canvas = [];
+var ctx = [];
+var currentId;
+var simStatus = {};
+var animation_instance;
+var timeoutFunc;
+
+SIM_STATUS_STOPPED = 1
+SIM_STATUS_PLAYING = 2
+SIM_STATUS_PAUSED = 3
+
+window.onload = function () {
+
+	// init pyodide
+	languagePluginLoader.then(() =>
+		pyodide.runPythonAsync(`
+	import sys
+	import traceback
+	import io
+	import js
+	import micropip
+	micropip.install('utils')
+	micropip.install('${document.location.origin}/_static/simanim-0.1.4-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
+	`)
+	).then(() => {
+		animations = document.getElementsByClassName('simanim')
+		for (var i = 0; i < animations.length; i++) {
+			simStatus[animations[i].id] = SIM_STATUS_STOPPED
+			code = animations[i].getAttribute('data-code')
+			animations[i].removeAttribute('data-code')
+			evaluatePython(animations[i].id, code)
+		}
+	});
+
+	async function evaluatePython(id, code) {
+		pyodide.globals.the_script = code
+		animation_instance = pyodide.runPythonAsync(`
+				try:
+					exec(the_script,{'animation_instance_key' : '${id}'})
+				except Exception:
+					exc_type, exc_value, exc_tb = sys.exc_info()
+					msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb.tb_next))
+				else:
+					msg = 'OK'
+					import simanim.pyodide.gui
+				`)
+			.then(msg => {
+				console.log(pyodide.globals.msg);
+				animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance
+			})
+			.then(animation_instance => generateModalForSim(id))
+			.then(animation_instance => {
+				canvas[id] = document.getElementById('simCanvas_' + id);
+				ctx[id] = canvas[id].getContext('2d');
+			})
+			.then(animation_instance => setupCanvas(id))
+			.catch(err => console.log(err));
+	}
+
+
+};
+
+function pythonInicijalizovan() {
+	pythonInitialized = true;
+}
+
+function startSim(el) {
+	if (currentId != el.currentTarget.getAttribute('animId')) {
+		cleanUp(currentId)
+	}	
+	currentId = el.currentTarget.getAttribute('animId')
+	document.getElementById('playBtn-' + currentId).classList.add('d-none');
+	document.getElementById('pauseBtn-' + currentId).classList.remove('d-none');
+	document.getElementById('stopBtn-' + currentId).removeAttribute('disabled');
+	if (simStatus[currentId] == SIM_STATUS_STOPPED) {
+		setGetters(currentId)
+	}
+
+	simStatus[currentId] = SIM_STATUS_PLAYING;
+	startDrawing();
+}
+
+
+function stopSim(el) {
+	currentId = el.currentTarget.getAttribute('animId')
+	cleanUp(currentId)
+}
+
+
+function pauseSim(el) {
+	currentId = el.currentTarget.getAttribute('animId')
+	document.getElementById('playBtn-' + currentId).classList.remove('d-none');
+	document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
+	simStatus[currentId] = SIM_STATUS_PAUSED
+}
+
+
+function startDrawing() {
+	console.log('rendering frame');
+	if (!animation_instance[currentId].getEndAnimation() && simStatus[currentId] == SIM_STATUS_PLAYING) {
+		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
+		animation_instance[currentId].drawFrame();
+		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period * 1000);
+	}
+	else if (simStatus[currentId] == SIM_STATUS_STOPPED || animation_instance[currentId].getEndAnimation()) {
+		cleanUp(currentId)
+	}
+}
+
+function cleanUp(currentId){
+	simStatus[currentId] = SIM_STATUS_STOPPED
+	ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
+	animation_instance[currentId].resetAnimation();
+	document.getElementById('playBtn-' + currentId).classList.remove('d-none');
+	document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
+	document.getElementById('stopBtn-' + currentId).setAttribute('disabled', 'disabled');
+
+	clearTimeout(timeoutFunc);
+}
+
+function setGettersFromInput(el){
+	id = el.currentTarget.getAttribute('anim-variable-id')
+	setGetters(id)
+}
+
+function setGetters(id){
+	currentId = id
+	vi = document.getElementsByClassName('variable-input-' + id);
+	viLabels = document.getElementsByClassName('variable-label-' + id);
+	variableValues = {}
+	for (var i = 0; i < vi.length; i++) {
+		variableValues[viLabels[i].innerText.split(" ")[0]] = {'class':'variable-input-' + id,'ord' : i}
+	}
+	animation_instance[id].setVarGetters(variableValues)
+	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
+	animation_instance[id].drawFrame();
+}
+
+function setupCanvas(id) {
+	ctx[id].canvas.width = animation_instance[id].anim_context.settings.window_with_px;
+	ctx[id].canvas.height = animation_instance[id].anim_context.settings.window_height_px;
+	ctx[id].fillStyle = animation_instance[id].anim_context.settings.background_color;
+	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
+	currentId = id
+	animation_instance[currentId].drawFrame(); // first frame
+}
+
+
+
+function generateModalForSim(id) {
+	var modalDiv = document.createElement('div');
+	modalDiv.setAttribute('id', 'simModal');
+	modalDiv.setAttribute('class', 'modal fade');
+	modalDiv.setAttribute('role', 'dialog');
+	modalDiv.setAttribute('aria-hidden', 'true');
+
+	var modalDivDialog = document.createElement('div');
+	modalDivDialog.setAttribute('class', 'modal-sim' );
+
+	var modalDivContent = document.createElement('div');
+	modalDivContent.setAttribute('class', 'modal-content-sim');
+
+	var modalDivHeader = document.createElement('div');
+	modalDivHeader.setAttribute('class', 'modal-header');
+
+	var closeModal = document.createElement('button');
+	closeModal.setAttribute('type', 'button');
+	closeModal.setAttribute('class', 'close');
+	closeModal.setAttribute('data-dismiss', 'modal');
+	closeModal.setAttribute('aria-label', 'Close');
+
+	var spanClose = document.createElement('span');
+	spanClose.setAttribute('aria-hidden', 'true');
+	spanClose.innerHTML = '&times;';
+
+	closeModal.appendChild(spanClose);
+
+	modalDivHeader.appendChild(closeModal);
+
+	var modalDivBody = document.createElement('div');
+	modalDivBody.setAttribute('class', 'modal-body');
+	modalDivBody.setAttribute('id', 'simModalBody');
+
+	var modalDivBodyControls = document.createElement('div');
+	modalDivBodyControls.setAttribute('class', 'sim-controls');
+
+	var playBtnsDiv = document.createElement('div');
+	playBtnsDiv.setAttribute('class', 'play-button-div');
+
+	var playBtn = document.createElement('button');
+	playBtn.setAttribute('class', 'control-btn');
+	playBtn.setAttribute('id', 'playBtn-' + id);
+	playBtn.setAttribute('animId', id);
+	playBtn.innerHTML = '<i class="fas fa-play"></i> PLAY';
+
+	var stopBtn = document.createElement('button');
+	stopBtn.setAttribute('class', 'control-btn');
+	stopBtn.setAttribute('disabled', 'disabled');
+	stopBtn.setAttribute('id', 'stopBtn-' + id);
+	stopBtn.setAttribute('animId', id);
+	stopBtn.innerHTML = '<i class="fas fa-stop"></i> STOP';
+
+	var pauseBtn = document.createElement('button');
+	pauseBtn.setAttribute('class', 'control-btn d-none');
+	pauseBtn.setAttribute('id', 'pauseBtn-' + id);
+	pauseBtn.setAttribute('animId', id);
+	pauseBtn.innerHTML = '<i class="fas fa-pause"></i> PAUSE';
+
+	playBtnsDiv.appendChild(playBtn);
+	playBtnsDiv.appendChild(pauseBtn);
+	playBtnsDiv.appendChild(stopBtn);
+	modalDivBodyControls.appendChild(playBtnsDiv);
+
+	var variablesDiv = document.createElement('div');
+	variablesDiv.setAttribute('class', 'sim-modal-variables');
+	variablesDiv.setAttribute('id', 'variablesDiv');
+
+
+	var variables = animation_instance[id].getVars();
+	for (var i = 0; i < variables.length; i++) {
+		if (variables[i].meta["type"] == 'InputFloat') {
+			var variableLabel = document.createElement('label');
+			variableLabel.setAttribute('class', 'variable-label variable-label-' + id);
+			variableLabel.innerHTML = `${variables[i].name} = `;
+
+			var variableInput = document.createElement('input');
+			variableInput.setAttribute('type', 'number');
+			variableInput.setAttribute('class', 'variable-input variable-input-' + id);
+			variableInput.setAttribute('anim-variable-id',id)
+			variableInput.setAttribute('value', '' + variables[i]['meta']['default']);
+			var max = variables[i]['meta']['limit_to']
+			var step = Math.pow(10,Math.floor(Math.log10(max)-1))
+			variableInput.setAttribute('min',variables[i]['meta']['limit_from'])
+			variableInput.setAttribute('max',variables[i]['meta']['limit_to'])
+			variableInput.setAttribute('step', step);
+			variableInput.addEventListener('input',(el) =>{setGettersFromInput(el)})
+
+			variablesDiv.appendChild(variableLabel);
+			variablesDiv.appendChild(variableInput);
+		}
+		else {
+			var variableLabel2 = document.createElement('label');
+			variableLabel2.setAttribute('class', 'variable-label variable-label-' + id);
+			variableLabel2.innerHTML = `${variables[i].name} = `;
+
+			var selectInput = document.createElement('select');
+			selectInput.setAttribute('class', 'variable-input variable-input-' + id)
+			selectInput.setAttribute('anim-variable-id',id)
+			for (var j = 0; j < variables[i].meta.lov.length; j++) {
+				var selectOption1 = document.createElement('option');
+				selectOption1.innerHTML = variables[i].meta.lov[j];
+				selectInput.appendChild(selectOption1);
+			}
+			selectInput.addEventListener('input',(el) =>{setGettersFromInput(el)})
+			variablesDiv.appendChild(variableLabel2);
+			variablesDiv.appendChild(selectInput);
+		}
+	}
+
+
+
+	modalDivBodyControls.appendChild(variablesDiv);
+
+	var modalBodyCanvasDiv = document.createElement('div');
+	modalBodyCanvasDiv.setAttribute('class', 'sim-modal-canvas');
+
+	var canvas = document.createElement('canvas');
+	canvas.setAttribute('id', 'simCanvas_' + id);
+	canvas.setAttribute('class', ' sim-canvas')
+	modalBodyCanvasDiv.appendChild(canvas);
+
+	modalDivBody.appendChild(modalDivBodyControls);
+	modalDivBody.appendChild(modalBodyCanvasDiv);
+
+	modalDivContent.appendChild(modalDivHeader);
+	modalDivContent.appendChild(modalDivBody);
+
+	modalDivDialog.appendChild(modalDivContent);
+
+	modalDiv.appendChild(modalDivDialog);
+
+	document.getElementById(id).appendChild(modalDivDialog);
+
+
+	if (document.getElementById('playBtn-' + id))
+		document.getElementById('playBtn-' + id).addEventListener('click', function (el) {
+			startSim(el);
+		});
+
+	if (document.getElementById('stopBtn-' + id))
+		document.getElementById('stopBtn-' + id).addEventListener('click', function (el) {
+			stopSim(el);
+		});
+
+	if (document.getElementById('pauseBtn-' + id))
+		document.getElementById('pauseBtn-' + id).addEventListener('click', function (el) {
+			pauseSim(el);
+		});
+}
+
