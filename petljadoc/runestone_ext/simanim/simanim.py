@@ -1,6 +1,7 @@
 __author__ = 'petlja'
 
 import os
+import shutil
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -14,8 +15,6 @@ def setup(app):
     app.add_stylesheet('simanim.css')
 
     app.add_javascript('simanim.js')
-    app.add_javascript('sim-drawing-api.js')
-    app.add_javascript('https://cdn.jsdelivr.net/pyodide/v0.16.1/full/')
     app.add_javascript('https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js')
 
     app.add_node(SinAnimQNode, html=(visit_info_note_node, depart_info_note_node))
@@ -25,7 +24,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="simanim" data-code="%(code)s">
+    <div id="%(divid)s" class="simanim" data-code="%(code)s" %(imgpath)s>
 """
 
 TEMPLATE_END = """
@@ -55,27 +54,51 @@ def depart_info_note_node(self, node):
 class SinAnimDirective(Directive):
     required_arguments = 1
     optional_arguments = 0
-    has_content = True
+    has_content = False
     option_spec = {}
     option_spec.update({
-        'includesrc': directives.unchanged
+        'folder': directives.unchanged,
+        'script': directives.unchanged,
+        'images': directives.unchanged,
     })
     def run(self):
 
 
         env = self.state.document.settings.env
 
-        if 'includesrc' in self.options:
-            fname = self.options['includesrc'].replace('\\', '/')
-            cwd = os.path.abspath(os.getcwd())
-            path = os.path.join(cwd, fname)
-            print(path)
-            with open(path, encoding='utf-8') as f:
-                self.options['code'] = html_escape(f.read())      
+        if 'script' not in self.options:
+            self.error('No script path specified')
+
+        if 'folder' not in self.options:
+            self.error('No folder path specified')      
+
+        if 'images' in self.options:
+            self.options['images'] = [image.strip() for image in self.options['images'].split(',')]
         else:
-            self.options['code'] = ""
+            self.options['images'] = []
+
+        fname = self.options['folder'].replace('\\', '/')
+        path = os.path.join(fname, self.options['script'])
+
+        try:
+            with open(path, encoding='utf-8') as f:
+                self.options['code'] = html_escape(f.read())
+        except:
+            self.error('Source file could not be opened')
+
+        for image in self.options['images']:
+            path = os.path.join(fname, image)
+            cwd = os.path.abspath(os.getcwd())
+            try:
+                if not os.path.exists(os.path.join(cwd, '_build/_images/')):
+                    os.makedirs(os.path.join(cwd, '_build/_images/'))
+                shutil.copyfile(path, os.path.join(cwd, '_build/_images/'+image))
+            except:
+                self.error('Images could not be copied')
 
         self.options['divid'] = self.arguments[0]
+
+        self.options['imgpath'] = 'data-img-path= ../../_images/'
 
         simnode = SinAnimQNode(self.options)
 
