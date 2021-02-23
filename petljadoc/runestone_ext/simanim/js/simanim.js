@@ -23,7 +23,7 @@ window.onload = function () {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.1.4-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
+	micropip.install('${document.location.origin}/_static/simanim-0.1.5-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
