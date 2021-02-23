@@ -104,6 +104,10 @@ function pauseSim(el) {
 function startDrawing() {
 	console.log('rendering frame');
 	if (!animation_instance[currentId].getEndAnimation() && simStatus[currentId] == SIM_STATUS_PLAYING) {
+		inputs = document.getElementsByClassName('variable-input')
+		for(var i=0;i<inputs.length;i++){
+			inputs[i].setAttribute('disabled','true')
+		}
 		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
 		animation_instance[currentId].drawFrame();
 		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period * 1000);
@@ -120,6 +124,11 @@ function cleanUp(currentId){
 	document.getElementById('playBtn-' + currentId).classList.remove('d-none');
 	document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
 	document.getElementById('stopBtn-' + currentId).setAttribute('disabled', 'disabled');
+
+	inputs = document.getElementsByClassName('variable-input')
+	for(var i=0;i<inputs.length;i++){
+		inputs[i].removeAttribute('disabled')
+	}
 
 	clearTimeout(timeoutFunc);
 }
