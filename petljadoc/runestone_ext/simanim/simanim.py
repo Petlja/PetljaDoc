@@ -79,7 +79,8 @@ class SinAnimDirective(Directive):
 
         fname = self.options['folder'].replace('\\', '/')
         if not os.path.isabs(fname):
-            fname = os.path.join(os.path.dirname(self.state_machine.get_source_and_line()[0]),fname)
+            source, _ = self.state_machine.get_source_and_line()
+            fname = os.path.join(os.path.dirname(source),fname)
         path = os.path.join(fname, self.options['script'])
 
         self.options['code'] = ""
