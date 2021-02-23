@@ -78,8 +78,11 @@ class SinAnimDirective(Directive):
             self.options['images'] = []
 
         fname = self.options['folder'].replace('\\', '/')
+        if not os.path.isabs(fname):
+            fname = os.path.join(os.path.dirname(self.state_machine.get_source_and_line()[0]),fname)
         path = os.path.join(fname, self.options['script'])
 
+        self.options['code'] = ""
         try:
             with open(path, encoding='utf-8') as f:
                 self.options['code'] = html_escape(f.read())
@@ -103,7 +106,7 @@ class SinAnimDirective(Directive):
 
         self.options['divid'] = self.arguments[0]
 
-        self.options['imgpath'] = 'data-img-path= ../../_images/'
+        self.options['imgpath'] = 'data-img-path= "../../_images/"'
 
         simnode = SinAnimQNode(self.options)
 
