@@ -1,16 +1,19 @@
-
 pythonInitialized = false;
 var canvas = [];
 var ctx = [];
+var imagePath = {}
 var currentId;
 var simStatus = {};
 var animation_instance;
 var timeoutFunc;
-var imagePath = {}
-
+var startFrameDelay ; 
+var endFrameDelay ;
+//var start;
+//var end;
 SIM_STATUS_STOPPED = 1
 SIM_STATUS_PLAYING = 2
 SIM_STATUS_PAUSED = 3
+SIM_STATUS_FINISHED = 4
 
 window.onload = function () {
 
@@ -23,7 +26,7 @@ window.onload = function () {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.1.5-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
+	micropip.install('${document.location.origin}/_static/simanim-0.2.0-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
@@ -75,15 +78,26 @@ function startSim(el) {
 		cleanUp(currentId)
 	}	
 	currentId = el.currentTarget.getAttribute('animId')
-	document.getElementById('playBtn-' + currentId).classList.add('d-none');
-	document.getElementById('pauseBtn-' + currentId).classList.remove('d-none');
-	document.getElementById('stopBtn-' + currentId).removeAttribute('disabled');
+
 	if (simStatus[currentId] == SIM_STATUS_STOPPED) {
 		setGetters(currentId)
 	}
+	if (simStatus[currentId] == SIM_STATUS_FINISHED) {
+		cleanUp(currentId)
+	}
+	document.getElementById('playBtn-' + currentId).classList.add('d-none');
+	document.getElementById('pauseBtn-' + currentId).classList.remove('d-none');
+	document.getElementById('stopBtn-' + currentId).removeAttribute('disabled');
+
+	inputs = document.getElementsByClassName('variable-input-'+currentId)
+	for(var i=0;i<inputs.length;i++){
+		inputs[i].setAttribute('disabled','true')
+	}
 
 	simStatus[currentId] = SIM_STATUS_PLAYING;
+//	start = window.performance.now();
 	startDrawing();
+
 }
 
 
@@ -103,27 +117,38 @@ function pauseSim(el) {
 
 function startDrawing() {
 	console.log('rendering frame');
+	startFrameDelay = window.performance.now();
 	if (!animation_instance[currentId].getEndAnimation() && simStatus[currentId] == SIM_STATUS_PLAYING) {
-		inputs = document.getElementsByClassName('variable-input')
-		for(var i=0;i<inputs.length;i++){
-			inputs[i].setAttribute('disabled','true')
-		}
 		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
 		animation_instance[currentId].drawFrame();
-		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period * 1000);
+		endFrameDelay = window.performance.now();
+		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period * 1000 - ( endFrameDelay - startFrameDelay));
 	}
-	else if (simStatus[currentId] == SIM_STATUS_STOPPED || animation_instance[currentId].getEndAnimation()) {
+	else if (simStatus[currentId] == SIM_STATUS_STOPPED) {
 		cleanUp(currentId)
+	}
+	else if (animation_instance[currentId].getEndAnimation()){
+//		end = window.performance.now();
+//		console.log(`Execution time: ${(end - start)/1000} s`);
+		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
+		animation_instance[currentId].drawFrame();
+		simStatus[currentId] = SIM_STATUS_FINISHED
+		document.getElementById('playBtn-' + currentId).classList.remove('d-none');
+		document.getElementById('playBtn-' + currentId).setAttribute('disabled', 'disabled');
+		document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
+	
+		clearTimeout(timeoutFunc)
 	}
 }
 
-function cleanUp(currentId){
-	simStatus[currentId] = SIM_STATUS_STOPPED
-	ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
-	animation_instance[currentId].resetAnimation();
-	document.getElementById('playBtn-' + currentId).classList.remove('d-none');
-	document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
-	document.getElementById('stopBtn-' + currentId).setAttribute('disabled', 'disabled');
+function cleanUp(id){
+	simStatus[id] = SIM_STATUS_STOPPED
+	ctx[id].clearRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
+	animation_instance[id].resetAnimation();
+	document.getElementById('playBtn-' + id).classList.remove('d-none');
+	document.getElementById('playBtn-' + id).removeAttribute('disabled');
+	document.getElementById('pauseBtn-' + id).classList.add('d-none');
+	document.getElementById('stopBtn-' + id).setAttribute('disabled', 'disabled');
 
 	inputs = document.getElementsByClassName('variable-input')
 	for(var i=0;i<inputs.length;i++){
@@ -139,6 +164,9 @@ function setGettersFromInput(el){
 }
 
 function setGetters(id){
+	if(currentId != id){
+		cleanUp(currentId)
+	}
 	currentId = id
 	vi = document.getElementsByClassName('variable-input-' + id);
 	viLabels = document.getElementsByClassName('variable-label-' + id);
@@ -174,23 +202,6 @@ function generateModalForSim(id) {
 
 	var modalDivContent = document.createElement('div');
 	modalDivContent.setAttribute('class', 'modal-content-sim');
-
-	var modalDivHeader = document.createElement('div');
-	modalDivHeader.setAttribute('class', 'modal-header');
-
-	var closeModal = document.createElement('button');
-	closeModal.setAttribute('type', 'button');
-	closeModal.setAttribute('class', 'close');
-	closeModal.setAttribute('data-dismiss', 'modal');
-	closeModal.setAttribute('aria-label', 'Close');
-
-	var spanClose = document.createElement('span');
-	spanClose.setAttribute('aria-hidden', 'true');
-	spanClose.innerHTML = '&times;';
-
-	closeModal.appendChild(spanClose);
-
-	modalDivHeader.appendChild(closeModal);
 
 	var modalDivBody = document.createElement('div');
 	modalDivBody.setAttribute('class', 'modal-body');
@@ -287,7 +298,6 @@ function generateModalForSim(id) {
 	modalDivBody.appendChild(modalDivBodyControls);
 	modalDivBody.appendChild(modalBodyCanvasDiv);
 
-	modalDivContent.appendChild(modalDivHeader);
 	modalDivContent.appendChild(modalDivBody);
 
 	modalDivDialog.appendChild(modalDivContent);
@@ -312,7 +322,6 @@ function generateModalForSim(id) {
 			pauseSim(el);
 		});
 }
-
 
 function drawCircle(centerX, centerY, radius, color, lineWidth, lineColor, lineDashed) {
 	ctx[currentId].save()
@@ -350,14 +359,13 @@ function drawBox(pointX, pointY, width, height, color, lineWidth, lineColor, lin
 function drawLine(pointX1, pointY1, pointX2, pointY2, color, lineWidth, lineColor, lineDashed) {
 	ctx[currentId].save()
 	ctx[currentId].strokeStyle = lineColor
-	ctx[currentId].lineWidth = lineWidth;
+	ctx[currentId].lineWidth  = lineWidth;
 	if (lineDashed) {
 		ctx[currentId].setLineDash([5, 5])
 	}
 	ctx[currentId].beginPath();
 	ctx[currentId].moveTo(pointX1, pointY1);
 	ctx[currentId].lineTo(pointX2, pointY2);
-	ctx[currentId].closePath();
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 }
@@ -380,6 +388,26 @@ function drawPolyLine(polyLine, color, lineWidth, lineColor, lineDashed) {
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 }
+
+function drawTriangle(pointX1, pointY1, pointX2, pointY2,pointX3, pointY3, color, lineWidth, lineColor, lineDashed){
+	ctx[currentId].save()
+	ctx[currentId].strokeStyle = lineColor
+	ctx[currentId].lineWidth  = lineWidth;
+	ctx[currentId].fillStyle = lineColor;
+	if (lineDashed) {
+		ctx[currentId].setLineDash([5, 5])
+	}
+	ctx[currentId].beginPath();
+	var path=new Path2D()
+	path.moveTo(pointX1, pointY1);
+	path.lineTo(pointX2, pointY2);
+	path.lineTo(pointX3,pointY3);
+	ctx[currentId].fill(path);
+	ctx[currentId].stroke();
+	ctx[currentId].restore()
+
+}
+
 var simImages = []
 function drawImage(imageName, pointX1, pointY1, width, height) {
 	var idOnLoad = currentId
@@ -401,7 +429,6 @@ function pathJoin(parts, sep){
    var replace   = new RegExp(separator+'{1,}', 'g');
    return parts.join(separator).replace(replace, separator);
 }
-
 
 function drawText(pointX1, pointY1, fontSize, text) {
 	ctx[currentId].save()
