@@ -26,7 +26,7 @@ window.onload = function () {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.2.0-py3-none-any.whl').then(js.pythonInicijalizovan()).then()
+	micropip.install('${document.location.origin}/_static/simanim-0.2.0-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
@@ -43,7 +43,7 @@ window.onload = function () {
 
 	async function evaluatePython(id, code) {
 		pyodide.globals.the_script = code
-		animation_instance = pyodide.runPythonAsync(`
+		pyodide.runPythonAsync(`
 				try:
 					exec(the_script,{'animation_instance_key' : '${id}'})
 				except Exception:
@@ -53,16 +53,17 @@ window.onload = function () {
 					msg = 'OK'
 					import simanim.pyodide.gui
 				`)
-			.then(msg => {
+			.then(() => {
 				console.log(pyodide.globals.msg);
 				animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance
 			})
-			.then(animation_instance => generateModalForSim(id))
-			.then(animation_instance => {
+			.then(()  => generateModalForSim(id))
+			.then(()  => {
 				canvas[id] = document.getElementById('simCanvas_' + id);
 				ctx[id] = canvas[id].getContext('2d');
 			})
-			.then(animation_instance => setupCanvas(id))
+			.then(() => setupCanvas(id))
+			.then(() => setTimeout(function(){cleanUp(id)},400))
 			.catch(err => console.log(err));
 	}
 
@@ -144,6 +145,7 @@ function startDrawing() {
 function cleanUp(id){
 	simStatus[id] = SIM_STATUS_STOPPED
 	ctx[id].clearRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
+	currentId = id
 	animation_instance[id].resetAnimation();
 	document.getElementById('playBtn-' + id).classList.remove('d-none');
 	document.getElementById('playBtn-' + id).removeAttribute('disabled');
@@ -185,7 +187,7 @@ function setupCanvas(id) {
 	ctx[id].fillStyle = animation_instance[id].anim_context.settings.background_color;
 	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
 	currentId = id
-	animation_instance[currentId].drawFrame(); // first frame
+	animation_instance[id].drawFrame();
 }
 
 
@@ -418,7 +420,10 @@ function drawImage(imageName, pointX1, pointY1, width, height) {
 		simImages[imageName] = new Image();
 		simImages[imageName].onload = function () {
 			ctx[idOnLoad].drawImage(simImages[imageName], pointX1, pointY1, width, height);
+			//end = window.performance.now();
+			//console.log(`Execution time: ${(end - start)} ms`);
 		}
+		//start = window.performance.now();
 		simImages[imageName].src =pathJoin([imagePath[currentId], imageName]);
 	}
 	ctx[idOnLoad].restore()
