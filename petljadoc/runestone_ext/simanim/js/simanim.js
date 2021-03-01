@@ -1,6 +1,7 @@
 pythonInitialized = false;
-var canvas = [];
-var ctx = [];
+var canvas = {};
+var ctx = {};
+var animmationScale = {}
 var imagePath = {}
 var currentId;
 var simStatus = {};
@@ -8,6 +9,9 @@ var animation_instance;
 var timeoutFunc;
 var startFrameDelay ; 
 var endFrameDelay ;
+var animation_instance_x_min = {}
+var animation_instance_y_min = {}
+var animation_instance_height = {}
 //var start;
 //var end;
 SIM_STATUS_STOPPED = 1
@@ -15,7 +19,8 @@ SIM_STATUS_PLAYING = 2
 SIM_STATUS_PAUSED = 3
 SIM_STATUS_FINISHED = 4
 
-window.onload = function () {
+
+window.addEventListener('load',function () {
 
 	// init pyodide
 	languagePluginLoader.then(() =>
@@ -36,7 +41,10 @@ window.onload = function () {
 			animations[i].removeAttribute('data-code')
 			path = animations[i].getAttribute('data-img-path')
 			animations[i].removeAttribute('data-img-path')
+			scale = animations[i].getAttribute('data-scale')
+			animations[i].removeAttribute('data-scale')
 			imagePath[animations[i].id] = path
+			animmationScale[animations[i].id] = parseFloat(scale)
 			evaluatePython(animations[i].id, code)
 		}
 	});
@@ -68,7 +76,7 @@ window.onload = function () {
 	}
 
 
-};
+});
 
 function pythonInicijalizovan() {
 	pythonInitialized = true;
@@ -118,19 +126,15 @@ function pauseSim(el) {
 
 function startDrawing() {
 	console.log('rendering frame');
-	startFrameDelay = window.performance.now();
 	if (!animation_instance[currentId].getEndAnimation() && simStatus[currentId] == SIM_STATUS_PLAYING) {
 		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
 		animation_instance[currentId].drawFrame();
-		endFrameDelay = window.performance.now();
-		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period * 1000 - ( endFrameDelay - startFrameDelay));
+		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period*1000 - (endFrameDelay - startFrameDelay)/1000);
 	}
 	else if (simStatus[currentId] == SIM_STATUS_STOPPED) {
 		cleanUp(currentId)
 	}
 	else if (animation_instance[currentId].getEndAnimation()){
-//		end = window.performance.now();
-//		console.log(`Execution time: ${(end - start)/1000} s`);
 		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
 		animation_instance[currentId].drawFrame();
 		simStatus[currentId] = SIM_STATUS_FINISHED
@@ -182,10 +186,14 @@ function setGetters(id){
 }
 
 function setupCanvas(id) {
-	ctx[id].canvas.width = animation_instance[id].anim_context.settings.window_with_px;
-	ctx[id].canvas.height = animation_instance[id].anim_context.settings.window_height_px;
+	ctx[id].canvas.width = animation_instance[id].anim_context.settings.window_with_px * animmationScale[id];
+	ctx[id].canvas.height = animation_instance[id].anim_context.settings.window_height_px * animmationScale[id];
 	ctx[id].fillStyle = animation_instance[id].anim_context.settings.background_color;
 	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
+	animmationScale[id] =  animation_instance[id].anim_context.settings.px_per_unit * animmationScale[id]
+	animation_instance_x_min[id] = animation_instance[id].anim_context.settings.view_box[0][0]
+	animation_instance_y_min[id]  =  animation_instance[id].anim_context.settings.view_box[0][1]
+	animation_instance_height[id] =  animation_instance[id].anim_context.settings.view_box[2]
 	currentId = id
 	animation_instance[id].drawFrame();
 }
@@ -325,106 +333,136 @@ function generateModalForSim(id) {
 		});
 }
 
-function drawCircle(centerX, centerY, radius, color, lineWidth, lineColor, lineDashed) {
+function scalarToPixel(scalar){
+	return scalar * animmationScale[currentId];
+}
+function pointToPixel(point){
+	scalarPointX = scalarToPixel(point[0] - animation_instance_x_min[currentId])
+	scalarPointY = scalarToPixel(animation_instance_y_min[currentId] +animation_instance_height[currentId] - point[1])
+	return [scalarPointX, scalarPointY]
+}
+function rectToPixel(rect){
+	var xy_min = pointToPixel([rect.xy_min[0],rect.xy_min[1] + rect.height])
+	var width = scalarToPixel(rect.width)
+	var height = scalarToPixel(rect.height)
+	return [xy_min, width, height]
+}
+
+
+function drawCircle(circle) {
 	ctx[currentId].save()
-	ctx[currentId].fillStyle = color;
-	ctx[currentId].strokeStyle = lineColor
-	ctx[currentId].lineWidth = lineWidth;
-	if (lineDashed) {
+	ctx[currentId].fillStyle = circle.fill_color;
+	ctx[currentId].strokeStyle = circle.pen_color
+	ctx[currentId].lineWidth = scalarToPixel(circle.line_width);
+	if (circle.line_dashed) {
 		ctx[currentId].setLineDash([5, 5])
 	}
+	center = pointToPixel(circle.center)
+	radius = scalarToPixel(circle.radius)
 	ctx[currentId].beginPath();
-	ctx[currentId].arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+	ctx[currentId].arc(center[0], center[1], radius, 0, 2 * Math.PI, false);
 	ctx[currentId].closePath();
 	ctx[currentId].fill();
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 }
 
-function drawBox(pointX, pointY, width, height, color, lineWidth, lineColor, lineDashed) {
+function drawBox(rect) {
 	ctx[currentId].save()
-	if (lineWidth > 0) {
-		ctx[currentId].fillStyle = color;
-		ctx[currentId].strokeStyle = lineColor
-		ctx[currentId].lineWidth = lineWidth;
-		if (lineDashed) {
+	if (rect.line_width > 0) {
+		ctx[currentId].fillStyle = rect.fill_color;
+		ctx[currentId].strokeStyle = rect.pen_color
+		ctx[currentId].lineWidth = scalarToPixel(rect.line_width);
+		if (rect.line_dashed) {
 			ctx[currentId].setLineDash([5, 5])
 		}
+		scaledRect = rectToPixel(rect)
 		ctx[currentId].beginPath();
-		ctx[currentId].rect(pointX, pointY, width, height);
+		ctx[currentId].rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
 		ctx[currentId].closePath();
 		ctx[currentId].fill();
 		ctx[currentId].stroke();
 	}
 	ctx[currentId].restore()
 }
-function drawLine(pointX1, pointY1, pointX2, pointY2, color, lineWidth, lineColor, lineDashed) {
+function drawLine(line) {
 	ctx[currentId].save()
-	ctx[currentId].strokeStyle = lineColor
-	ctx[currentId].lineWidth  = lineWidth;
-	if (lineDashed) {
+	ctx[currentId].strokeStyle = line.pen_color
+	ctx[currentId].lineWidth = scalarToPixel(line.line_width);
+	if (line.line_dashed) {
 		ctx[currentId].setLineDash([5, 5])
 	}
 	ctx[currentId].beginPath();
-	ctx[currentId].moveTo(pointX1, pointY1);
-	ctx[currentId].lineTo(pointX2, pointY2);
+	point1 = pointToPixel(line.point1)
+	point2 = pointToPixel(line.point2)
+	ctx[currentId].moveTo(point1[0], point1[1]);
+	ctx[currentId].lineTo(point2[0], point2[1]);
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 }
-function drawPolyLine(polyLine, color, lineWidth, lineColor, lineDashed) {
+function drawPolyLine(polyLine) {
 	ctx[currentId].save()
-	if (polyLine.length < 1) {
+	var n = polyLine.points.length
+	if (n < 1) {
 		return;
 	}
-	ctx[currentId].fillStyle = color;
-	ctx[currentId].strokeStyle = lineColor
-	ctx[currentId].lineWidth = lineWidth;
-	if (lineDashed) {
+	let points = polyLine.points
+	ctx[currentId].fillStyle = polyLine.fill_color;
+	ctx[currentId].strokeStyle = polyLine.pen_color
+	ctx[currentId].lineWidth = scalarToPixel(polyLine.line_width);
+	if (polyLine.line_dashed) {
 		ctx[currentId].setLineDash([5, 5])
 	}
 	ctx[currentId].beginPath();
-	ctx[currentId].moveTo(polyLine[0][0], polyLine[0][1])
-	for (i = 1; i < polyLine.length; i++) {
-		ctx[currentId].lineTo(polyLine[i][0], polyLine[i][1])
+	var scalarPointX 
+	var scalarPointY 
+	[scalarPointX, scalarPointY] = pointToPixel(points[0])
+	ctx[currentId].moveTo(scalarPointX,scalarPointY)
+	for (i = 1; i < n; i++) {
+		[scalarPointX, scalarPointY] = pointToPixel(points[i])
+		ctx[currentId].lineTo(scalarPointX,scalarPointY)
 	};
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 }
 
-function drawTriangle(pointX1, pointY1, pointX2, pointY2,pointX3, pointY3, color, lineWidth, lineColor, lineDashed){
+function drawTriangle(pointX1, pointY1, pointX2, pointY2,pointX3, pointY3,line){
 	ctx[currentId].save()
-	ctx[currentId].strokeStyle = lineColor
-	ctx[currentId].lineWidth  = lineWidth;
-	ctx[currentId].fillStyle = lineColor;
-	if (lineDashed) {
+	ctx[currentId].strokeStyle = line.pen_color;
+	ctx[currentId].lineWidth  = scalarToPixel(line.line_width);
+	ctx[currentId].fillStyle = line.pen_color;
+	if (line.line_dashed) {
 		ctx[currentId].setLineDash([5, 5])
 	}
+	point1 = pointToPixel([pointX1,pointY1])
+	point2 = pointToPixel([pointX2,pointY2])
+	point3 = pointToPixel([pointX3,pointY3])
 	ctx[currentId].beginPath();
 	var path=new Path2D()
-	path.moveTo(pointX1, pointY1);
-	path.lineTo(pointX2, pointY2);
-	path.lineTo(pointX3,pointY3);
+	path.moveTo(point1[0], point1[1]);
+	path.lineTo(point2[0], point2[1]);
+	path.lineTo(point3[0], point3[1]);
 	ctx[currentId].fill(path);
 	ctx[currentId].stroke();
 	ctx[currentId].restore()
 
 }
 
-var simImages = []
-function drawImage(imageName, pointX1, pointY1, width, height) {
+var simImages = {}
+function drawImage(image) {
 	var idOnLoad = currentId
 	ctx[idOnLoad].save()
-	if (imageName in simImages)
-		ctx[idOnLoad].drawImage(simImages[imageName], pointX1, pointY1, width, height);
+	var xy_min = pointToPixel([image.xy_min[0],image.xy_min[1] + image.height])
+	var width = scalarToPixel(image.width)
+	var height = scalarToPixel(image.height)
+	if (image.file in simImages)
+		ctx[idOnLoad].drawImage(simImages[image.file], xy_min[0],xy_min[1], width, height);
 	else {
-		simImages[imageName] = new Image();
-		simImages[imageName].onload = function () {
-			ctx[idOnLoad].drawImage(simImages[imageName], pointX1, pointY1, width, height);
-			//end = window.performance.now();
-			//console.log(`Execution time: ${(end - start)} ms`);
+		simImages[image.file] = new Image();
+		simImages[image.file].onload = function () {
+			ctx[idOnLoad].drawImage(simImages[image.file], xy_min[0], xy_min[1], width, height);
 		}
-		//start = window.performance.now();
-		simImages[imageName].src =pathJoin([imagePath[currentId], imageName]);
+		simImages[image.file].src =pathJoin([imagePath[currentId], image.file]);
 	}
 	ctx[idOnLoad].restore()
 }
@@ -435,11 +473,13 @@ function pathJoin(parts, sep){
    return parts.join(separator).replace(replace, separator);
 }
 
-function drawText(pointX1, pointY1, fontSize, text) {
+function drawText(text) {
 	ctx[currentId].save()
 	ctx[currentId].fillStyle = 'black'
-	ctx[currentId].font = `bold ${fontSize}px Courier New`;
-	ctx[currentId].fillText(text, pointX1, pointY1);
+	font_size = scalarToPixel(text.font_size)
+	ctx[currentId].font = `bold ${font_size}px Courier New`;
+	position = pointToPixel(text.position)
+	ctx[currentId].fillText(text.content, position[0], position[1]);
 	ctx[currentId].restore()
 }
 
@@ -448,7 +488,8 @@ function restore() {
 }
 
 function rotate(point, angle) {
-	ctx[currentId].translate(point[0], point[1]);
+	scaledPoint = pointToPixel(point)
+	ctx[currentId].translate( scaledPoint[0], scaledPoint[1]);
 	ctx[currentId].rotate(angle);
-	ctx[currentId].translate(- point[0], - point[1]);
+	ctx[currentId].translate(- scaledPoint[0], - scaledPoint[1]);
 }

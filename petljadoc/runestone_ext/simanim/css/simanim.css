@@ -1,3 +1,10 @@
+.simanim{
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
 .play-button-div {
     max-width: 50%;
     float: left;

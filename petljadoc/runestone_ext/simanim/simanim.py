@@ -24,7 +24,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="simanim" data-code="%(code)s" %(imgpath)s>
+    <div id="%(divid)s" class="simanim" data-code="%(code)s" %(imgpath)s %(scale)s>
 """
 
 TEMPLATE_END = """
@@ -60,6 +60,7 @@ class SinAnimDirective(Directive):
         'folder': directives.unchanged,
         'script': directives.unchanged,
         'images': directives.unchanged,
+        'scale': directives.unchanged,
     })
     def run(self):
 
@@ -76,6 +77,11 @@ class SinAnimDirective(Directive):
             self.options['images'] = [image.strip() for image in self.options['images'].split(',')]
         else:
             self.options['images'] = []
+
+        if 'scale' in self.options:
+            self.options['scale'] = 'data-scale = "{}"'.format( self.options['scale'])
+        else:
+            self.options['scale'] = 'data-scale = "1"'
 
         fname = self.options['folder'].replace('\\', '/')
         if not os.path.isabs(fname):
