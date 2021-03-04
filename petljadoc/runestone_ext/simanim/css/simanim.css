@@ -5,7 +5,7 @@
     margin-bottom: 25px;
 }
 
-.play-button-div {
+.control-button-div {
     max-width: 50%;
     float: left;
     border: 1px solid lightgray;
@@ -20,6 +20,11 @@
     border-radius: 2px;
     width: 100px;
 }
+
+.control-btn:disabled{
+    opacity: 0.7;
+}
+
 .sim-controls{
     height: 50px;
 }
@@ -38,6 +43,7 @@
 }
 
 .modal-content-sim{
+    padding: 10px;
     position: relative;
     display: -ms-flexbox;
     display: flex;
@@ -51,6 +57,7 @@
     border-radius: .3rem;
     outline: 0;
     width: max-content;
+    min-width: 560px;
 }
 
 .sim-modal-variables {

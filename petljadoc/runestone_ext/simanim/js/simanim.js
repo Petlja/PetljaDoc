@@ -1,27 +1,447 @@
 pythonInitialized = false;
-var canvas = {};
-var ctx = {};
-var animmationScale = {}
-var imagePath = {}
-var currentId;
-var simStatus = {};
-var animation_instance;
-var timeoutFunc;
-var startFrameDelay ; 
-var endFrameDelay ;
-var animation_instance_x_min = {}
-var animation_instance_y_min = {}
-var animation_instance_height = {}
-//var start;
-//var end;
+
 SIM_STATUS_STOPPED = 1
 SIM_STATUS_PLAYING = 2
 SIM_STATUS_PAUSED = 3
 SIM_STATUS_FINISHED = 4
 
+simanimList = {}
 
-window.addEventListener('load',function () {
+function SimAnim (opts) {
+    if (opts) {
+        this.init(opts);
+    }
+}
 
+SimAnim.prototype.init = async function(opts){
+	this.opts = opts
+	this.id = opts.id
+	this.simStatus = SIM_STATUS_STOPPED
+	this.code = opts.getAttribute('data-code')
+	this.imgPath = opts.getAttribute('data-img-path')
+	this.scale = parseFloat(opts.getAttribute('data-scale'))
+	this.pythonError = false
+	this.pythonErrorMsg = ""
+	this.varsInputElementId = {}
+	this.eventQue = []
+	this.simImages = {}
+	this.drawFunctions = {'circle' : this.drawCircle,
+						  'box' : this.drawBox,
+						  'line' : this.drawLine, 
+						  'triangle' : this.drawTriangle,
+						  'polyLine' : this.drawPolyLine,
+						  'image' : this.drawImage,
+						  'text' : this.drawText,
+						  'rotate' : this.rotate,
+						  'restore' : this.restore
+						}
+	await this.execPython()
+	if(this.pythonError){
+	   console.log(this.pythonErrorMsg)
+	}
+	else{
+		this.generateHTMLForSim() 
+		await this.setupCanvas()
+		await this.execDrawing()
+	}
+}
+
+SimAnim.prototype.execDrawing = async function(){
+	for(var i =0; i < this.eventQue.length; i++){
+		await this.eventQue[i]()
+	}
+	this.eventQue = []
+}
+
+SimAnim.prototype.setupCanvas = function() {
+	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
+	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
+
+	this.scale =  this.animation_instance.anim_context.settings.px_per_unit * this.scale
+	this.animation_instance_x_min = this.animation_instance.anim_context.settings.view_box[0][0]
+	this.animation_instance_y_min  =  this.animation_instance.anim_context.settings.view_box[0][1]
+	this.animation_instance_height = this.animation_instance.anim_context.settings.view_box[2]
+	this.update_period = this.animation_instance.anim_context.settings.update_period
+
+	this.ctx.fillStyle = this.animation_instance.anim_context.settings.background_color;
+	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+	this.animation_instance.drawFrame();
+}
+
+SimAnim.prototype.setPythonErrorMsg = function(msg){
+	this.pythonError = true
+	this.pythonErrorMsg = msg
+}
+
+SimAnim.prototype.execPython = function(){
+	pyodide.globals.the_script = this.code
+	return pyodide.runPythonAsync(`
+			try:
+				exec(the_script,{'animation_instance_key' : '${this.id}'})
+			except Exception:
+				exc_type, exc_value, exc_tb = sys.exc_info()
+				msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb.tb_next))
+				js.simanimList['${this.id}'].setPythonErrorMsg(msg)
+			else:
+				import simanim.pyodide.gui						
+			`)
+		.then(() => {				
+			this.animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance[this.id]
+		})
+}
+
+SimAnim.prototype.generateHTMLForSim = function() {
+	var simDiv = document.createElement('div');
+	simDiv.setAttribute('class', 'modal-sim');
+
+	var simDivContent = document.createElement('div');
+	simDivContent.setAttribute('class', 'modal-content-sim');
+
+	var simDivControls = document.createElement('div');
+	simDivControls.setAttribute('class', 'sim-controls');
+
+	var controlBtnDiv = document.createElement('div');
+	controlBtnDiv.setAttribute('class', 'control-button-div');
+
+	this.playBtn = document.createElement('button');
+	this.playBtn.setAttribute('class', 'control-btn');
+	this.playBtn.addEventListener('click', this.startSim.bind(this));
+	this.playBtn.innerHTML = '<i class="fas fa-play"></i> PLAY';
+
+	this.stopBtn = document.createElement('button');
+	this.stopBtn.setAttribute('class', 'control-btn');
+	this.stopBtn.setAttribute('disabled', 'disabled');
+	this.stopBtn.addEventListener('click', this.stopSim.bind(this));
+	this.stopBtn.innerHTML = '<i class="fas fa-stop"></i> STOP';
+
+	this.pauseBtn = document.createElement('button');
+	this.pauseBtn.setAttribute('class', 'control-btn d-none');
+	this.pauseBtn.addEventListener('click', this.pauseSim.bind(this));
+	this.pauseBtn.innerHTML = '<i class="fas fa-pause"></i> PAUSE';
+
+	controlBtnDiv.appendChild(this.playBtn);
+	controlBtnDiv.appendChild(this.pauseBtn);
+	controlBtnDiv.appendChild(this.stopBtn);
+	
+	simDivControls.appendChild(controlBtnDiv);
+
+	var variablesDiv = document.createElement('div');
+	variablesDiv.setAttribute('class', 'sim-modal-variables');
+	variablesDiv.setAttribute('id', 'variablesDiv');
+
+	var variables = this.animation_instance.getVars();
+	for (var i = 0; i < variables.length; i++) {
+		if (variables[i].meta["type"] == 'InputFloat') {
+			var variableLabel = document.createElement('label');
+			variableLabel.setAttribute('class', 'variable-label');
+			variableLabel.innerHTML = `${variables[i].name} = `;
+
+			var max = variables[i]['meta']['limit_to']
+			var step = Math.pow(10,Math.floor(Math.log10(max)-1))
+
+			var variableInput = document.createElement('input');
+			variableInput.setAttribute('type', 'number');
+			variableInput.setAttribute('class', 'variable-input');	
+			variableInput.setAttribute('id', this.id + '-' +i)		
+			variableInput.setAttribute('value', '' + variables[i]['meta']['default']);
+			variableInput.setAttribute('min',variables[i]['meta']['limit_from'])
+			variableInput.setAttribute('max',variables[i]['meta']['limit_to'])		
+			variableInput.setAttribute('step', step);
+			variableInput.addEventListener('input',this.setGetters.bind(this))
+
+			this.varsInputElementId[variables[i].name] = this.id + '-' +i	
+
+			variablesDiv.appendChild(variableLabel);
+			variablesDiv.appendChild(variableInput);
+		}
+		else {
+			var variableLabel = document.createElement('label');
+			variableLabel.setAttribute('class', 'variable-label');
+			variableLabel.innerHTML = `${variables[i].name} = `;
+
+			var selectInput = document.createElement('select');
+			selectInput.setAttribute('class', 'variable-input')
+			selectInput.setAttribute('id', this.id + '-' +i)
+			selectInput.addEventListener('input',this.setGetters.bind(this))
+
+			for (var j = 0; j < variables[i].meta.lov.length; j++) {
+				var selectOption = document.createElement('option');
+				selectOption.innerHTML = variables[i].meta.lov[j];
+				selectInput.appendChild(selectOption);
+			}
+			this.varsInputElementId[variables[i].name] = this.id + '-' +i
+
+			variablesDiv.appendChild(variableLabel);
+			variablesDiv.appendChild(selectInput);
+		}
+	}
+
+	simDivControls.appendChild(variablesDiv);
+
+	var simBodyCanvasDiv = document.createElement('div');
+	simBodyCanvasDiv.setAttribute('class', 'sim-modal-canvas');
+
+	this.canvas = document.createElement('canvas');
+	this.canvas.setAttribute('id', 'simCanvas-' + this.id);
+	this.canvas.setAttribute('class', ' sim-canvas')
+	this.ctx = this.canvas.getContext('2d');
+
+	simBodyCanvasDiv.appendChild(this.canvas);
+	simDivContent.appendChild(simDivControls);
+	simDivContent.appendChild(simBodyCanvasDiv);
+
+	simDiv.appendChild(simDivContent);
+	this.opts.appendChild(simDiv);
+
+}
+
+SimAnim.prototype.startSim = function() {
+	this.playBtn.classList.add('d-none');
+	this.pauseBtn.classList.remove('d-none');
+	this.stopBtn.removeAttribute('disabled');
+
+	for (var varName in this.varsInputElementId) {
+		document.getElementById(this.varsInputElementId[varName]).setAttribute('disabled','true')
+	}
+	this.simStatus = SIM_STATUS_PLAYING;
+	this.startDrawing.call(this)
+}
+
+SimAnim.prototype.setGetters = async function(){
+	variableValues = {}
+	for (var varName in this.varsInputElementId) {
+		variableValues[varName] = this.varsInputElementId[varName] 
+	}
+	this.animation_instance.setVarGetters(variableValues)
+	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	this.animation_instance.drawFrame();
+	await this.execDrawing()
+}
+
+SimAnim.prototype.startDrawing = async function(){
+	var startDrawing =  window.performance.now();
+	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.animation_instance.drawFrame();
+		await this.execDrawing()
+		var endDrawing = window.performance.now();
+		this.timeoutFunc = setTimeout(() => {this.startDrawing.call(this)}, this.update_period*1000 - (endDrawing - startDrawing)/1000);
+	}
+	else if (this.animation_instance.getEndAnimation()){
+		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+		this.animation_instance.drawFrame();
+		await this.execDrawing()
+
+		this.simStatus = SIM_STATUS_FINISHED
+		this.playBtn.classList.remove('d-none');
+		this.playBtn.setAttribute('disabled', 'disabled');
+		this.pauseBtn.classList.add('d-none');
+	
+		clearTimeout(this.timeoutFunc)
+	}
+}
+
+SimAnim.prototype.cleanUp = async function(){
+	this.simStatus = SIM_STATUS_STOPPED
+	this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	this.animation_instance.resetAnimation();
+	await this.execDrawing()
+
+	this.playBtn.classList.remove('d-none');
+	this.playBtn.removeAttribute('disabled');
+	this.pauseBtn.classList.add('d-none');
+	this.stopBtn.setAttribute('disabled', 'disabled');
+
+	for (var varName in this.varsInputElementId) {
+		document.getElementById(this.varsInputElementId[varName]).removeAttribute('disabled')
+	}
+
+	clearTimeout(this.timeoutFunc);
+}
+
+SimAnim.prototype.stopSim = function() {
+	this.cleanUp()
+}
+
+SimAnim.prototype.pauseSim = function() {
+	this.playBtn.classList.remove('d-none');
+	this.pauseBtn.classList.add('d-none');
+	this.simStatus = SIM_STATUS_PAUSED
+}
+
+SimAnim.prototype.queueDrawEvent = function(type, obj){
+	this.eventQue.push(this.drawFunctions[type].bind(this, obj))
+}
+
+SimAnim.prototype.scalarToPixel = function(scalar){
+	return scalar * this.scale
+}
+
+SimAnim.prototype.pointToPixel = function(point){
+	scalarPointX = this.scalarToPixel(point[0] - this.animation_instance_x_min)
+	scalarPointY = this.scalarToPixel(this.animation_instance_y_min + this.animation_instance_height - point[1])
+	return [scalarPointX, scalarPointY]
+}
+SimAnim.prototype.rectToPixel = function(rect){
+	var xy_min = this.pointToPixel([rect.xy_min[0],rect.xy_min[1] + rect.height])
+	var width = this.scalarToPixel(rect.width)
+	var height = this.scalarToPixel(rect.height)
+	return [xy_min, width, height]
+}
+
+SimAnim.prototype.drawCircle = function(circle){
+	this.ctx.save()
+	this.ctx.fillStyle = circle.fill_color;
+	this.ctx.strokeStyle = circle.pen_color
+	this.ctx.lineWidth = this.scalarToPixel(circle.line_width);
+	if (this.ctx.line_dashed) {
+		this.ctx.setLineDash([5, 5])
+	}
+	center = this.pointToPixel(circle.center)
+	radius = this.scalarToPixel(circle.radius)
+	this.ctx.beginPath();
+	this.ctx.arc(center[0], center[1], radius, 0, 2 * Math.PI, false);
+	this.ctx.closePath();
+	this.ctx.fill();
+	this.ctx.stroke();
+	this.ctx.restore();
+}
+
+SimAnim.prototype.drawBox = function(rect) {
+	this.ctx.save()
+	if (rect.line_width > 0) {
+		this.ctx.fillStyle = rect.fill_color;
+		this.ctx.strokeStyle = rect.pen_color
+		this.ctx.lineWidth = this.scalarToPixel(rect.line_width);
+		if (rect.line_dashed) {
+			this.ctx.setLineDash([5, 5])
+		}
+		scaledRect = this.rectToPixel(rect)
+		this.ctx.beginPath();
+		this.ctx.rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
+		this.ctx.closePath();
+		this.ctx.fill();
+		this.ctx.stroke();
+	}
+	this.ctx.restore()
+}
+
+SimAnim.prototype.drawLine = function(line) {
+	this.ctx.save()
+	this.ctx.strokeStyle = line.pen_color
+	this.ctx.lineWidth = this.scalarToPixel(line.line_width);
+	if (line.line_dashed) {
+		this.ctx.setLineDash([5, 5])
+	}
+	this.ctx.beginPath();
+	point1 = this.pointToPixel(line.point1)
+	point2 = this.pointToPixel(line.point2)
+	this.ctx.moveTo(point1[0], point1[1]);
+	this.ctx.lineTo(point2[0], point2[1]);
+	this.ctx.stroke();
+	this.ctx.restore()
+}
+SimAnim.prototype.drawPolyLine = function(polyLine) {
+	this.ctx.save()
+	var n = polyLine.points.length
+	if (n < 1) {
+		return;
+	}
+	let points = polyLine.points
+	this.ctx.fillStyle = polyLine.fill_color;
+	this.ctx.strokeStyle = polyLine.pen_color
+	this.ctx.lineWidth = this.scalarToPixel(polyLine.line_width);
+	if (polyLine.line_dashed) {
+		this.ctx.setLineDash([5, 5])
+	}
+	this.ctx.beginPath();
+	var scalarPointX 
+	var scalarPointY 
+	[scalarPointX, scalarPointY] = this.pointToPixel(points[0])
+	this.ctx.moveTo(scalarPointX,scalarPointY)
+	for (i = 1; i < n; i++) {
+		[scalarPointX, scalarPointY] = this.pointToPixel(points[i])
+		this.ctx.lineTo(scalarPointX,scalarPointY)
+	};
+	this.ctx.stroke();
+	this.ctx.restore()
+}
+
+SimAnim.prototype.drawTriangle = function(triangle) {
+	//triangle[6] canvas settings
+	//trinagle[0] point 1  X
+	//trinagle[1] point 1  Y
+	//trinagle[2] point 2  X
+	//trinagle[3] point 2  Y
+	//trinagle[4] point 3  X
+	//trinagle[5] point 3  Y
+	this.ctx.save()
+	this.ctx.strokeStyle = triangle[6].pen_color;
+	this.ctx.lineWidth  = this.scalarToPixel(triangle[6].line_width);
+	this.ctx.fillStyle = triangle[6].pen_color;
+	if (triangle[6].line_dashed) {
+		this.ctx.setLineDash([5, 5])
+	}
+	point1 = this.pointToPixel([triangle[0],triangle[1]])
+	point2 = this.pointToPixel([triangle[2],triangle[3]])
+	point3 = this.pointToPixel([triangle[4],triangle[5]])
+	this.ctx.beginPath();
+	var path=new Path2D()
+	path.moveTo(point1[0], point1[1]);
+	path.lineTo(point2[0], point2[1]);
+	path.lineTo(point3[0], point3[1]);
+	this.ctx.fill(path);
+	this.ctx.stroke();
+	this.ctx.restore()
+
+}
+
+SimAnim.prototype.drawImage = function(image) {
+	this.ctx.save()
+	return new Promise(function (resolve){
+		if (image.file in this.simImages)
+			resolve(image)
+		else {
+			this.simImages[image.file] = new Image();
+			this.simImages[image.file].onload = () => {
+				resolve(image)
+			}
+			this.simImages[image.file].src = pathJoin([this.imgPath, image.file]);
+		}
+		
+	}.bind(this)).then((image) => {
+		var xy_min = this.pointToPixel([image.xy_min[0],image.xy_min[1] + image.height])
+		var width = this.scalarToPixel(image.width)
+		var height = this.scalarToPixel(image.height)
+		this.ctx.drawImage(this.simImages[image.file], xy_min[0], xy_min[1], width, height);
+		this.ctx.restore()
+	});
+
+}
+
+SimAnim.prototype.drawText = function(text) {
+	this.ctx.save()
+	this.ctx.fillStyle = 'black'
+	font_size = this.scalarToPixel(text.font_size)
+	this.ctx.font = `bold ${font_size}px Courier New`;
+	position = this.pointToPixel(text.position)
+	this.ctx.fillText(text.content, position[0], position[1]);
+	this.ctx.restore()
+}
+
+SimAnim.prototype.restore = function() {
+	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+SimAnim.prototype.rotate = function(point) {
+	scaledPoint = this.pointToPixel(point[0])
+	this.ctx.translate( scaledPoint[0], scaledPoint[1]);
+	this.ctx.rotate(point[1]);
+	this.ctx.translate(- scaledPoint[0], - scaledPoint[1]);
+}
+
+window.addEventListener('load',function() {
 	// init pyodide
 	languagePluginLoader.then(() =>
 		pyodide.runPythonAsync(`
@@ -31,50 +451,14 @@ window.addEventListener('load',function () {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.2.0-py3-none-any.whl').then(js.pythonInicijalizovan())
+	micropip.install('${document.location.origin}/_static/simanim-0.3.0-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
 		for (var i = 0; i < animations.length; i++) {
-			simStatus[animations[i].id] = SIM_STATUS_STOPPED
-			code = animations[i].getAttribute('data-code')
-			animations[i].removeAttribute('data-code')
-			path = animations[i].getAttribute('data-img-path')
-			animations[i].removeAttribute('data-img-path')
-			scale = animations[i].getAttribute('data-scale')
-			animations[i].removeAttribute('data-scale')
-			imagePath[animations[i].id] = path
-			animmationScale[animations[i].id] = parseFloat(scale)
-			evaluatePython(animations[i].id, code)
+			simanimList[animations[i].id] = new SimAnim(animations[i])			
 		}
 	});
-
-	async function evaluatePython(id, code) {
-		pyodide.globals.the_script = code
-		pyodide.runPythonAsync(`
-				try:
-					exec(the_script,{'animation_instance_key' : '${id}'})
-				except Exception:
-					exc_type, exc_value, exc_tb = sys.exc_info()
-					msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb.tb_next))
-				else:
-					msg = 'OK'
-					import simanim.pyodide.gui
-				`)
-			.then(() => {
-				console.log(pyodide.globals.msg);
-				animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance
-			})
-			.then(()  => generateModalForSim(id))
-			.then(()  => {
-				canvas[id] = document.getElementById('simCanvas_' + id);
-				ctx[id] = canvas[id].getContext('2d');
-			})
-			.then(() => setupCanvas(id))
-			.then(() => setTimeout(function(){cleanUp(id)},400))
-			.catch(err => console.log(err));
-	}
-
 
 });
 
@@ -82,414 +466,12 @@ function pythonInicijalizovan() {
 	pythonInitialized = true;
 }
 
-function startSim(el) {
-	if (currentId != el.currentTarget.getAttribute('animId')) {
-		cleanUp(currentId)
-	}	
-	currentId = el.currentTarget.getAttribute('animId')
-
-	if (simStatus[currentId] == SIM_STATUS_STOPPED) {
-		setGetters(currentId)
-	}
-	if (simStatus[currentId] == SIM_STATUS_FINISHED) {
-		cleanUp(currentId)
-	}
-	document.getElementById('playBtn-' + currentId).classList.add('d-none');
-	document.getElementById('pauseBtn-' + currentId).classList.remove('d-none');
-	document.getElementById('stopBtn-' + currentId).removeAttribute('disabled');
-
-	inputs = document.getElementsByClassName('variable-input-'+currentId)
-	for(var i=0;i<inputs.length;i++){
-		inputs[i].setAttribute('disabled','true')
-	}
-
-	simStatus[currentId] = SIM_STATUS_PLAYING;
-//	start = window.performance.now();
-	startDrawing();
-
-}
-
-
-function stopSim(el) {
-	currentId = el.currentTarget.getAttribute('animId')
-	cleanUp(currentId)
-}
-
-
-function pauseSim(el) {
-	currentId = el.currentTarget.getAttribute('animId')
-	document.getElementById('playBtn-' + currentId).classList.remove('d-none');
-	document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
-	simStatus[currentId] = SIM_STATUS_PAUSED
-}
-
-
-function startDrawing() {
-	console.log('rendering frame');
-	if (!animation_instance[currentId].getEndAnimation() && simStatus[currentId] == SIM_STATUS_PLAYING) {
-		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
-		animation_instance[currentId].drawFrame();
-		timeoutFunc = setTimeout(startDrawing, animation_instance[currentId].anim_context.settings.update_period*1000 - (endFrameDelay - startFrameDelay)/1000);
-	}
-	else if (simStatus[currentId] == SIM_STATUS_STOPPED) {
-		cleanUp(currentId)
-	}
-	else if (animation_instance[currentId].getEndAnimation()){
-		ctx[currentId].clearRect(0, 0, ctx[currentId].canvas.width, ctx[currentId].canvas.height);
-		animation_instance[currentId].drawFrame();
-		simStatus[currentId] = SIM_STATUS_FINISHED
-		document.getElementById('playBtn-' + currentId).classList.remove('d-none');
-		document.getElementById('playBtn-' + currentId).setAttribute('disabled', 'disabled');
-		document.getElementById('pauseBtn-' + currentId).classList.add('d-none');
-	
-		clearTimeout(timeoutFunc)
-	}
-}
-
-function cleanUp(id){
-	simStatus[id] = SIM_STATUS_STOPPED
-	ctx[id].clearRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
-	currentId = id
-	animation_instance[id].resetAnimation();
-	document.getElementById('playBtn-' + id).classList.remove('d-none');
-	document.getElementById('playBtn-' + id).removeAttribute('disabled');
-	document.getElementById('pauseBtn-' + id).classList.add('d-none');
-	document.getElementById('stopBtn-' + id).setAttribute('disabled', 'disabled');
-
-	inputs = document.getElementsByClassName('variable-input')
-	for(var i=0;i<inputs.length;i++){
-		inputs[i].removeAttribute('disabled')
-	}
-
-	clearTimeout(timeoutFunc);
-}
-
-function setGettersFromInput(el){
-	id = el.currentTarget.getAttribute('anim-variable-id')
-	setGetters(id)
-}
-
-function setGetters(id){
-	if(currentId != id){
-		cleanUp(currentId)
-	}
-	currentId = id
-	vi = document.getElementsByClassName('variable-input-' + id);
-	viLabels = document.getElementsByClassName('variable-label-' + id);
-	variableValues = {}
-	for (var i = 0; i < vi.length; i++) {
-		variableValues[viLabels[i].innerText.split(" ")[0]] = {'class':'variable-input-' + id,'ord' : i}
-	}
-	animation_instance[id].setVarGetters(variableValues)
-	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
-	animation_instance[id].drawFrame();
-}
-
-function setupCanvas(id) {
-	ctx[id].canvas.width = animation_instance[id].anim_context.settings.window_with_px * animmationScale[id];
-	ctx[id].canvas.height = animation_instance[id].anim_context.settings.window_height_px * animmationScale[id];
-	ctx[id].fillStyle = animation_instance[id].anim_context.settings.background_color;
-	ctx[id].fillRect(0, 0, ctx[id].canvas.width, ctx[id].canvas.height);
-	animmationScale[id] =  animation_instance[id].anim_context.settings.px_per_unit * animmationScale[id]
-	animation_instance_x_min[id] = animation_instance[id].anim_context.settings.view_box[0][0]
-	animation_instance_y_min[id]  =  animation_instance[id].anim_context.settings.view_box[0][1]
-	animation_instance_height[id] =  animation_instance[id].anim_context.settings.view_box[2]
-	currentId = id
-	animation_instance[id].drawFrame();
-}
-
-
-
-function generateModalForSim(id) {
-	var modalDiv = document.createElement('div');
-	modalDiv.setAttribute('id', 'simModal');
-	modalDiv.setAttribute('class', 'modal fade');
-	modalDiv.setAttribute('role', 'dialog');
-	modalDiv.setAttribute('aria-hidden', 'true');
-
-	var modalDivDialog = document.createElement('div');
-	modalDivDialog.setAttribute('class', 'modal-sim' );
-
-	var modalDivContent = document.createElement('div');
-	modalDivContent.setAttribute('class', 'modal-content-sim');
-
-	var modalDivBody = document.createElement('div');
-	modalDivBody.setAttribute('class', 'modal-body');
-	modalDivBody.setAttribute('id', 'simModalBody');
-
-	var modalDivBodyControls = document.createElement('div');
-	modalDivBodyControls.setAttribute('class', 'sim-controls');
-
-	var playBtnsDiv = document.createElement('div');
-	playBtnsDiv.setAttribute('class', 'play-button-div');
-
-	var playBtn = document.createElement('button');
-	playBtn.setAttribute('class', 'control-btn');
-	playBtn.setAttribute('id', 'playBtn-' + id);
-	playBtn.setAttribute('animId', id);
-	playBtn.innerHTML = '<i class="fas fa-play"></i> PLAY';
-
-	var stopBtn = document.createElement('button');
-	stopBtn.setAttribute('class', 'control-btn');
-	stopBtn.setAttribute('disabled', 'disabled');
-	stopBtn.setAttribute('id', 'stopBtn-' + id);
-	stopBtn.setAttribute('animId', id);
-	stopBtn.innerHTML = '<i class="fas fa-stop"></i> STOP';
-
-	var pauseBtn = document.createElement('button');
-	pauseBtn.setAttribute('class', 'control-btn d-none');
-	pauseBtn.setAttribute('id', 'pauseBtn-' + id);
-	pauseBtn.setAttribute('animId', id);
-	pauseBtn.innerHTML = '<i class="fas fa-pause"></i> PAUSE';
-
-	playBtnsDiv.appendChild(playBtn);
-	playBtnsDiv.appendChild(pauseBtn);
-	playBtnsDiv.appendChild(stopBtn);
-	modalDivBodyControls.appendChild(playBtnsDiv);
-
-	var variablesDiv = document.createElement('div');
-	variablesDiv.setAttribute('class', 'sim-modal-variables');
-	variablesDiv.setAttribute('id', 'variablesDiv');
-
-
-	var variables = animation_instance[id].getVars();
-	for (var i = 0; i < variables.length; i++) {
-		if (variables[i].meta["type"] == 'InputFloat') {
-			var variableLabel = document.createElement('label');
-			variableLabel.setAttribute('class', 'variable-label variable-label-' + id);
-			variableLabel.innerHTML = `${variables[i].name} = `;
-
-			var variableInput = document.createElement('input');
-			variableInput.setAttribute('type', 'number');
-			variableInput.setAttribute('class', 'variable-input variable-input-' + id);
-			variableInput.setAttribute('anim-variable-id',id)
-			variableInput.setAttribute('value', '' + variables[i]['meta']['default']);
-			var max = variables[i]['meta']['limit_to']
-			var step = Math.pow(10,Math.floor(Math.log10(max)-1))
-			variableInput.setAttribute('min',variables[i]['meta']['limit_from'])
-			variableInput.setAttribute('max',variables[i]['meta']['limit_to'])
-			variableInput.setAttribute('step', step);
-			variableInput.addEventListener('input',(el) =>{setGettersFromInput(el)})
-
-			variablesDiv.appendChild(variableLabel);
-			variablesDiv.appendChild(variableInput);
-		}
-		else {
-			var variableLabel2 = document.createElement('label');
-			variableLabel2.setAttribute('class', 'variable-label variable-label-' + id);
-			variableLabel2.innerHTML = `${variables[i].name} = `;
-
-			var selectInput = document.createElement('select');
-			selectInput.setAttribute('class', 'variable-input variable-input-' + id)
-			selectInput.setAttribute('anim-variable-id',id)
-			for (var j = 0; j < variables[i].meta.lov.length; j++) {
-				var selectOption1 = document.createElement('option');
-				selectOption1.innerHTML = variables[i].meta.lov[j];
-				selectInput.appendChild(selectOption1);
-			}
-			selectInput.addEventListener('input',(el) =>{setGettersFromInput(el)})
-			variablesDiv.appendChild(variableLabel2);
-			variablesDiv.appendChild(selectInput);
-		}
-	}
-
-
-
-	modalDivBodyControls.appendChild(variablesDiv);
-
-	var modalBodyCanvasDiv = document.createElement('div');
-	modalBodyCanvasDiv.setAttribute('class', 'sim-modal-canvas');
-
-	var canvas = document.createElement('canvas');
-	canvas.setAttribute('id', 'simCanvas_' + id);
-	canvas.setAttribute('class', ' sim-canvas')
-	modalBodyCanvasDiv.appendChild(canvas);
-
-	modalDivBody.appendChild(modalDivBodyControls);
-	modalDivBody.appendChild(modalBodyCanvasDiv);
-
-	modalDivContent.appendChild(modalDivBody);
-
-	modalDivDialog.appendChild(modalDivContent);
-
-	modalDiv.appendChild(modalDivDialog);
-
-	document.getElementById(id).appendChild(modalDivDialog);
-
-
-	if (document.getElementById('playBtn-' + id))
-		document.getElementById('playBtn-' + id).addEventListener('click', function (el) {
-			startSim(el);
-		});
-
-	if (document.getElementById('stopBtn-' + id))
-		document.getElementById('stopBtn-' + id).addEventListener('click', function (el) {
-			stopSim(el);
-		});
-
-	if (document.getElementById('pauseBtn-' + id))
-		document.getElementById('pauseBtn-' + id).addEventListener('click', function (el) {
-			pauseSim(el);
-		});
-}
-
-function scalarToPixel(scalar){
-	return scalar * animmationScale[currentId];
-}
-function pointToPixel(point){
-	scalarPointX = scalarToPixel(point[0] - animation_instance_x_min[currentId])
-	scalarPointY = scalarToPixel(animation_instance_y_min[currentId] +animation_instance_height[currentId] - point[1])
-	return [scalarPointX, scalarPointY]
-}
-function rectToPixel(rect){
-	var xy_min = pointToPixel([rect.xy_min[0],rect.xy_min[1] + rect.height])
-	var width = scalarToPixel(rect.width)
-	var height = scalarToPixel(rect.height)
-	return [xy_min, width, height]
-}
-
-
-function drawCircle(circle) {
-	ctx[currentId].save()
-	ctx[currentId].fillStyle = circle.fill_color;
-	ctx[currentId].strokeStyle = circle.pen_color
-	ctx[currentId].lineWidth = scalarToPixel(circle.line_width);
-	if (circle.line_dashed) {
-		ctx[currentId].setLineDash([5, 5])
-	}
-	center = pointToPixel(circle.center)
-	radius = scalarToPixel(circle.radius)
-	ctx[currentId].beginPath();
-	ctx[currentId].arc(center[0], center[1], radius, 0, 2 * Math.PI, false);
-	ctx[currentId].closePath();
-	ctx[currentId].fill();
-	ctx[currentId].stroke();
-	ctx[currentId].restore()
-}
-
-function drawBox(rect) {
-	ctx[currentId].save()
-	if (rect.line_width > 0) {
-		ctx[currentId].fillStyle = rect.fill_color;
-		ctx[currentId].strokeStyle = rect.pen_color
-		ctx[currentId].lineWidth = scalarToPixel(rect.line_width);
-		if (rect.line_dashed) {
-			ctx[currentId].setLineDash([5, 5])
-		}
-		scaledRect = rectToPixel(rect)
-		ctx[currentId].beginPath();
-		ctx[currentId].rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
-		ctx[currentId].closePath();
-		ctx[currentId].fill();
-		ctx[currentId].stroke();
-	}
-	ctx[currentId].restore()
-}
-function drawLine(line) {
-	ctx[currentId].save()
-	ctx[currentId].strokeStyle = line.pen_color
-	ctx[currentId].lineWidth = scalarToPixel(line.line_width);
-	if (line.line_dashed) {
-		ctx[currentId].setLineDash([5, 5])
-	}
-	ctx[currentId].beginPath();
-	point1 = pointToPixel(line.point1)
-	point2 = pointToPixel(line.point2)
-	ctx[currentId].moveTo(point1[0], point1[1]);
-	ctx[currentId].lineTo(point2[0], point2[1]);
-	ctx[currentId].stroke();
-	ctx[currentId].restore()
-}
-function drawPolyLine(polyLine) {
-	ctx[currentId].save()
-	var n = polyLine.points.length
-	if (n < 1) {
-		return;
-	}
-	let points = polyLine.points
-	ctx[currentId].fillStyle = polyLine.fill_color;
-	ctx[currentId].strokeStyle = polyLine.pen_color
-	ctx[currentId].lineWidth = scalarToPixel(polyLine.line_width);
-	if (polyLine.line_dashed) {
-		ctx[currentId].setLineDash([5, 5])
-	}
-	ctx[currentId].beginPath();
-	var scalarPointX 
-	var scalarPointY 
-	[scalarPointX, scalarPointY] = pointToPixel(points[0])
-	ctx[currentId].moveTo(scalarPointX,scalarPointY)
-	for (i = 1; i < n; i++) {
-		[scalarPointX, scalarPointY] = pointToPixel(points[i])
-		ctx[currentId].lineTo(scalarPointX,scalarPointY)
-	};
-	ctx[currentId].stroke();
-	ctx[currentId].restore()
-}
-
-function drawTriangle(pointX1, pointY1, pointX2, pointY2,pointX3, pointY3,line){
-	ctx[currentId].save()
-	ctx[currentId].strokeStyle = line.pen_color;
-	ctx[currentId].lineWidth  = scalarToPixel(line.line_width);
-	ctx[currentId].fillStyle = line.pen_color;
-	if (line.line_dashed) {
-		ctx[currentId].setLineDash([5, 5])
-	}
-	point1 = pointToPixel([pointX1,pointY1])
-	point2 = pointToPixel([pointX2,pointY2])
-	point3 = pointToPixel([pointX3,pointY3])
-	ctx[currentId].beginPath();
-	var path=new Path2D()
-	path.moveTo(point1[0], point1[1]);
-	path.lineTo(point2[0], point2[1]);
-	path.lineTo(point3[0], point3[1]);
-	ctx[currentId].fill(path);
-	ctx[currentId].stroke();
-	ctx[currentId].restore()
-
-}
-
-var simImages = {}
-function drawImage(image) {
-	var idOnLoad = currentId
-	ctx[idOnLoad].save()
-	var xy_min = pointToPixel([image.xy_min[0],image.xy_min[1] + image.height])
-	var width = scalarToPixel(image.width)
-	var height = scalarToPixel(image.height)
-	if (image.file in simImages)
-		ctx[idOnLoad].drawImage(simImages[image.file], xy_min[0],xy_min[1], width, height);
-	else {
-		simImages[image.file] = new Image();
-		simImages[image.file].onload = function () {
-			ctx[idOnLoad].drawImage(simImages[image.file], xy_min[0], xy_min[1], width, height);
-		}
-		simImages[image.file].src =pathJoin([imagePath[currentId], image.file]);
-	}
-	ctx[idOnLoad].restore()
+function queDrawEvent(event){
+	simanimList[event.animation_key].queueDrawEvent(event.type,event.object)
 }
 
 function pathJoin(parts, sep){
-   var separator = sep || '/';
-   var replace   = new RegExp(separator+'{1,}', 'g');
-   return parts.join(separator).replace(replace, separator);
-}
-
-function drawText(text) {
-	ctx[currentId].save()
-	ctx[currentId].fillStyle = 'black'
-	font_size = scalarToPixel(text.font_size)
-	ctx[currentId].font = `bold ${font_size}px Courier New`;
-	position = pointToPixel(text.position)
-	ctx[currentId].fillText(text.content, position[0], position[1]);
-	ctx[currentId].restore()
-}
-
-function restore() {
-	ctx[currentId].setTransform(1, 0, 0, 1, 0, 0);
-}
-
-function rotate(point, angle) {
-	scaledPoint = pointToPixel(point)
-	ctx[currentId].translate( scaledPoint[0], scaledPoint[1]);
-	ctx[currentId].rotate(angle);
-	ctx[currentId].translate(- scaledPoint[0], - scaledPoint[1]);
-}
+	var separator = sep || '/';
+	var replace   = new RegExp(separator+'{1,}', 'g');
+	return parts.join(separator).replace(replace, separator);
+ }
