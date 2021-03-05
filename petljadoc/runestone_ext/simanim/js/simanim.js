@@ -42,7 +42,7 @@ SimAnim.prototype.init = async function(opts){
 	}
 	else{
 		this.generateHTMLForSim() 
-		await this.setupCanvas()
+		this.setupCanvas()
 	}
 }
 
@@ -53,7 +53,7 @@ SimAnim.prototype.execDrawing = async function(){
 	this.eventQue = []
 }
 
-SimAnim.prototype.setupCanvas = async function() {
+SimAnim.prototype.setupCanvas = function() {
 	// settings
 	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
 	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
@@ -69,7 +69,7 @@ SimAnim.prototype.setupCanvas = async function() {
 	this.ctx.fillStyle = this.background_color
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	this.animation_instance.queueFrame(); // setting up frist frame / thumbnail
-	await this.execDrawing()
+	this.execDrawing()
 }
 
 SimAnim.prototype.setPythonErrorMsg = function(errMsg){
@@ -212,33 +212,33 @@ SimAnim.prototype.startSim = function() {
 	this.startDrawing.call(this)
 }
 
-SimAnim.prototype.setGetters = async function(){
+SimAnim.prototype.setGetters =  function(){
 	variableValues = {}
 	for (var varName in this.varsInputElementId) {
 		variableValues[varName] = this.varsInputElementId[varName] 
 	}
 	this.animation_instance.setVarGetters(variableValues) // resets the animation to the begining
-	await this.clearAndDraw()
+	this.clearAndDraw()
 }
 
-SimAnim.prototype.clearAndDraw = async function(){
+SimAnim.prototype.clearAndDraw =  function(){
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	this.animation_instance.queueFrame();
-	await this.execDrawing()
+	this.execDrawing()
 }
 
-SimAnim.prototype.startDrawing = async function(){
+SimAnim.prototype.startDrawing =  function(){
 	var startDrawing =  window.performance.now();
 	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
-		await this.clearAndDraw()
+	     this.clearAndDraw()
 		var endDrawing = window.performance.now();
 		//console.log('Next frame drawn in '+ (this.update_period*1000 - (endDrawing - startDrawing)/1000) +' s')
 		//console.log('Frame drawn in '+(endDrawing - startDrawing)/1000+' s')
 		this.timeoutFunc = setTimeout(() => {this.startDrawing.call(this)}, this.update_period*1000 - (endDrawing - startDrawing)/1000);
 	}
 	else if (this.animation_instance.getEndAnimation()){
-		await this.clearAndDraw()
+		this.clearAndDraw()
 
 		this.simStatus = SIM_STATUS_FINISHED
 		this.playBtn.classList.remove('d-none');
@@ -249,12 +249,12 @@ SimAnim.prototype.startDrawing = async function(){
 	}
 }
 
-SimAnim.prototype.cleanUp = async function(){
+SimAnim.prototype.cleanUp = function(){
 	this.simStatus = SIM_STATUS_STOPPED
 	this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 	this.animation_instance.resetAnimation();
-	await this.execDrawing()
+	this.execDrawing()
 
 	this.playBtn.classList.remove('d-none');
 	this.playBtn.removeAttribute('disabled');
