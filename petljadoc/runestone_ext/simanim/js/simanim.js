@@ -172,6 +172,9 @@ SimAnim.prototype.generateHTMLForSim = function() {
 			for (var j = 0; j < variables[i].meta.lov.length; j++) {
 				var selectOption = document.createElement('option');
 				selectOption.innerHTML = variables[i].meta.lov[j];
+				if(variables[i].meta.lov[j] == variables[i].meta.default){
+					selectOption.setAttribute('selected','selected')	
+				}
 				selectInput.appendChild(selectOption);
 			}
 			this.varsInputElementId[variables[i].name] = this.id + '-' +i
@@ -318,20 +321,19 @@ SimAnim.prototype.drawCircle = function(circle){
 
 SimAnim.prototype.drawBox = function(rect) {
 	this.ctx.save()
-	if (rect.line_width > 0) {
-		this.ctx.fillStyle = rect.fill_color;
-		this.ctx.strokeStyle = rect.pen_color
-		this.ctx.lineWidth = this.scalarToPixel(rect.line_width);
-		if (rect.line_dashed) {
-			this.ctx.setLineDash([5, 5])
-		}
-		var scaledRect = this.rectToPixel(rect)
-		this.ctx.beginPath();
-		this.ctx.rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
-		this.ctx.closePath();
-		this.ctx.fill();
-		this.ctx.stroke();
+	this.ctx.lineWidth  = rect.line_width ?  this.scalarToPixel(rect.line_width)  : 1
+	this.ctx.fillStyle = rect.fill_color;
+	this.ctx.strokeStyle = rect.pen_color ? rect.pen_color : rect.fill_color 
+	if (rect.line_dashed) {
+		this.ctx.setLineDash([5, 5])
 	}
+	var scaledRect = this.rectToPixel(rect)
+	this.ctx.beginPath();
+	this.ctx.rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
+	this.ctx.closePath();
+	this.ctx.fill();
+	this.ctx.stroke();
+
 	this.ctx.restore()
 }
 
