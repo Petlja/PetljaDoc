@@ -63,7 +63,6 @@
 .sim-modal-variables {
     float: right;
     height: 50px;
-    max-width: max-content;
     border: 1px solid lightgray;
     padding: 8px 10px;
     margin-left: 20px;
