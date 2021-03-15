@@ -184,8 +184,10 @@ SimAnim.prototype.generateHTMLForSim = function() {
 		}
 	}
 
-	simDivControls.appendChild(variablesDiv);
-
+	if(variables.length > 0){
+		simDivControls.appendChild(variablesDiv);
+	}
+	
 	var simBodyCanvasDiv = document.createElement('div');
 	simBodyCanvasDiv.setAttribute('class', 'sim-modal-canvas');
 
@@ -234,7 +236,7 @@ SimAnim.prototype.clearAndDraw =  function(){
 SimAnim.prototype.startDrawing =  function(){
 	var startDrawing =  window.performance.now();
 	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
-	     this.clearAndDraw()
+	    this.clearAndDraw()
 		var endDrawing = window.performance.now();
 		//console.log('Next frame drawn in '+ (this.update_period*1000 - (endDrawing - startDrawing)/1000) +' s')
 		//console.log('Frame drawn in '+(endDrawing - startDrawing)/1000+' s')
@@ -303,9 +305,9 @@ SimAnim.prototype.rectToPixel = function(rect){
 
 SimAnim.prototype.drawCircle = function(circle){
 	this.ctx.save()
-	this.ctx.fillStyle = circle.fill_color;
-	this.ctx.strokeStyle = circle.pen_color
-	this.ctx.lineWidth = this.scalarToPixel(circle.line_width);
+	this.ctx.strokeStyle = (circle.pen_color && circle.line_width) ? circle.pen_color : circle.fill_color
+	this.ctx.lineWidth  = circle.line_width ?  this.scalarToPixel(circle.line_width)  : 1
+	this.ctx.fillStyle = circle.fill_color; 
 	if (this.ctx.line_dashed) {
 		this.ctx.setLineDash([5, 5])
 	}
@@ -321,9 +323,9 @@ SimAnim.prototype.drawCircle = function(circle){
 
 SimAnim.prototype.drawBox = function(rect) {
 	this.ctx.save()
-	this.ctx.lineWidth  = rect.line_width ?  this.scalarToPixel(rect.line_width)  : 1
+	this.ctx.lineWidth  = rect.line_width ?  this.scalarToPixel(rect.line_width)  : 1;
+	this.ctx.strokeStyle = (rect.pen_color && rect.line_width) ? rect.pen_color : rect.fill_color;
 	this.ctx.fillStyle = rect.fill_color;
-	this.ctx.strokeStyle = rect.pen_color ? rect.pen_color : rect.fill_color 
 	if (rect.line_dashed) {
 		this.ctx.setLineDash([5, 5])
 	}
@@ -359,9 +361,9 @@ SimAnim.prototype.drawPolyLine = function(polyLine) {
 		return;
 	}
 	let points = polyLine.points
+	this.ctx.strokeStyle = (polyLine.pen_color && polyLine.line_width) ? polyLine.pen_color : polyLine.fill_color;
+	this.ctx.lineWidth =  polyLine.line_width ?  this.scalarToPixel(polyLine.line_width)  : 1;
 	this.ctx.fillStyle = polyLine.fill_color;
-	this.ctx.strokeStyle = polyLine.pen_color
-	this.ctx.lineWidth = this.scalarToPixel(polyLine.line_width);
 	if (polyLine.line_dashed) {
 		this.ctx.setLineDash([5, 5])
 	}
@@ -462,7 +464,7 @@ window.addEventListener('load',function() {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.3.1-py3-none-any.whl').then(js.pythonInicijalizovan())
+	micropip.install('${document.location.origin}/_static/simanim-0.0.2-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
