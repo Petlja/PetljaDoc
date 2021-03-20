@@ -434,7 +434,7 @@ SimAnim.prototype.drawImage = function(image) {
 
 SimAnim.prototype.drawText = function(text) {
 	this.ctx.save()
-	this.ctx.fillStyle = 'black'
+	this.ctx.fillStyle = text.pen_color;
 	var font_size = this.scalarToPixel(text.font_size)
 	this.ctx.font = `bold ${font_size}px Courier New`;
 	var position = this.pointToPixel(text.position)
