@@ -16,6 +16,7 @@ PyodideCode.prototype.init = async function(opts){
 	this.id = opts.id
 	this.simStatus = SIM_STATUS_STOPPED
 	this.code = popAttribute(opts,'data-code',"") 
+	this.originalCode = this.code
 	this.imgPath = popAttribute(opts,'data-img-path',"")
 	this.scale = parseFloat(popAttribute(opts,'data-scale',"1"))
 	this.pythonError = false
@@ -232,10 +233,16 @@ PyodideCode.prototype.generateEditorDiv =  function () {
 	controlDiv.setAttribute('class','control-py')
 
 	this.startButton = document.createElement('div')
-	this.startButton.innerHTML = 'Pokreni animaciju'
+	this.startButton.innerHTML = 'Покрени скрипту'
 	this.startButton.setAttribute('class','btn btn-success btn-py')
 	this.startButton.addEventListener('click', this.runPythonFromCode.bind(this))
 	controlDiv.appendChild(this.startButton)
+
+	this.restartButton = document.createElement('div')
+	this.restartButton.innerHTML = '<i class="fas fa-fast-backward"></i>'
+	this.restartButton.setAttribute('class','btn btn-success btn-reset')
+	this.restartButton.addEventListener('click', () => {this.editor.doc.setValue(this.originalCode);this.restartButton.classList.remove('show')})
+	controlDiv.appendChild(this.restartButton)
 
 	var codeDiv = document.createElement('textarea');
 	codeDiv.innerHTML = this.code
@@ -253,34 +260,41 @@ PyodideCode.prototype.generateEditorDiv =  function () {
 		autoMatchParens: true,
         extraKeys: { "Tab": "indentMore", "Shift-Tab": "indentLess" }
     })
+	this.editor.on('change', () => {this.restartButton.classList.add('show')})
 }
+
 
 PyodideCode.prototype.runPythonFromCode = async function(){
 	this.code = this.editor.getValue()
-	await this.execPython()
-	if(!this.pythonError && this.animation_instance){
-		this.generateHTMLForSim()
-	}
-	else{
-		this.generateHTMLforErrorOutput()
-	}
-	this.createAnimationModal()
-	if(this.animation_instance)
-		this.setupCanvas()
+	if(pythonInitialized){
+		await this.execPython()
+		if(!this.pythonError && this.animation_instance){
+			this.generateHTMLForSim()
+		}
+		else{
+			this.generateHTMLforErrorOutput()
+		}
+		this.createAnimationModal()
+		if(this.animation_instance)
+			this.setupCanvas()
 
-	document.getElementById('main-content').appendChild(this.modalDiv);		
-	$("#simModal").on('hidden.bs.modal', function () {
-		$("#simModal").remove()
-	});
-	$('#simModal').modal()
+		document.getElementById('main-content').appendChild(this.modalDiv);		
+		$("#simModal").on('hidden.bs.modal', function () {
+			$("#simModal").remove()
+			pyodide.runPythonAsync(`del simanim.pyodide.gui.animation_instance['${this.id}']`)
+		.then()
+		}.bind(this));
+		$('#simModal').modal()
+	}
 }
 
 PyodideCode.prototype.generateHTMLforErrorOutput = function(){
 	var errLabel = document.createElement('label')
 	errLabel.innerHTML = '<b>Error:</b>'
-	var errorMsgDiv = document.createElement('div')
+	var errorMsgDiv = document.createElement('textarea')
 	errorMsgDiv.setAttribute('class', 'err')
-	errorMsgDiv.innerHTML = this.pythonErrorMsg.replaceAll('\n','<br>').replaceAll(' ', '&nbsp')
+	errorMsgDiv.innerHTML = this.pythonErrorMsg
+	errorMsgDiv.disabled = true;
 	var errorDiv = document.createElement('div')
 	errorDiv.appendChild(errLabel)
 	errorDiv.appendChild(errorMsgDiv)	
@@ -319,7 +333,7 @@ PyodideCode.prototype.createAnimationModal = function (){
 	modalDivFooter.setAttribute('class', 'modal-footer')
 
 	var closeButton = document.createElement('button')
-	closeButton.innerHTML = 'Zatvori'
+	closeButton.innerHTML = 'Затвори'
 	closeButton.setAttribute('class', 'btn btn-secondary')
 	closeButton.setAttribute('data-dismiss', 'modal')
 	closeButton.setAttribute('type', 'button')
@@ -587,34 +601,19 @@ function queDrawEvent(event){
 	}
 }
 
-function pathJoin(parts, sep){
-	var separator = sep || '/';
-	var replace   = new RegExp(separator+'{1,}', 'g');
-	return parts.join(separator).replace(replace, separator);
- }
- 
- function popAttribute(element, atribute, fallback){
-	var atr = fallback;
-	if (element.hasAttribute(atribute)){
-		atr = element.getAttribute(atribute)
-		element.removeAttribute(atribute)
-	}
-	return atr;
- }
-
- function throwError(msg){
-	throw msg
-}
-
 function createOutDiv(stdout){
 	var outDiv = document.createElement('div')
 	outDiv.setAttribute('class','mt-3')
+
 	var label = document.createElement('label')
 	label.innerHTML = '<b>Stdout:</b>'
-	outDiv.appendChild(label)
-	var output = document.createElement('div')
-	output.innerHTML = stdout.replaceAll('\n','<br>').replaceAll(' ', '&nbsp')
+
+	var output = document.createElement('textarea')
+	output.innerHTML = stdout
 	output.setAttribute('class', 'out')
+	output.disabled = true
+
+	outDiv.appendChild(label)
 	outDiv.appendChild(output)
 	return outDiv
 }

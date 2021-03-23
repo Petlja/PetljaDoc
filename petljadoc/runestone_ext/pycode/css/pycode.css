@@ -96,6 +96,10 @@
 .editor{
     width:500px;
     height: auto;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    border-top: 5px solid #18bc9c;
+    padding-top:10px;
 }
 
 .btn-py{
@@ -103,6 +107,18 @@
     display: flex;
     width: max-content;
 }
+.btn-reset{
+    position: relative;
+    width: max-content;
+    float:right;
+    opacity: 0;
+}
+.btn-reset.show {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+
 .control-py{
     width: 100%;
     margin-bottom: 5px;
@@ -112,11 +128,23 @@
 .out{
     border: 1px solid #18bc9c;
     margin-bottom: 15px;
+    width: 100%;
+    background: white;
+}
+.out:focus{
+    border: 1px solid #18bc9c;
 }
 
 .err{
     border: 1px solid red;
+    width: 100%;
+    padding-bottom: 5px;
+    background: white;
 }
+.err:focus{
+    border: 1px solid red
+}
+
 .modal {
     position: fixed !important; 
     top: 0 !important;
@@ -151,4 +179,8 @@
 .modal-backdrop
 {
     opacity:0.5 !important;
+}
+
+body.modal-open {
+    overflow: visible;
 }

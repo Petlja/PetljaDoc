@@ -464,7 +464,7 @@ window.addEventListener('load',function() {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.0.2-py3-none-any.whl').then(js.pythonInicijalizovan())
+	micropip.install('${document.location.origin}/_static/simanim-0.0.3-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
@@ -480,7 +480,11 @@ function pythonInicijalizovan() {
 }
 
 function queDrawEvent(event){
-	simanimList[event.animation_key].queueDrawEvent(event.type,event.object)
+	if(pyodideCodeList[event.animation_key])
+		pyodideCodeList[event.animation_key].queueDrawEvent(event.type, event.object)
+	else{
+		simanimList[event.animation_key].queueDrawEvent(event.type, event.object)
+	}
 }
 
 function pathJoin(parts, sep){
