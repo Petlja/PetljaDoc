@@ -45,6 +45,12 @@ PyodideCode.prototype.execDrawing = async function(){
 }
 
 PyodideCode.prototype.setupCanvas = function() {
+	//adjust scale based on current windows size
+		var simWidth = this.animation_instance.anim_context.settings.window_with_px * this.scale;
+		var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width*0.8 - 100;
+		if(simWidth >  mainContentWidth){
+			this.scale = this.scale* parseFloat((mainContentWidth/simWidth).toFixed(2));
+		}
 	// settings
 	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
 	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;

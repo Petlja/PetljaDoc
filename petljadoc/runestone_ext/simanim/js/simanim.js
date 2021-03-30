@@ -20,6 +20,7 @@ SimAnim.prototype.init = async function(opts){
 	this.code = popAttribute(opts,'data-code',"") 
 	this.imgPath = popAttribute(opts,'data-img-path',"")
 	this.scale = parseFloat(popAttribute(opts,'data-scale',"1"))
+	this.originalScale = this.scale;
 	this.pythonError = false
 	this.pythonErrorMsg = ""
 	this.varsInputElementId = {}
@@ -54,6 +55,13 @@ SimAnim.prototype.execDrawing = async function(){
 }
 
 SimAnim.prototype.setupCanvas = function() {
+	//adjust scale based on current windows size
+	this.scale = this.originalScale
+	var simWidth = this.animation_instance.anim_context.settings.window_with_px * this.scale;
+	var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width - 20;
+	if(simWidth >  mainContentWidth){
+		this.scale = this.scale* parseFloat((mainContentWidth/simWidth).toFixed(2));
+	}
 	// settings
 	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
 	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
@@ -68,7 +76,8 @@ SimAnim.prototype.setupCanvas = function() {
 	//drawing
 	this.ctx.fillStyle = this.background_color
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-	this.animation_instance.queueFrame(); // setting up frist frame / thumbnail
+	this.eventQue = [];
+	this.animation_instance.resetAnimation(); // setting up frist frame / thumbnail
 	this.execDrawing()
 }
 
@@ -96,8 +105,8 @@ SimAnim.prototype.execPython = function(){
 }
 
 SimAnim.prototype.generateHTMLForSim = function() {
-	var simDiv = document.createElement('div');
-	simDiv.setAttribute('class', 'modal-sim');
+	this.simDiv = document.createElement('div');
+	this.simDiv.setAttribute('class', 'modal-sim');
 
 	var simDivContent = document.createElement('div');
 	simDivContent.setAttribute('class', 'modal-content-sim');
@@ -200,8 +209,8 @@ SimAnim.prototype.generateHTMLForSim = function() {
 	simDivContent.appendChild(simDivControls);
 	simDivContent.appendChild(simBodyCanvasDiv);
 
-	simDiv.appendChild(simDivContent);
-	this.opts.appendChild(simDiv);
+	this.simDiv.appendChild(simDivContent);
+	this.opts.appendChild(this.simDiv);
 
 }
 
@@ -256,10 +265,8 @@ SimAnim.prototype.startDrawing =  function(){
 
 SimAnim.prototype.cleanUp = function(){
 	this.simStatus = SIM_STATUS_STOPPED
-	this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 	this.animation_instance.resetAnimation();
-	this.execDrawing()
+	this.setupCanvas()
 
 	this.playBtn.classList.remove('d-none');
 	this.playBtn.removeAttribute('disabled');
@@ -505,3 +512,10 @@ function pathJoin(parts, sep){
  function throwError(msg){
 	throw msg
 }
+
+window.addEventListener('resize', function(){
+	console.log('resize')
+	for (var id in simanimList){
+		simanimList[id].stopSim()
+	}
+});
