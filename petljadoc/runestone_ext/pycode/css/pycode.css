@@ -3,32 +3,6 @@
     width: min-content;
 }
 
-.modal-content-sim{
-    padding: 10px;
-    position: relative;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    width: 100%;
-    pointer-events: auto;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid rgba(0,0,0,.2);
-    border-radius: .3rem;
-    outline: 0;
-    width: max-content;
-    min-width: 560px;
-}
-
-.sim-modal-variables {
-    float: right;
-    height: 50px;
-    border: 1px solid lightgray;
-    padding: 8px 10px;
-    margin-left: 20px;
-}
-
 .variable-label {
     margin-left: 10px;
 }

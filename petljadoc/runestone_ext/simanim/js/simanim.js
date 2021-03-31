@@ -54,14 +54,14 @@ SimAnim.prototype.execDrawing = async function(){
 	this.eventQue = []
 }
 
-SimAnim.prototype.setupCanvas = function() {
-	//adjust scale based on current windows size
+SimAnim.prototype.rescale = function(){
 	this.scale = this.originalScale
 	var simWidth = this.animation_instance.anim_context.settings.window_with_px * this.scale;
-	var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width - 20;
+	var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width - 50;
 	if(simWidth >  mainContentWidth){
 		this.scale = this.scale* parseFloat((mainContentWidth/simWidth).toFixed(2));
 	}
+
 	// settings
 	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
 	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
@@ -72,12 +72,16 @@ SimAnim.prototype.setupCanvas = function() {
 	this.animation_instance_height = this.animation_instance.anim_context.settings.view_box[2]
 	this.update_period = this.animation_instance.anim_context.settings.update_period
 	this.background_color =  this.animation_instance.anim_context.settings.background_color
+}
+
+SimAnim.prototype.setupCanvas = function() {
+	//adjust scale based on current windows size
+	this.rescale()
 
 	//drawing
 	this.ctx.fillStyle = this.background_color
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-	this.eventQue = [];
-	this.animation_instance.resetAnimation(); // setting up frist frame / thumbnail
+	this.animation_instance.queueFrame();
 	this.execDrawing()
 }
 
@@ -237,6 +241,7 @@ SimAnim.prototype.setGetters =  function(){
 
 SimAnim.prototype.clearAndDraw =  function(){
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.ctx.fillStyle = this.background_color
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	this.animation_instance.queueFrame();
 	this.execDrawing()
@@ -266,7 +271,7 @@ SimAnim.prototype.startDrawing =  function(){
 SimAnim.prototype.cleanUp = function(){
 	this.simStatus = SIM_STATUS_STOPPED
 	this.animation_instance.resetAnimation();
-	this.setupCanvas()
+	this.clearAndDraw();
 
 	this.playBtn.classList.remove('d-none');
 	this.playBtn.removeAttribute('disabled');
@@ -514,8 +519,8 @@ function pathJoin(parts, sep){
 }
 
 window.addEventListener('resize', function(){
-	console.log('resize')
 	for (var id in simanimList){
+		simanimList[id].rescale()
 		simanimList[id].stopSim()
 	}
 });

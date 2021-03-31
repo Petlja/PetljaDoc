@@ -19,6 +19,7 @@ PyodideCode.prototype.init = async function(opts){
 	this.originalCode = this.code
 	this.imgPath = popAttribute(opts,'data-img-path',"")
 	this.scale = parseFloat(popAttribute(opts,'data-scale',"1"))
+	this.originalScale = this.scale;
 	this.pythonError = false
 	this.pythonErrorMsg = ""
 	this.varsInputElementId = {}
@@ -46,8 +47,9 @@ PyodideCode.prototype.execDrawing = async function(){
 
 PyodideCode.prototype.setupCanvas = function() {
 	//adjust scale based on current windows size
+		this.scale = this.originalScale;
 		var simWidth = this.animation_instance.anim_context.settings.window_with_px * this.scale;
-		var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width*0.8 - 100;
+		var mainContentWidth = document.getElementById('main-content').getBoundingClientRect().width*0.8 - 50; // give modal 25px margin
 		if(simWidth >  mainContentWidth){
 			this.scale = this.scale* parseFloat((mainContentWidth/simWidth).toFixed(2));
 		}
@@ -286,9 +288,9 @@ PyodideCode.prototype.runPythonFromCode = async function(){
 
 		document.getElementById('main-content').appendChild(this.modalDiv);		
 		$("#simModal").on('hidden.bs.modal', function () {
-			$("#simModal").remove()
-			pyodide.runPythonAsync(`del simanim.pyodide.gui.animation_instance['${this.id}']`)
-		.then()
+			$("#simModal").remove();
+			pyodideCodeList[this.id].stopSim();
+			pyodide.runPythonAsync(`del simanim.pyodide.gui.animation_instance['${this.id}']`).then();
 		}.bind(this));
 		$('#simModal').modal()
 	}
