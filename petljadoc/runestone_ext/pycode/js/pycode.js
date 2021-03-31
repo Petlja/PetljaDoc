@@ -368,9 +368,10 @@ PyodideCode.prototype.setGetters =  function(){
 
 PyodideCode.prototype.clearAndDraw =  function(){
 	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.ctx.fillStyle = this.background_color;
 	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	this.animation_instance.queueFrame();
-	this.execDrawing()
+	this.execDrawing();
 }
 
 PyodideCode.prototype.startDrawing =  function(){
@@ -396,10 +397,8 @@ PyodideCode.prototype.startDrawing =  function(){
 
 PyodideCode.prototype.cleanUp = function(){
 	this.simStatus = SIM_STATUS_STOPPED
-	this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 	this.animation_instance.resetAnimation();
-	this.execDrawing()
+	this.clearAndDraw()
 
 	this.playBtn.classList.remove('d-none');
 	this.playBtn.removeAttribute('disabled');
