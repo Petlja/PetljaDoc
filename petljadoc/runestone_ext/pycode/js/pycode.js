@@ -253,11 +253,15 @@ PyodideCode.prototype.generateEditorDiv =  function () {
 	controlDiv.appendChild(this.restartButton)
 
 	var codeDiv = document.createElement('textarea');
+	this.preprocessText();
 	codeDiv.innerHTML = this.code
 	
 	editorDiv.appendChild(controlDiv)
 	editorDiv.appendChild(codeDiv)
 	this.opts.appendChild(editorDiv)
+
+
+
 
 	this.editor = CodeMirror.fromTextArea(codeDiv,{
 		autoRefresh: true,
@@ -268,12 +272,40 @@ PyodideCode.prototype.generateEditorDiv =  function () {
 		autoMatchParens: true,
         extraKeys: { "Tab": "indentMore", "Shift-Tab": "indentLess" }
     })
+
+	if (this.markedText) {
+        this.lineHandles = [];
+        for (var i = this.generalInitSec; i < this.mainSec; i++) {
+            this.lineHandles.push(this.editor.addLineClass(i, "background", "shaded"));
+        }
+        this.editor.markText({ line: 0, ch: 0 }, { line: this.mainSec, ch: 0 }, {
+            readOnly: true,
+            inclusiveLeft: true,
+            atomic: true
+        });
+        for (var i = this.afterMainSec; i < this.editor.lineCount() + 1; i++) {
+            this.lineHandles.push(this.editor.addLineClass(i, "background", "shaded"));
+        }
+        this.editor.markText({ line: this.afterMainSec, ch: 0 }, { line: this.editor.lineCount(), ch: 0 }, {
+            readOnly: true,
+            inclusiveLeft: true,
+            inclusiveRight: true,
+            atomic: true
+        });
+    }
+
 	this.editor.on('change', () => {this.restartButton.classList.add('show')})
 }
 
 
 PyodideCode.prototype.runPythonFromCode = async function(){
 	this.code = this.editor.getValue()
+	if(this.code.indexOf('???') != -1){
+		if (!confirm('Treba da umesto ??? otkucаš svoj kod.\nSve naredbe koje sadrže ??? će biti preskočene prilikom izvršavanja programa.\nDa li želiš da izvršiš kod?')) {
+			return;
+		}
+		this.code = this.code.split('\n').filter(line => line.indexOf("???") == -1).join("\n");
+	}
 	if(pythonInitialized){
 		await this.execPython()
 		if(!this.pythonError && this.animation_instance){
@@ -294,6 +326,46 @@ PyodideCode.prototype.runPythonFromCode = async function(){
 		}.bind(this));
 		$('#simModal').modal()
 	}
+}
+
+PyodideCode.prototype.preprocessText = function(){
+	var re = /#\s-\*-.+(acsection:).+-\*-/
+    this.markedText = false;
+    if (re.exec(this.code)) {
+        this.markedText = true;
+        var tmp = this.code.split('\n');
+        var c = 0;
+        var replacement = "";
+        this.generalInitContent = "";
+        this.generalInitSec = -1;
+        this.mainSec = -1;
+        this.afterMainSec = -1;
+        this.mainSecContent = "";
+        for (var i = 0; i < tmp.length; i++) {
+            if (tmp[i].indexOf('acsection: general-init') > -1) {
+                this.generalInitSec = c;
+                continue;
+            }
+            if (tmp[i].indexOf('acsection: main') > -1) {
+                this.mainSec = c;
+                continue;
+            }
+            if (tmp[i].indexOf('acsection: after-main') > -1) {
+                this.afterMainSec = c;
+                continue;
+            }
+            replacement += tmp[i] + "\n";
+            if (this.varInitSec == -1 && this.generalInitSec > -1) {
+                this.generalInitContent += tmp[i] + "\n";
+            }
+            if (this.mainSec != -1 && this.afterMainSec == -1) {
+                this.mainSecContent += tmp[i] + "\n";
+            }
+            c++;
+        }
+        this.code = replacement;
+    }
+    this.code = this.code.replace(/^\s+|\s+$/g, '') + "\n";
 }
 
 PyodideCode.prototype.generateHTMLforErrorOutput = function(){
@@ -328,11 +400,11 @@ PyodideCode.prototype.createAnimationModal = function (){
 	modalDivDialog.setAttribute('role', 'document');
 
 	var modalDivContent = document.createElement('div');
-	modalDivContent.setAttribute('class', 'modal-content');
+	modalDivContent.setAttribute('class', 'modal-content modal-content-py');
 
 
 	var modalDivBody = document.createElement('div');
-	modalDivBody.setAttribute('class', 'modal-body');
+	modalDivBody.setAttribute('class', 'modal-body modal-body-py');
 	modalDivBody.setAttribute('id', 'simModalBody');
 	modalDivBody.appendChild(this.mainConentDiv)
 

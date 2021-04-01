@@ -65,6 +65,8 @@
     margin-bottom: 15px;
     width: 100%;
     background: white;
+    min-width: 780px;
+    height: 75px;
 }
 .out:focus{
     border: 1px solid #18bc9c;
@@ -75,6 +77,8 @@
     width: 100%;
     padding-bottom: 5px;
     background: white;
+    min-width: 780px;
+    height: 75px;
 }
 .err:focus{
     border: 1px solid red
@@ -118,4 +122,11 @@
 
 body.modal-open {
     overflow: visible;
+}
+
+.modal-body-py{
+    width: max-content !important;
+}
+.modal-content-py{
+    width: max-content !important;
 }
