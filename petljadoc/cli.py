@@ -20,6 +20,7 @@ from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
+import subprocess
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -212,25 +213,36 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     if not buildPath.exists:
         os.makedirs(buildPath)
     args = []
+    
     if sphinx_autobuild:
-        args.append(f'--port {port}')
-        args.append('--open-browser')
-        args.append('--no-initial')
-        build_module = "sphinx_autobuild"
+        srcdir = os.path.realpath(paver_options.build.sourcedir)
+        outdir = os.path.realpath(paver_options.build.builddir)
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+        server = Server()
+        builder = get_builder(
+            server.watcher, ['-b', 'html', '-d', './_build/doctrees', '-c', '.', srcdir, outdir], pre_build_commands=[]
+        )
+
+        server.watch(srcdir, builder, ignore=[])
+        server.setHeader('Access-Control-Allow-Origin', '*')
+        server.setHeader('Access-Control-Allow-Methods', '*')
+
+        server.serve(port=port, host="127.0.0.1", root=outdir, open_url_delay=5)
+
     if sphinx_build:
         build_module = "sphinx.cmd.build"
         args.append('-a')
         args.append('-E')
-    args.append('-b html')
-    args.append(f'-c "{paver_options.build.confdir}"')
-    args.append(f'-d "{paver_options.build.builddir}/doctrees"')
-    for k, v in paver_options.build.template_args.items():
-        args.append(f'-A "{k}={v}"')
-    args.append(f'"{paver_options.build.sourcedir}"')
-    args.append(f'"{paver_options.build.builddir}"')
+        args.append('-b html')
+        args.append(f'-c "{paver_options.build.confdir}"')
+        args.append(f'-d "{paver_options.build.builddir}/doctrees"')
+        for k, v in paver_options.build.template_args.items():
+            args.append(f'-A "{k}={v}"')
+        args.append(f'"{paver_options.build.sourcedir}"')
+        args.append(f'"{paver_options.build.builddir}"')
 
-    sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
-
+        sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
 
 @main.command()
 @click.option("--port", "-p", default=8000, type=int, help="HTTP port numpber (default 8000)")
@@ -731,3 +743,51 @@ class SafeLineLoader(SafeLoader):
             node, deep=deep)
         mapping['__line__'] = node.start_mark.line + 1
         return mapping
+
+
+def get_builder(watcher, sphinx_args, *, pre_build_commands):
+    """Prepare the function that calls sphinx."""
+    sphinx_command = [sys.executable, "-m", "sphinx"] + sphinx_args
+    def build():
+        """Generate the documentation using ``sphinx``."""
+        if watcher.filepath:
+            heading = f"changed: {watcher.filepath}"
+        else:
+            heading = "manual build"
+        run_with_surrounding_separators(sphinx_command, heading=heading)
+
+    return build
+
+def run_with_surrounding_separators(args, *, heading, include_footer=True):
+    """Run a subprocess with the output surrounded by a box.
+
+    Looks like::
+
+        +---------- heading ----------
+        | first line of output
+        | second line of output
+        +-----------------------------
+    """
+    separator_width = 80
+    header = "+" + f"-- {heading} --".center(separator_width, "-")
+    footer = "+" + "-" * separator_width
+
+    sys.stdout.write(header + "\n")
+
+    stdout = subprocess.Popen(
+        args, stdout=subprocess.PIPE, universal_newlines=True
+    ).stdout
+
+    try:
+        while 1:
+            line = stdout.readline()
+            if not line:
+                break
+            sys.stdout.write("| ")
+            sys.stdout.write(line.rstrip())
+            sys.stdout.write("\n")
+    except IOError:
+        pass
+    finally:
+            stdout.close()
+    sys.stdout.write(footer + "\n")
