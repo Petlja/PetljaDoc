@@ -54,6 +54,7 @@ class Course:
     def create_YAML(self, desc):
         self.dict['courseId'] = self.courseId
         self.dict['title'] = self.title
+        self.dict['lang'] = self.lang
         self.dict['description'] = {}
         self.dict['description']['willlearn'] = self.willlearn
         self.dict['description']['shortDescription'] = self.shortDesc
@@ -83,12 +84,14 @@ class Course:
                                          'guid': lesson.guid,
                                          'description':  lesson.description,
                                          'folder': lesson.folder,
-                                         'activites': tmp_activities,
-                                         'archived-activities': tmp_archived}
+                                         'activities': tmp_activities}
                                         )
-            self.dict['archived-lessons'] = []
-            for al in self.archived_lessons:
-                self.dict['archived-lessons'].append({'guid': al})
+            if len(tmp_archived):
+                self.dict['lessons'].append({'archived-activities': tmp_archived})
+            if len(self.archived_lessons):
+                self.dict['archived-lessons'] = []
+                for al in self.archived_lessons:
+                    self.dict['archived-lessons'].append({'guid': al})
 
         with open(desc, 'w', encoding='utf-8') as outfile:
             yaml.dump(self.dict, outfile, default_flow_style=False,
