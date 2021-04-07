@@ -91,8 +91,8 @@ class P5jsDirective(Directive):
                 self.options['images'] = []
     
             fname = self.options['folder'].replace('\\', '/')
+            source, _ = self.state_machine.get_source_and_line()
             if not os.path.isabs(fname):
-                source, _ = self.state_machine.get_source_and_line()
                 fname = os.path.join(os.path.dirname(source),fname)
                 
             lecture_path =  os.path.dirname(source.replace('_intermediate','_build'))
