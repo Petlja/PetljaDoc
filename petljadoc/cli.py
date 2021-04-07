@@ -9,6 +9,7 @@ import getpass
 import filecmp
 import click
 import yaml
+import subprocess
 from yaml.loader import SafeLoader
 from colorama import Fore, init, Style, deinit, reinit
 from pkg_resources import resource_filename, working_set
@@ -20,7 +21,6 @@ from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
-import subprocess
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 

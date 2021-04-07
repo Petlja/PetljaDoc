@@ -83,42 +83,47 @@ class P5jsDirective(Directive):
             self.options['height'] = '500'
         if 'canvaswidth' not in self.options:
             self.options['canvaswidth'] = '500'
-        if 'folder' not in self.options:
-            self.error('No folder path specified')      
 
-        if 'images' in self.options:
-            self.options['images'] = [image.strip() for image in self.options['images'].split(',')]
-        else:
-            self.options['images'] = []
+        if 'folder' in self.options:   
+            if 'images' in self.options:
+                self.options['images'] = [image.strip() for image in self.options['images'].split(',')]
+            else:
+                self.options['images'] = []
+    
+            fname = self.options['folder'].replace('\\', '/')
+            if not os.path.isabs(fname):
+                source, _ = self.state_machine.get_source_and_line()
+                fname = os.path.join(os.path.dirname(source),fname)
+                
+            lecture_path =  os.path.dirname(source.replace('_intermediate','_build'))
+            for image in self.options['images']:
+                path = os.path.dirname(os.path.join(fname, image))
+                img = os.path.basename(image)
+                cwd = os.path.abspath(os.getcwd())
+                try:
+                    build_file_path = lecture_path
+                    src_file_path = os.path.join(path,img)
+                    build_file_path_img = os.path.join(lecture_path,img)
+                    if not os.path.exists(build_file_path):
+                        os.makedirs(build_file_path)
+                    shutil.copyfile(src_file_path, build_file_path_img)
+                except:
+                    self.error('Images could not be copied')
 
-        fname = self.options['folder'].replace('\\', '/')
-        if not os.path.isabs(fname):
-            source, _ = self.state_machine.get_source_and_line()
-            fname = os.path.join(os.path.dirname(source),fname)
-
+        self.options['code'] = ''
         if 'script' not in self.options:
             self.options['code'] = "\n".join(self.content)
         else:
-            path = os.path.join(fname, self.options['script'])
-            try:
-                with open(path, encoding='utf-8') as f:
-                    self.options['code'] = html_escape(f.read())
-            except:
-                self.error('Source file could not be opened')
-        lecture_path =  os.path.dirname(source.replace('_intermediate','_build'))
-        for image in self.options['images']:
-            path = os.path.dirname(os.path.join(fname, image))
-            img = os.path.basename(image)
-            cwd = os.path.abspath(os.getcwd())
-            try:
-                build_file_path = lecture_path
-                src_file_path = os.path.join(path,img)
-                build_file_path_img = os.path.join(lecture_path,img)
-                if not os.path.exists(build_file_path):
-                    os.makedirs(build_file_path)
-                shutil.copyfile(src_file_path, build_file_path_img)
-            except:
-                self.error('Images could not be copied')
+            if 'folder' in self.options:
+                path = os.path.join(fname, self.options['script'])
+                try:
+                    with open(path, encoding='utf-8') as f:
+                        self.options['code'] = html_escape(f.read())
+                except:
+                    self.error('Source file could not be opened')
+            else:
+                 self.error('Source folder missing')
+
 
         self.options['divid'] = self.arguments[0]
 
