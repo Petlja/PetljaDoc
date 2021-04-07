@@ -320,8 +320,8 @@ PyodideCode.prototype.runPythonFromCode = async function(){
 
 		document.getElementById('main-content').appendChild(this.modalDiv);		
 		$("#simModal").on('hidden.bs.modal', function () {
-			$("#simModal").remove();
 			pyodideCodeList[this.id].stopSim();
+			$("#simModal").remove();
 			pyodide.runPythonAsync(`del simanim.pyodide.gui.animation_instance['${this.id}']`).then();
 		}.bind(this));
 		$('#simModal').modal()
