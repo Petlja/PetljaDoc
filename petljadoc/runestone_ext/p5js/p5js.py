@@ -28,7 +28,7 @@ TEMPLATE_START = """
     <div class ="p5js-editor" >
     <div class = "p5js-container">
     <div class = "p5js-resize" style="width: %(width)spx">
-    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(previewwidth)s">
+    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(canvaswidth)s">
     %(code)s
 
 """
@@ -63,7 +63,7 @@ def depart_info_note_node(self, node):
 class P5jsDirective(Directive):
     required_arguments = 1
     optional_arguments = 0
-    has_content = False
+    has_content = True
     option_spec = {}
     option_spec.update({
         'folder': directives.unchanged,
@@ -71,7 +71,7 @@ class P5jsDirective(Directive):
         'images': directives.unchanged,
         'width': directives.unchanged,
         'height': directives.unchanged,
-        'previewwidth': directives.unchanged,
+        'canvaswidth': directives.unchanged,
     })
     def run(self):
 
@@ -81,11 +81,8 @@ class P5jsDirective(Directive):
             self.options['width'] = '750'
         if 'height' not in self.options:
             self.options['height'] = '500'
-        if 'previewwidth' not in self.options:
-            self.options['previewwidth'] = '500'
-        if 'script' not in self.options:
-            self.error('No script path specified')
-
+        if 'canvaswidth' not in self.options:
+            self.options['canvaswidth'] = '500'
         if 'folder' not in self.options:
             self.error('No folder path specified')      
 
@@ -98,13 +95,16 @@ class P5jsDirective(Directive):
         if not os.path.isabs(fname):
             source, _ = self.state_machine.get_source_and_line()
             fname = os.path.join(os.path.dirname(source),fname)
-        path = os.path.join(fname, self.options['script'])
-        self.options['code'] = ""
-        try:
-            with open(path, encoding='utf-8') as f:
-                self.options['code'] = html_escape(f.read())
-        except:
-            self.error('Source file could not be opened')
+
+        if 'script' not in self.options:
+            self.options['code'] = "\n".join(self.content)
+        else:
+            path = os.path.join(fname, self.options['script'])
+            try:
+                with open(path, encoding='utf-8') as f:
+                    self.options['code'] = html_escape(f.read())
+            except:
+                self.error('Source file could not be opened')
         lecture_path =  os.path.dirname(source.replace('_intermediate','_build'))
         for image in self.options['images']:
             path = os.path.dirname(os.path.join(fname, image))
