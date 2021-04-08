@@ -56,7 +56,7 @@ class Course:
         self.dict['title'] = self.title
         self.dict['lang'] = self.lang
         self.dict['description'] = {}
-        self.dict['description']['willlearn'] = self.willlearn
+        self.dict['description']['willLearn'] = self.willlearn
         self.dict['description']['shortDescription'] = self.shortDesc
         self.dict['description']['longDescription'] = publish_parts(self.longDesc, writer_name='html')[
             'html_body'] if self.longDesc.find('\n') != -1 else self.longDesc
