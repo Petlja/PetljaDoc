@@ -28,7 +28,7 @@ TEMPLATE_START = """
     <div class ="p5js-editor" >
     <div class = "p5js-container">
     <div class = "p5js-resize" style="width: %(width)spx">
-    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(canvaswidth)s">
+    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(canvaswidth)s" %(version)s>
     %(code)s
 
 """
