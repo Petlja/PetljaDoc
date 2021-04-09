@@ -84,8 +84,8 @@ class PyCodeDirective(Directive):
             self.options['scale'] = 'data-scale = "1"'
 
         fname = self.options['folder'].replace('\\', '/')
+        source, _ = self.state_machine.get_source_and_line()
         if not os.path.isabs(fname):
-            source, _ = self.state_machine.get_source_and_line()
             fname = os.path.join(os.path.dirname(source),fname)
         path = os.path.join(fname, self.options['script'])
 

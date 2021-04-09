@@ -28,7 +28,7 @@ TEMPLATE_START = """
     <div class ="p5js-editor" >
     <div class = "p5js-container">
     <div class = "p5js-resize" style="width: %(width)spx">
-    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(canvaswidth)s">
+    <script type="text/p5"  data-id="%(divid)s" data-height="%(height)s" data-preview-width="%(canvaswidth)s" %(version)s>
     %(code)s
 
 """
@@ -71,6 +71,7 @@ class P5jsDirective(Directive):
         'images': directives.unchanged,
         'width': directives.unchanged,
         'height': directives.unchanged,
+        'version': directives.unchanged,
         'canvaswidth': directives.unchanged,
     })
     def run(self):
@@ -83,6 +84,10 @@ class P5jsDirective(Directive):
             self.options['height'] = '500'
         if 'canvaswidth' not in self.options:
             self.options['canvaswidth'] = '500'
+        if 'version' not in self.options:
+            self.options['version'] = ''
+        else:
+            self.options['version'] = 'data-p5-version="{}"'.format(self.options['version'])
 
         if 'folder' in self.options:   
             if 'images' in self.options:
@@ -91,8 +96,8 @@ class P5jsDirective(Directive):
                 self.options['images'] = []
     
             fname = self.options['folder'].replace('\\', '/')
+            source, _ = self.state_machine.get_source_and_line()
             if not os.path.isabs(fname):
-                source, _ = self.state_machine.get_source_and_line()
                 fname = os.path.join(os.path.dirname(source),fname)
                 
             lecture_path =  os.path.dirname(source.replace('_intermediate','_build'))
@@ -101,9 +106,16 @@ class P5jsDirective(Directive):
                 img = os.path.basename(image)
                 cwd = os.path.abspath(os.getcwd())
                 try:
+                    #coping img to activity dir
                     build_file_path = lecture_path
                     src_file_path = os.path.join(path,img)
                     build_file_path_img = os.path.join(lecture_path,img)
+                    if not os.path.exists(build_file_path):
+                        os.makedirs(build_file_path)
+                    shutil.copyfile(src_file_path, build_file_path_img)
+                    #coping img to _build/_images dir
+                    build_file_path = os.path.join(cwd,os.path.dirname(os.path.join('_build/_images/',image)))
+                    build_file_path_img = os.path.join(cwd, os.path.join(os.path.dirname(os.path.join('_build/_images/',image)),img))
                     if not os.path.exists(build_file_path):
                         os.makedirs(build_file_path)
                     shutil.copyfile(src_file_path, build_file_path_img)
