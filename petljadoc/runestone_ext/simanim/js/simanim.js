@@ -6,6 +6,7 @@ SIM_STATUS_PAUSED = 3
 SIM_STATUS_FINISHED = 4
 
 simanimList = {}
+pyodideCodeList = {}
 
 function SimAnim (opts) {
     if (opts) {
@@ -61,28 +62,40 @@ SimAnim.prototype.rescale = function(){
 	if(simWidth >  mainContentWidth){
 		this.scale = this.scale* parseFloat((mainContentWidth/simWidth).toFixed(2));
 	}
-
-	// settings
-	this.ctx.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
-	this.ctx.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
-
-	this.scale =  this.animation_instance.anim_context.settings.px_per_unit * this.scale
-	this.animation_instance_x_min = this.animation_instance.anim_context.settings.view_box[0][0]
-	this.animation_instance_y_min  =  this.animation_instance.anim_context.settings.view_box[0][1]
-	this.animation_instance_height = this.animation_instance.anim_context.settings.view_box[2]
-	this.update_period = this.animation_instance.anim_context.settings.update_period
-	this.background_color =  this.animation_instance.anim_context.settings.background_color
+	// settings	
+	this.canvas.width = this.animation_instance.anim_context.settings.window_with_px * this.scale;
+	this.canvas.height = this.animation_instance.anim_context.settings.window_height_px * this.scale;
+	this.bufferCanvs.width = this.canvas.width;
+	this.bufferCanvs.height = this.canvas.height;
+	
+	//we use this to scale all of the animations
+	this.pixelPerUnit =  this.animation_instance.anim_context.settings.px_per_unit * this.scale;
 }
 
-SimAnim.prototype.setupCanvas = function() {
+SimAnim.prototype.setupCanvas = async function() {
+	//creating buffer canvas	
+	this.bufferCanvs =  document.createElement('canvas');
+	this.bufferCanvsContext = this.bufferCanvs.getContext('2d', { alpha: false });
+
 	//adjust scale based on current windows size
 	this.rescale()
 
+	//settings
+	this.animation_instance_x_min = this.animation_instance.anim_context.settings.view_box[0][0]
+	this.animation_instance_y_min  =  this.animation_instance.anim_context.settings.view_box[0][1]
+	this.animation_instance_height = this.animation_instance.anim_context.settings.view_box[2]
+	this.frame_period = parseFloat(this.animation_instance.anim_context.settings.frame_period.toFixed(5))
+	this.frameTime = this.frame_period * 1000;
+	this.background_color =  this.animation_instance.anim_context.settings.background_color
+
 	//drawing
-	this.ctx.fillStyle = this.background_color
-	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	this.bufferCanvsContext.fillStyle = this.background_color
+	this.bufferCanvsContext.fillRect(0, 0, this.bufferCanvs.width, this.bufferCanvs.height);
 	this.animation_instance.queueFrame();
-	this.execDrawing()
+	await this.execDrawing()
+	
+	//swaping buffer with main canvas
+	this.canvasContext.drawImage(this.bufferCanvs,0,0)	
 }
 
 SimAnim.prototype.setPythonErrorMsg = function(errMsg){
@@ -103,7 +116,7 @@ SimAnim.prototype.execPython = function(){
 				import simanim.pyodide.gui	
 			`)
 		.then(() => {				
-			this.animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance[this.id]
+			this.animation_instance = pyodide.globals.simanim.pyodide.gui.animation_instance[this.id];
 		})
 		.catch((msg) => {this.setPythonErrorMsg(msg);})
 }
@@ -207,7 +220,7 @@ SimAnim.prototype.generateHTMLForSim = function() {
 	this.canvas = document.createElement('canvas');
 	this.canvas.setAttribute('id', 'simCanvas-' + this.id);
 	this.canvas.setAttribute('class', ' sim-canvas')
-	this.ctx = this.canvas.getContext('2d');
+	this.canvasContext = this.canvas.getContext('2d', { alpha: false });;
 
 	simBodyCanvasDiv.appendChild(this.canvas);
 	simDivContent.appendChild(simDivControls);
@@ -227,51 +240,77 @@ SimAnim.prototype.startSim = function() {
 		document.getElementById(this.varsInputElementId[varName]).setAttribute('disabled','true')
 	}
 	this.simStatus = SIM_STATUS_PLAYING;
-	this.startDrawing.call(this)
+	this.nextFrameTargetTime = window.performance.now() + this.frameTime
+	//this.animationStart = window.performance.now()
+	this.drawAnimation.call(this)
 }
 
-SimAnim.prototype.setGetters =  function(){
-	variableValues = {}
-	for (var varName in this.varsInputElementId) {
-		variableValues[varName] = this.varsInputElementId[varName] 
+
+SimAnim.prototype.flipFrame = async function(){
+	// waite for the next animationFrame if we are too early
+	if(this.nextFrameTargetTime - window.performance.now() > this.frameTime/5){
+		window.requestAnimationFrame(() => {this.flipFrame.call(this)});
 	}
-	this.animation_instance.setVarGetters(variableValues) // resets the animation to the begining
-	this.clearAndDraw()
+	else{
+	this.canvasContext.drawImage(this.bufferCanvs,0,0)
+	this.nextFrameTargetTime = window.performance.now() + this.frame_period * 1000
+	this.drawAnimation();
+	}
 }
 
-SimAnim.prototype.clearAndDraw =  function(){
-	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	this.ctx.fillStyle = this.background_color
-	this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+SimAnim.prototype.drawAnimation = function(){
+	this.clearBufferCanvas();
+	this.animation_instance.updateBetweenFrames();
 	this.animation_instance.queueFrame();
-	this.execDrawing()
-}
-
-SimAnim.prototype.startDrawing =  function(){
-	var startDrawing =  window.performance.now();
+    this.execDrawing()
 	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
-	    this.clearAndDraw()
-		var endDrawing = window.performance.now();
-		//console.log('Next frame drawn in '+ (this.update_period*1000 - (endDrawing - startDrawing)/1000) +' s')
-		//console.log('Frame drawn in '+(endDrawing - startDrawing)/1000+' s')
-		this.timeoutFunc = setTimeout(() => {this.startDrawing.call(this)}, this.update_period*1000 - (endDrawing - startDrawing)/1000);
+		window.requestAnimationFrame(() => {this.flipFrame.call(this)});
 	}
 	else if (this.animation_instance.getEndAnimation()){
-		this.clearAndDraw()
+		//last buffered frame drawn
+		setTimeout(()=>{this.canvasContext.drawImage(this.bufferCanvs,0,0);},this.frame_period)
 
 		this.simStatus = SIM_STATUS_FINISHED
 		this.playBtn.classList.remove('d-none');
 		this.playBtn.setAttribute('disabled', 'disabled');
 		this.pauseBtn.classList.add('d-none');
-	
-		clearTimeout(this.timeoutFunc)
+		//console.log((window.performance.now() - this.animationStart)/1000)
 	}
 }
 
-SimAnim.prototype.cleanUp = function(){
+SimAnim.prototype.setGetters =async  function(){
+	variableValues = {}
+	for (var varName in this.varsInputElementId) {
+		variableValues[varName] = this.varsInputElementId[varName] 
+	}
+	
+	// resets the animation to the begining
+	this.animation_instance.setVarGetters(variableValues)
+
+	this.clearBufferCanvas();
+	this.animation_instance.queueFrame() 
+
+	await this.execDrawing()
+	this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.canvasContext.drawImage(this.bufferCanvs,0,0)
+
+	// populate buffer
+	this.animation_instance.updateBetweenFrames();
+	this.animation_instance.queueFrame();
+	this.execDrawing()	
+}
+
+SimAnim.prototype.cleanUp =async function(){
 	this.simStatus = SIM_STATUS_STOPPED
+	this.eventQue = []
 	this.animation_instance.resetAnimation();
-	this.clearAndDraw();
+	this.clearBufferCanvas();
+	this.animation_instance.queueFrame();
+	await this.execDrawing()
+
+	//swap first frame to main canvas
+	this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.canvasContext.drawImage(this.bufferCanvs,0,0)
 
 	this.playBtn.classList.remove('d-none');
 	this.playBtn.removeAttribute('disabled');
@@ -281,8 +320,6 @@ SimAnim.prototype.cleanUp = function(){
 	for (var varName in this.varsInputElementId) {
 		document.getElementById(this.varsInputElementId[varName]).removeAttribute('disabled')
 	}
-
-	clearTimeout(this.timeoutFunc);
 }
 
 SimAnim.prototype.stopSim = function() {
@@ -299,8 +336,14 @@ SimAnim.prototype.queueDrawEvent = function(type, obj){
 	this.eventQue.push(this.drawFunctions[type].bind(this, obj))
 }
 
+SimAnim.prototype.clearBufferCanvas = function() {
+	this.bufferCanvsContext.clearRect(0, 0, this.bufferCanvs.width, this.bufferCanvs.height);
+	this.bufferCanvsContext.fillStyle = this.background_color
+	this.bufferCanvsContext.fillRect(0, 0, this.bufferCanvs.width, this.bufferCanvs.height);
+}
+
 SimAnim.prototype.scalarToPixel = function(scalar){
-	return scalar * this.scale
+	return scalar * this.pixelPerUnit
 }
 
 SimAnim.prototype.pointToPixel = function(point){
@@ -316,80 +359,80 @@ SimAnim.prototype.rectToPixel = function(rect){
 }
 
 SimAnim.prototype.drawCircle = function(circle){
-	this.ctx.save()
-	this.ctx.strokeStyle = (circle.pen_color && circle.line_width) ? circle.pen_color : circle.fill_color
-	this.ctx.lineWidth  = circle.line_width ?  this.scalarToPixel(circle.line_width)  : 1
-	this.ctx.fillStyle = circle.fill_color; 
-	if (this.ctx.line_dashed) {
-		this.ctx.setLineDash([5, 5])
+	this.bufferCanvsContext.save()
+	this.bufferCanvsContext.strokeStyle = (circle.pen_color && circle.line_width) ? circle.pen_color : circle.fill_color
+	this.bufferCanvsContext.lineWidth  = circle.line_width ?  this.scalarToPixel(circle.line_width)  : 1
+	this.bufferCanvsContext.fillStyle = circle.fill_color; 
+	if (this.bufferCanvsContext.line_dashed) {
+		this.bufferCanvsContext.setLineDash([5, 5])
 	}
 	var center = this.pointToPixel(circle.center)
 	var radius = this.scalarToPixel(circle.radius)
-	this.ctx.beginPath();
-	this.ctx.arc(center[0], center[1], radius, 0, 2 * Math.PI, false);
-	this.ctx.closePath();
-	this.ctx.fill();
-	this.ctx.stroke();
-	this.ctx.restore();
+	this.bufferCanvsContext.beginPath();
+	this.bufferCanvsContext.arc(center[0], center[1], radius, 0, 2 * Math.PI, false);
+	this.bufferCanvsContext.closePath();
+	this.bufferCanvsContext.fill();
+	this.bufferCanvsContext.stroke();
+	this.bufferCanvsContext.restore();
 }
 
 SimAnim.prototype.drawBox = function(rect) {
-	this.ctx.save()
-	this.ctx.lineWidth  = rect.line_width ?  this.scalarToPixel(rect.line_width)  : 1;
-	this.ctx.strokeStyle = (rect.pen_color && rect.line_width) ? rect.pen_color : rect.fill_color;
-	this.ctx.fillStyle = rect.fill_color;
+	this.bufferCanvsContext.save()
+	this.bufferCanvsContext.lineWidth  = rect.line_width ?  this.scalarToPixel(rect.line_width)  : 1;
+	this.bufferCanvsContext.strokeStyle = (rect.pen_color && rect.line_width) ? rect.pen_color : rect.fill_color;
+	this.bufferCanvsContext.fillStyle = rect.fill_color;
 	if (rect.line_dashed) {
-		this.ctx.setLineDash([5, 5])
+		this.bufferCanvsContext.setLineDash([5, 5])
 	}
 	var scaledRect = this.rectToPixel(rect)
-	this.ctx.beginPath();
-	this.ctx.rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
-	this.ctx.closePath();
-	this.ctx.fill();
-	this.ctx.stroke();
+	this.bufferCanvsContext.beginPath();
+	this.bufferCanvsContext.rect(scaledRect[0][0], scaledRect[0][1], scaledRect[1], scaledRect[2]);
+	this.bufferCanvsContext.closePath();
+	this.bufferCanvsContext.fill();
+	this.bufferCanvsContext.stroke();
 
-	this.ctx.restore()
+	this.bufferCanvsContext.restore()
 }
 
 SimAnim.prototype.drawLine = function(line) {
-	this.ctx.save()
-	this.ctx.strokeStyle = line.pen_color
-	this.ctx.lineWidth = this.scalarToPixel(line.line_width);
+	this.bufferCanvsContext.save()
+	this.bufferCanvsContext.strokeStyle = line.pen_color
+	this.bufferCanvsContext.lineWidth = this.scalarToPixel(line.line_width);
 	if (line.line_dashed) {
-		this.ctx.setLineDash([5, 5])
+		this.bufferCanvsContext.setLineDash([5, 5])
 	}
-	this.ctx.beginPath();
+	this.bufferCanvsContext.beginPath();
 	var point1 = this.pointToPixel(line.point1)
 	var point2 = this.pointToPixel(line.point2)
-	this.ctx.moveTo(point1[0], point1[1]);
-	this.ctx.lineTo(point2[0], point2[1]);
-	this.ctx.stroke();
-	this.ctx.restore()
+	this.bufferCanvsContext.moveTo(point1[0], point1[1]);
+	this.bufferCanvsContext.lineTo(point2[0], point2[1]);
+	this.bufferCanvsContext.stroke();
+	this.bufferCanvsContext.restore()
 }
 SimAnim.prototype.drawPolyLine = function(polyLine) {
-	this.ctx.save()
+	this.bufferCanvsContext.save()
 	var numberOfPoints = polyLine.points.length
 	if (numberOfPoints < 1) {
 		return;
 	}
 	let points = polyLine.points
-	this.ctx.strokeStyle = (polyLine.pen_color && polyLine.line_width) ? polyLine.pen_color : polyLine.fill_color;
-	this.ctx.lineWidth =  polyLine.line_width ?  this.scalarToPixel(polyLine.line_width)  : 1;
-	this.ctx.fillStyle = polyLine.fill_color;
+	this.bufferCanvsContext.strokeStyle = (polyLine.pen_color && polyLine.line_width) ? polyLine.pen_color : polyLine.fill_color;
+	this.bufferCanvsContext.lineWidth =  polyLine.line_width ?  this.scalarToPixel(polyLine.line_width)  : 1;
+	this.bufferCanvsContext.fillStyle = polyLine.fill_color;
 	if (polyLine.line_dashed) {
-		this.ctx.setLineDash([5, 5])
+		this.bufferCanvsContext.setLineDash([5, 5])
 	}
-	this.ctx.beginPath();
+	this.bufferCanvsContext.beginPath();
 	var scalarPointX 
 	var scalarPointY 
 	[scalarPointX, scalarPointY] = this.pointToPixel(points[0])
-	this.ctx.moveTo(scalarPointX,scalarPointY)
+	this.bufferCanvsContext.moveTo(scalarPointX,scalarPointY)
 	for (i = 1; i < numberOfPoints; i++) {
 		[scalarPointX, scalarPointY] = this.pointToPixel(points[i])
-		this.ctx.lineTo(scalarPointX,scalarPointY)
+		this.bufferCanvsContext.lineTo(scalarPointX,scalarPointY)
 	};
-	this.ctx.stroke();
-	this.ctx.restore()
+	this.bufferCanvsContext.stroke();
+	this.bufferCanvsContext.restore()
 }
 //triangle[6] canvas settings
 //trinagle[0] point 1  X
@@ -399,28 +442,28 @@ SimAnim.prototype.drawPolyLine = function(polyLine) {
 //trinagle[4] point 3  X
 //trinagle[5] point 3  Y
 SimAnim.prototype.drawTriangle = function(triangle) {
-	this.ctx.save()
-	this.ctx.strokeStyle = triangle[6].pen_color;
-	this.ctx.lineWidth  = this.scalarToPixel(triangle[6].line_width);
-	this.ctx.fillStyle = triangle[6].pen_color;
+	this.bufferCanvsContext.save()
+	this.bufferCanvsContext.strokeStyle = triangle[6].pen_color;
+	this.bufferCanvsContext.lineWidth  = this.scalarToPixel(triangle[6].line_width);
+	this.bufferCanvsContext.fillStyle = triangle[6].pen_color;
 	if (triangle[6].line_dashed) {
-		this.ctx.setLineDash([5, 5])
+		this.bufferCanvsContext.setLineDash([5, 5])
 	}
 	var point1 = this.pointToPixel([triangle[0],triangle[1]])
 	var point2 = this.pointToPixel([triangle[2],triangle[3]])
 	var point3 = this.pointToPixel([triangle[4],triangle[5]])
-	this.ctx.beginPath();
+	this.bufferCanvsContext.beginPath();
 	var path=new Path2D()
 	path.moveTo(point1[0], point1[1]);
 	path.lineTo(point2[0], point2[1]);
 	path.lineTo(point3[0], point3[1]);
-	this.ctx.fill(path);
-	this.ctx.stroke();
-	this.ctx.restore()
+	this.bufferCanvsContext.fill(path);
+	this.bufferCanvsContext.stroke();
+	this.bufferCanvsContext.restore()
 }
 
 SimAnim.prototype.drawImage = function(image) {
-	this.ctx.save()
+	this.bufferCanvsContext.save()
 	return new Promise(function (resolve){
 		if (image.file in this.simImages)
 			resolve(image)
@@ -436,34 +479,34 @@ SimAnim.prototype.drawImage = function(image) {
 		var xy_min = this.pointToPixel([image.xy_min[0],image.xy_min[1] + image.height])
 		var width = this.scalarToPixel(image.width)
 		var height = this.scalarToPixel(image.height)
-		this.ctx.drawImage(this.simImages[image.file], xy_min[0], xy_min[1], width, height);
-		this.ctx.restore()
+		this.bufferCanvsContext.drawImage(this.simImages[image.file], xy_min[0], xy_min[1], width, height);
+		this.bufferCanvsContext.restore()
 	});
 
 }
 
 //text.position [X,Y] 
-
 SimAnim.prototype.drawText = function(text) {
-	this.ctx.save()
-	this.ctx.fillStyle = text.pen_color;
+	this.bufferCanvsContext.save()
+	this.bufferCanvsContext.fillStyle = text.pen_color;
 	var font_size = this.scalarToPixel(text.font_size)
-	this.ctx.font = `bold ${font_size}px Courier New`;
+	this.bufferCanvsContext.font = `bold ${font_size}px Courier New`;
 	var position = this.pointToPixel(text.position)
-	this.ctx.fillText(text.content, position[0], position[1]);
-	this.ctx.restore()
+	this.bufferCanvsContext.fillText(text.content, position[0], position[1]);
+	this.bufferCanvsContext.restore()
 }
 
 SimAnim.prototype.restore = function() {
-	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+	this.bufferCanvsContext.setTransform(1, 0, 0, 1, 0, 0);
 }
+
 //point[0] point around which we rotate
 //point[1] angle
 SimAnim.prototype.rotate = function(point) {
 	var scaledPoint = this.pointToPixel(point[0])
-	this.ctx.translate( scaledPoint[0], scaledPoint[1]);
-	this.ctx.rotate(point[1]);
-	this.ctx.translate(- scaledPoint[0], - scaledPoint[1]);
+	this.bufferCanvsContext.translate( scaledPoint[0], scaledPoint[1]);
+	this.bufferCanvsContext.rotate(point[1]);
+	this.bufferCanvsContext.translate(- scaledPoint[0], - scaledPoint[1]);
 }
 
 window.addEventListener('load',function() {
@@ -476,7 +519,7 @@ window.addEventListener('load',function() {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.0.3-py3-none-any.whl').then(js.pythonInicijalizovan())
+	micropip.install('${document.location.origin}/_static/simanim-0.0.4-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
