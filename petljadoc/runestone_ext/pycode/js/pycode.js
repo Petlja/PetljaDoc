@@ -3,6 +3,7 @@ SIM_STATUS_PLAYING = 2
 SIM_STATUS_PAUSED = 3
 SIM_STATUS_FINISHED = 4
 
+pyodideCodeList = {}
 
 function PyodideCode (opts) {
     if (opts) {
