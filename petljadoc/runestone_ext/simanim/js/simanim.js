@@ -262,7 +262,7 @@ SimAnim.prototype.drawAnimation = function(){
 	this.clearBufferCanvas();
 	this.animation_instance.updateBetweenFrames();
 	this.animation_instance.queueFrame();
-    this.execDrawing()
+	this.execDrawing()
 	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
 		window.requestAnimationFrame(() => {this.flipFrame.call(this)});
 	}
