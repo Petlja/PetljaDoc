@@ -75,7 +75,7 @@ SimAnim.prototype.rescale = function(){
 SimAnim.prototype.setupCanvas = async function() {
 	//creating buffer canvas	
 	this.bufferCanvs =  document.createElement('canvas');
-	this.bufferCanvsContext = this.bufferCanvs.getContext('2d', { alpha: false });
+	this.bufferCanvsContext = this.bufferCanvs.getContext('2d');
 
 	//adjust scale based on current windows size
 	this.rescale()
@@ -220,7 +220,7 @@ SimAnim.prototype.generateHTMLForSim = function() {
 	this.canvas = document.createElement('canvas');
 	this.canvas.setAttribute('id', 'simCanvas-' + this.id);
 	this.canvas.setAttribute('class', ' sim-canvas')
-	this.canvasContext = this.canvas.getContext('2d', { alpha: false });;
+	this.canvasContext = this.canvas.getContext('2d');
 
 	simBodyCanvasDiv.appendChild(this.canvas);
 	simDivContent.appendChild(simDivControls);
@@ -228,7 +228,6 @@ SimAnim.prototype.generateHTMLForSim = function() {
 
 	this.simDiv.appendChild(simDivContent);
 	this.opts.appendChild(this.simDiv);
-
 }
 
 SimAnim.prototype.startSim = function() {
@@ -237,24 +236,33 @@ SimAnim.prototype.startSim = function() {
 	this.stopBtn.removeAttribute('disabled');
 
 	for (var varName in this.varsInputElementId) {
-		document.getElementById(this.varsInputElementId[varName]).setAttribute('disabled','true')
+		document.getElementById(this.varsInputElementId[varName]).setAttribute('disabled','true');
 	}
 	this.simStatus = SIM_STATUS_PLAYING;
-	this.nextFrameTargetTime = window.performance.now() + this.frameTime
-	//this.animationStart = window.performance.now()
-	this.drawAnimation.call(this)
+	this.animationStart = window.performance.now();
+	this.nextFrameTargetTime = window.performance.now();
+	this.drawAnimation.call(this);
 }
 
-
-SimAnim.prototype.flipFrame = async function(){
-	// waite for the next animationFrame if we are too early
-	if(this.nextFrameTargetTime - window.performance.now() > this.frameTime/5){
-		window.requestAnimationFrame(() => {this.flipFrame.call(this)});
+SimAnim.prototype.flipFrame = function(timestamp){
+	// waite for the next animationFrame, interpolate in the meantime if we are close enough
+	if(timestamp < this.nextFrameTargetTime + this.frameTime * 0.9){
+		if((timestamp > this.nextFrameTargetTime + this.frameTime * 0.6)){
+			if(this.canvasContext.globalAlpha !== 0.5){
+				this.canvasContext.globalAlpha = 0.5;
+				this.canvasContext.drawImage(this.bufferCanvs,0,0);
+			}
+			window.requestAnimationFrame((timestemp) => {this.flipFrame.call(this,timestemp);});
+		}
+		else{
+			window.requestAnimationFrame((timestemp) => {this.flipFrame.call(this,timestemp);});
+		}
 	}
 	else{
-	this.canvasContext.drawImage(this.bufferCanvs,0,0)
-	this.nextFrameTargetTime = window.performance.now() + this.frame_period * 1000
-	this.drawAnimation();
+		this.canvasContext.globalAlpha = 1;
+		this.canvasContext.drawImage(this.bufferCanvs,0,0);
+		this.nextFrameTargetTime = timestamp;
+		setTimeout(()=>{this.drawAnimation();},0);
 	}
 }
 
@@ -262,45 +270,45 @@ SimAnim.prototype.drawAnimation = function(){
 	this.clearBufferCanvas();
 	this.animation_instance.updateBetweenFrames();
 	this.animation_instance.queueFrame();
-    this.execDrawing()
+	this.execDrawing();
 	if (!this.animation_instance.getEndAnimation() && this.simStatus == SIM_STATUS_PLAYING) {
-		window.requestAnimationFrame(() => {this.flipFrame.call(this)});
+		window.requestAnimationFrame((timestemp) => {this.flipFrame.call(this,timestemp);});
 	}
 	else if (this.animation_instance.getEndAnimation()){
 		//last buffered frame drawn
-		setTimeout(()=>{this.canvasContext.drawImage(this.bufferCanvs,0,0);},this.frame_period)
-
-		this.simStatus = SIM_STATUS_FINISHED
+		setTimeout(()=>{this.canvasContext.drawImage(this.bufferCanvs,0,0);},this.frameTime);
+		this.simStatus = SIM_STATUS_FINISHED;
 		this.playBtn.classList.remove('d-none');
 		this.playBtn.setAttribute('disabled', 'disabled');
 		this.pauseBtn.classList.add('d-none');
-		//console.log((window.performance.now() - this.animationStart)/1000)
+		//console.log((window.performance.now() - this.animationStart)/1000);
 	}
 }
 
 SimAnim.prototype.setGetters =async  function(){
-	variableValues = {}
+	variableValues = {};
 	for (var varName in this.varsInputElementId) {
-		variableValues[varName] = this.varsInputElementId[varName] 
+		variableValues[varName] = this.varsInputElementId[varName]; 
 	}
 	
 	// resets the animation to the begining
-	this.animation_instance.setVarGetters(variableValues)
+	this.animation_instance.setVarGetters(variableValues);
 
 	this.clearBufferCanvas();
-	this.animation_instance.queueFrame() 
+	this.animation_instance.queueFrame();
 
-	await this.execDrawing()
+	await this.execDrawing();
 	this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	this.canvasContext.drawImage(this.bufferCanvs,0,0)
 
 	// populate buffer
 	this.animation_instance.updateBetweenFrames();
 	this.animation_instance.queueFrame();
-	this.execDrawing()	
+	this.execDrawing();
 }
 
 SimAnim.prototype.cleanUp =async function(){
+	this.canvasContext.globalAlpha = 1;
 	this.simStatus = SIM_STATUS_STOPPED
 	this.eventQue = []
 	this.animation_instance.resetAnimation();
