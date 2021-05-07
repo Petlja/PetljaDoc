@@ -3,6 +3,10 @@
     width: min-content;
 }
 
+.pycode{
+    display: flex;
+}
+
 .variable-label {
     margin-left: 10px;
 }
