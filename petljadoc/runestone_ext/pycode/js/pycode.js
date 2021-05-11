@@ -436,7 +436,7 @@ PyodideCode.prototype.createAnimationModal = function (){
 	this.modalDiv.appendChild(modalDivDialog);
 }
 
-PyodideCode.prototype.flipFrame = async function(){
+PyodideCode.prototype.flipFrame = async function(timestamp){
 	// waite for the next animationFrame, interpolate in the meantime if we are close enough
 	if(timestamp < this.nextFrameTargetTime + this.frameTime * 0.9){
 		if((timestamp > this.nextFrameTargetTime + this.frameTime * 0.6)){
