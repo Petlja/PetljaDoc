@@ -480,7 +480,7 @@ SimAnim.prototype.drawImage = function(image) {
 			this.simImages[image.file].onload = () => {
 				resolve(image)
 			}
-			this.simImages[image.file].src = pathJoin([this.imgPath, image.file]);
+			this.simImages[image.file].src = pathJoin([this.imgPath, image.file]) + '?' + new Date().getTime();
 		}
 		
 	}.bind(this)).then((image) => {
