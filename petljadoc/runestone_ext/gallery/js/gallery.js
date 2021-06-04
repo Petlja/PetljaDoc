@@ -10,9 +10,9 @@ window.addEventListener('load',function(){
             var gallery = document.getElementById(id);
             var imges = gallery.getElementsByTagName('img');
             for(var i=0; i<imges.length;i++){
-                if(imges[i].style.display !== 'none' && i !== imges.length - 1){
-                    imges[i].style.display = 'none'
-                    imges[i+1].style.display = 'block'
+                if(!imges[i].classList.contains('hidden') && i !== imges.length - 1){
+                    imges[i+1].classList.toggle('hidden')
+                    imges[i].classList.toggle('hidden')
                     break;
                 }
             }
@@ -25,9 +25,9 @@ window.addEventListener('load',function(){
             var gallery = document.getElementById(id);
             var imges = gallery.getElementsByTagName('img');
             for(var i=0; i<imges.length;i++){
-                if(imges[i].style.display !== 'none' && i !== 0){
-                    imges[i].style.display = 'none'
-                    imges[i-1].style.display = 'block'
+                if(!imges[i].classList.contains('hidden') && i !== 0){
+                    imges[i].classList.toggle('hidden')
+                    imges[i-1].classList.toggle('hidden')
                     break;
                 }
             }

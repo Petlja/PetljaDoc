@@ -114,7 +114,7 @@ class GalleryDirective(Directive):
                 shutil.copyfile(src_file_path, build_file_path_img)
             except:
                 self.error('Images could not be copied')
-            self.options['imgnodes'] = self.options['imgnodes']  + ('<img src="../_images/{}" width="100%" height="100%">\n'.format(image) if first else '<img src="../_images/{}" width="100%" height="100%" style="display: none;">\n'.format(image))
+            self.options['imgnodes'] = self.options['imgnodes']  + ('<img src="../_images/{}" width="100%" height="100%">\n'.format(image) if first else '<img src="../_images/{}" width="100%" height="100%" class="hidden">\n'.format(image))
             first = False
            
         self.options['divid'] = self.arguments[0]
