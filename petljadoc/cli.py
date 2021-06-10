@@ -656,8 +656,11 @@ def copy_dir(src_dir, dest_dir, filter_name=None):
             copy_dir(s, d, filter_name)
         else:
             d = os.path.join(dest_dir, item)
-            shutil.copyfile(s, d)
-            #print(f"C {s} -> {d}")
+            try:
+                shutil.copyfile(s, d)
+                #print(f"C {s} -> {d}")
+            except FileNotFoundError:
+                pass
 
 
 def rst_title(title):
