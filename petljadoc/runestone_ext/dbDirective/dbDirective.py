@@ -93,7 +93,10 @@ class dbDirective(Directive):
         else:
             self.options['checkquery'] = ''
 
-        self.options['content'] = self.content[0]
+        if self.content:
+            self.options['content'] = self.content[0]
+        else:
+            self.options['content'] = ''
 
         db = dbNode(self.options)
 
