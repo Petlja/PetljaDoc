@@ -9,9 +9,8 @@ class DbDirectives {
         this.run = opts.getElementsByClassName('runQuery')[0];
         this.stats = opts.getElementsByClassName('stats')[0];
         this.editor = this.opts.getElementsByClassName('query')[0];
-        this.editor.value =  this.editor.value + "\n";
+        this.editor.value =  this.editor.value.endsWith("\n") ? this.editor.value: this.editor.value + "\n";
         this.editorCM = CodeMirror.fromTextArea(this.editor,{
-            autoRefresh: true,
             lineNumbers: true,
             mode: 'text/x-sql', 
             indentUnit: 4,
