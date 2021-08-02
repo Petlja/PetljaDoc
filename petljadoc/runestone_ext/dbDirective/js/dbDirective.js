@@ -45,7 +45,14 @@ class DbDirectives {
         pyodide.globals.creationQuery = this.script;
         
         pyodide.runPythonAsync(`
+        import locale
+        locale.setlocale(locale.LC_ALL, '')
+
+        def collate_UNICODE(str1, str2):
+            return locale.strcoll(str1, str2)
+
         dbs[name] = sqlite3.connect(name)
+        dbs[name].create_collation("UNICODE", collate_UNICODE)
         dbs[name].executescript(creationQuery)
         dbs[name].commit()
         `).then(
@@ -252,7 +259,7 @@ window.addEventListener('load',function(){
 
         def state(conn,id):
             cur = conn.cursor()
-            cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
             tables = cur.fetchall()
             statsToSend = []
             for table in tables:
