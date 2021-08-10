@@ -168,10 +168,18 @@ class DbDirectives {
         }
         if(trunc){
             var tr = document.createElement('tr');  
+
+            var td = document.createElement('td');
+            td.innerHTML = '21';
+            tr.appendChild(td);
+
             var td = document.createElement('td');
             td.innerHTML = '...';
-            td.setAttribute('colspan',rows[0].length+1)
+            td.setAttribute('colspan',rows[0].length)
             tr.appendChild(td);
+
+
+
             tbdy.appendChild(tr);
         }
 
