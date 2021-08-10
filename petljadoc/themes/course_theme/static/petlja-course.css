@@ -178,6 +178,12 @@ ul:first-child {
 .toctree-l1 ul {
 	padding-left: 15px;
 }
+
+.quiz-question{
+	border: 1px solid black;
+	padding: 10px;
+}
+
 @media only screen and (max-width: 900px) {
 	.course-content {
 		padding: 5px;
