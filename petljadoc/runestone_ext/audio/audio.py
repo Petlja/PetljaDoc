@@ -23,20 +23,12 @@ TEMPLATE_START = """
 
 class AudioDirective(Directive):
     """
-.. audio:: file_name
-   :ext: file_extension
-
-
-   .. audio:: lecture_1
-    
-   .. audio:: lecture_2
-    :ext: 'mp4'
+.. audio:: file_name 
     """
     required_arguments = 1
     optional_arguments = 1
     has_content = False
     option_spec = {
-        "ext":directives.unchanged,
     }
 
     def run(self):
@@ -47,18 +39,8 @@ class AudioDirective(Directive):
         """
         env = self.state.document.settings.env
 
-        self.options['path'] = "_static/audio/"+self.arguments[0]
+        self.options['path'] = "../_static/audio/"+self.arguments[0]
 
-        if "ext" in self.options:
-            ext = literal_eval(self.options["ext"])
-            if len(ext)>5:
-                raise IOError("Extension length exceeded")
-            self.options["ext"] = ext
-        else:
-            self.options["ext"] = "mp3"
-        
-        self.options['path'] += "."+self.options["ext"]
-        
         res = TEMPLATE_START % self.options
         raw_node = nodes.raw(self.block_text, res, format="html")
         raw_node.source, raw_node.line = self.state_machine.get_source_and_line(
