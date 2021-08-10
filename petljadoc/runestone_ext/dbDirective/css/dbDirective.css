@@ -44,14 +44,13 @@
 }
 .db-tables tr, .db-tables th, .db-tables td{
     border: 1px solid black; 
+    padding-left: 2.5px;
+    padding-right: 2.5px;
+    text-align: center !important;
 }
 
 .db-table{
     cursor: pointer; 
-}
-
-.db-table th {
-	text-align: center;
 }
 
 .res-tables{
@@ -64,11 +63,14 @@
     border: 1px solid black;
     min-width: 45px;
     text-align: center;
+    padding-left: 2.5px;
+    padding-right: 2.5px;
 }
 .res-tables  td{
-
     border-left: 1px solid black;
     min-width: 45px;
+    padding-left: 2.5px;
+    padding-right: 2.5px;
 }
 .res-tables tr:nth-child(even){
     background-color:#18bc9c ;

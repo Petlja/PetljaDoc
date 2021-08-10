@@ -24,14 +24,14 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s> 
+    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname)s> 
         <div class="row">
         <div class="db-input"> 
             <div class= "editor-div-db"> 
             <textarea class="query" rows='6'>%(content)s</textarea>
             </div>
             <br>
-            <button class='runQuery btn btn-success'>Izvrsi upit</button>
+            <button class='runQuery btn btn-success'>Изврши упит</button>
             <br>
             <div class='result'  disabled>
         </div>
@@ -76,6 +76,7 @@ class dbDirective(Directive):
         'dbfile': directives.unchanged,
         'solutionquery': directives.unchanged,
         'checkquery': directives.unchanged,
+        'checkcolumnname': directives.unchanged,
     })
     def run(self):
         env = self.state.document.settings.env
@@ -88,10 +89,15 @@ class dbDirective(Directive):
         else:
             self.options['solutionquery'] = ''
 
-        if 'checkQuery' in self.options:
+        if 'checkquery' in self.options:
             self.options['checkquery'] = 'db-check-query = "{}"'.format( self.options['checkquery'])
         else:
             self.options['checkquery'] = ''
+
+        if 'checkcolumnname' in self.options:
+            self.options['checkcolumnname'] = 'db-check-col-name'
+        else:
+             self.options['checkcolumnname'] = ''
 
         if self.content:
             self.options['content'] = self.content[0]

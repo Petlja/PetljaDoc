@@ -10,6 +10,8 @@ class DbDirectives {
         this.stats = opts.getElementsByClassName('stats')[0];
         this.editor = this.opts.getElementsByClassName('query')[0];
         this.editor.value =  this.editor.value.endsWith("\n") ? this.editor.value: this.editor.value + "\n";
+        this.checkColumnName = false;
+
         this.editorCM = CodeMirror.fromTextArea(this.editor,{
             lineNumbers: true,
             mode: 'text/x-sql', 
@@ -36,6 +38,12 @@ class DbDirectives {
         else{
             this.run.addEventListener('click',  this.execute.bind(this));
         }
+
+        
+        if(opts.hasAttribute('db-check-col-name')){
+            this.checkColumnName = true;
+        }
+
         this.script = ''
     }
 
@@ -105,8 +113,9 @@ class DbDirectives {
         pyodide.globals.query = this.query;
         pyodide.globals.queryUser = this.queryUser;
         pyodide.globals.id = this.id;
+        pyodide.globals.checkColumnName = this.checkColumnName ? "True" : "False";
         await pyodide.runPythonAsync(`
-        check(dbs[name], query, queryUser, id)
+        check(dbs[name], query, queryUser, id, checkColumnName)
         `)
             .then()
             .catch();
@@ -127,14 +136,18 @@ class DbDirectives {
         var tbdy = document.createElement('tbody');
         var tr = document.createElement('tr');
 
-        var td = document.createElement('th');  
-        td.appendChild(document.createTextNode('#'));
-        tr.appendChild(td);
-
         for (var i=0;i<rows[0].length;i++){
-            var td = document.createElement('th');  
-            td.appendChild(document.createTextNode(rows[0][i]))
-            tr.appendChild(td)
+            if(i==0){
+                var th = document.createElement('th');  
+                th.appendChild(document.createTextNode(rows[0][i]))
+                th.setAttribute('colspan',2);
+                tr.appendChild(th);
+            }
+            else{
+                var td = document.createElement('th');  
+                td.appendChild(document.createTextNode(rows[0][i]))
+                tr.appendChild(td)
+            }
         }
 
         tbdy.appendChild(tr);
@@ -270,34 +283,46 @@ window.addEventListener('load',function(){
             
             js.writeToDbState(statsToSend,id)
 
-        def check(conn,query,userQuery,id):
+        def check(conn,query,userQuery,id, checkColumnName):
             cur = conn.cursor()
             conn.commit()
+            checkColumnName = True if checkColumnName == 'True' else False
+            resaultColumnName = [] 
+            resaultUserColumnName = []
+
             try:
                 cur.execute(query)
+                if checkColumnName:
+                    resaultColumnName = [description[0] for description in cur.description]
                 resault = list(cur.fetchall())
                 conn.rollback()
-                cur.execute(userQuery)
+
+                cur.execute(userQuery)         
+                if checkColumnName:
+                    resaultUserColumnName = [description[0] for description in cur.description]
                 resaultUser = list(cur.fetchall())
                 conn.rollback()
             except Error as e:
                 js.writeErrorToOutput(str(e),id)
             else:
+                correctColumnName = True
+                if checkColumnName: 
+                    correctColumnName = resaultColumnName == resaultUserColumnName
                 if 'order by' in query.lower():
-                    if resault == resaultUser:
-                        js.querySuccess('Upit je tacan',id)
+                    if resault == resaultUser and correctColumnName:
+                        js.querySuccess('Упита је тачан',id)
                     else:
-                        js.writeErrorToOutput('Pogresno resenje.',id)
+                        js.writeErrorToOutput('Погрешно решење.',id)
                 else:
                     check = Counter(resault) - Counter(resaultUser)
-                    if len(check) == 0:
-                        js.querySuccess('Upit je tacan',id)
+                    if len(check) == 0 and correctColumnName:
+                        js.querySuccess('Упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
                                 js.writeToOutput(list(rows),id, len(rows) > 20, False)
                     else:
-                        js.writeErrorToOutput('Pogresno resenje.',id)
+                        js.writeErrorToOutput('Погрешно решење.',id)
                         
         
         def checkWithTest(conn,query,userQuery, testQuery, id):
@@ -317,23 +342,23 @@ window.addEventListener('load',function(){
             else:
                 if 'order by' in query.lower():
                     if resault == resaultUser:
-                        js.querySuccess('Upit je tacan',id)
+                        js.querySuccess('Упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
                                 js.writeToOutput(list(rows),id, len(rows) > 20, False)
                     else:
-                        js.writeErrorToOutput('Pogresno resenje.',id)
+                        js.writeErrorToOutput('Погрешно решење.',id)
                 else:
                     check = Counter(resault) - Counter(resaultUser)
                     if len(check) == 0:
-                        js.querySuccess('Upit je tacan',id)
+                        js.querySuccess('Упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
                                 js.writeToOutput(list(rows),id, len(rows) > 20, False)
                     else:
-                        js.writeErrorToOutput('Pogresno resenje.',id)
+                        js.writeErrorToOutput('Погрешно решење.',id)
 
 
         dbs = {};
