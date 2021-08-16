@@ -322,7 +322,7 @@ window.addEventListener('load',function(){
                     else:
                         js.writeErrorToOutput('Погрешно решење.',id)
                 else:
-                    check = Counter(resault) - Counter(resaultUser)
+                    check = (Counter(resault) - Counter(resaultUser)) + (Counter(resaultUser) - Counter(resault))
                     if len(check) == 0 and correctColumnName:
                         js.querySuccess('Упита је тачан',id)
                         if cur.description:
@@ -358,7 +358,7 @@ window.addEventListener('load',function(){
                     else:
                         js.writeErrorToOutput('Погрешно решење.',id)
                 else:
-                    check = Counter(resault) - Counter(resaultUser)
+                    check = (Counter(resault) - Counter(resaultUser)) + (Counter(resaultUser) - Counter(resault))
                     if len(check) == 0:
                         js.querySuccess('Упита је тачан',id)
                         if cur.description:
