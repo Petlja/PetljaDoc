@@ -319,6 +319,10 @@ window.addEventListener('load',function(){
                 if 'order by' in query.lower():
                     if resault == resaultUser and correctColumnName:
                         js.querySuccess('Упита је тачан',id)
+                        if cur.description:
+                            rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
+                            if len(rows) > 1:
+                                js.writeToOutput(list(rows),id, len(rows) > 20, False)
                     else:
                         js.writeErrorToOutput('Погрешно решење.',id)
                 else:
