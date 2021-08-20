@@ -43,6 +43,19 @@ class DbDirectives {
         if(opts.hasAttribute('db-check-col-name')){
             this.checkColumnName = true;
         }
+        if(opts.hasAttribute('db-show-result') && this.query){
+            this.showResult = true;
+            this.showResultbtn = opts.getElementsByClassName('showresult')[0];
+            this.showResultbtn.addEventListener('click',  this.result.bind(this))
+        }
+
+        if(opts.hasAttribute('db-hint')){
+            this.hintQuery = opts.getAttribute('db-hint');
+            opts.removeAttribute('db-hint');
+            this.hintBTN = opts.getElementsByClassName('hint')[0];
+            this.hintBTN.addEventListener('click',  this.showHint.bind(this));
+        }
+
 
         this.script = ''
     }
@@ -84,7 +97,7 @@ class DbDirectives {
         pyodide.globals.query = this.queryUser;
         pyodide.globals.id = this.id;
         await pyodide.runPythonAsync(`
-        execute_query(dbs[name], query, id)
+        execute_query_show_results(dbs[name], query, id)
         `)
             .then()
             .catch();
@@ -252,6 +265,22 @@ class DbDirectives {
         tbl.appendChild(tbdy);
         body.appendChild(tbl)
     }
+
+    showHint(){
+        this.clearOutput();
+        this.editorCM.setValue(this.hintQuery)
+    }
+    async result(){
+        this.clearOutput();
+        pyodide.globals.name = this.name;
+        pyodide.globals.query = this.query;
+        pyodide.globals.id = this.id;
+        await pyodide.runPythonAsync(`
+        execute_query_show_results(dbs[name], query, id)
+        `)
+            .then()
+            .catch();
+    }
   }
 
 
@@ -318,7 +347,7 @@ window.addEventListener('load',function(){
                     correctColumnName = resaultColumnName == resaultUserColumnName
                 if 'order by' in query.lower():
                     if resault == resaultUser and correctColumnName:
-                        js.querySuccess('Упита је тачан',id)
+                        js.querySuccess('Резултат упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
@@ -328,7 +357,7 @@ window.addEventListener('load',function(){
                 else:
                     check = (Counter(resault) - Counter(resaultUser)) + (Counter(resaultUser) - Counter(resault))
                     if len(check) == 0 and correctColumnName:
-                        js.querySuccess('Упита је тачан',id)
+                        js.querySuccess('Резултат упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
@@ -354,7 +383,7 @@ window.addEventListener('load',function(){
             else:
                 if 'order by' in query.lower():
                     if resault == resaultUser:
-                        js.querySuccess('Упита је тачан',id)
+                        js.querySuccess('Резултат упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
@@ -364,7 +393,7 @@ window.addEventListener('load',function(){
                 else:
                     check = (Counter(resault) - Counter(resaultUser)) + (Counter(resaultUser) - Counter(resault))
                     if len(check) == 0:
-                        js.querySuccess('Упита је тачан',id)
+                        js.querySuccess('Резултат упита је тачан',id)
                         if cur.description:
                             rows =  [[description[0] for description in cur.description]] + list(resaultUser)[0:20]
                             if len(rows) > 1:
@@ -372,7 +401,17 @@ window.addEventListener('load',function(){
                     else:
                         js.writeErrorToOutput('Погрешно решење.',id)
 
-
+        def execute_query_show_results(conn,query,id):
+            cur = conn.cursor()
+            try:
+                cur.execute(query)
+            except Error as e:
+                js.writeErrorToOutput(str(e),id)
+            else:
+                if cur.description:
+                    rows =  [[description[0] for description in cur.description]] + list(cur.fetchall())[0:20]
+                    js.writeToOutput(list(rows),id, len(rows) > 20)
+                conn.rollback()
         dbs = {};
     `)).then(() => {
 		dbDirectives = document.getElementsByClassName('db')

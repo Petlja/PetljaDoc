@@ -72,6 +72,19 @@
     padding-left: 2.5px;
     padding-right: 2.5px;
 }
+
+.res-tables  td{
+    border-left: 1px solid black;
+    min-width: 45px;
+    padding-left: 2.5px;
+    padding-right: 2.5px;
+}
+
+.res-tables tr td:first-child{
+    color: black;
+    width: 10px;
+    background: lightblue;
+}
 .res-tables tr:nth-child(even){
     background-color:#18bc9c ;
 }
@@ -97,3 +110,26 @@
     width: 500px;
     margin-left:20px
 }
+
+.btn-db {
+    display:inline-block;
+    margin-bottom:0;
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-weight:normal;
+    text-align:center;
+    vertical-align:middle;
+    -ms-touch-action:manipulation;
+    touch-action:manipulation;
+    cursor:pointer;
+    background-image:none;
+    border:1px solid transparent;
+    white-space:nowrap;
+    font-size:15px;
+    line-height:1.42857143;
+    border-radius:4px;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none
+   }

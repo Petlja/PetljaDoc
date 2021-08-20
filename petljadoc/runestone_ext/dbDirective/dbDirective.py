@@ -24,14 +24,18 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname)s> 
+    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname) s%(hint) s%(showresult)s> 
         <div class="row">
         <div class="db-input"> 
             <div class= "editor-div-db"> 
             <textarea class="query" rows='6'>%(content)s</textarea>
             </div>
             <br>
-            <button class='runQuery btn btn-success'>Изврши упит</button>
+            <div class="row">
+                <button class='runQuery btn-db btn-success'>Изврши упит</button>
+                %(hintbutton)s
+                %(showresultbutton)s
+            </div>
             <br>
             <div class='result'  disabled>
         </div>
@@ -77,6 +81,8 @@ class dbDirective(Directive):
         'solutionquery': directives.unchanged,
         'checkquery': directives.unchanged,
         'checkcolumnname': directives.unchanged,
+        'hint' : directives.unchanged,
+        'showresult' : directives.unchanged,
     })
     def run(self):
         env = self.state.document.settings.env
@@ -86,6 +92,7 @@ class dbDirective(Directive):
             self.error('No script path specified')
         if 'solutionquery' in self.options:
             self.options['solutionquery'] = 'db-check = "{}"'.format( self.options['solutionquery'])
+            self.options['check'] = ''
         else:
             self.options['solutionquery'] = ''
 
@@ -93,6 +100,20 @@ class dbDirective(Directive):
             self.options['checkquery'] = 'db-check-query = "{}"'.format( self.options['checkquery'])
         else:
             self.options['checkquery'] = ''
+
+        if 'hint' in self.options:
+            self.options['hint'] = 'db-hint = "{}"'.format( self.options['hint'])
+            self.options['hintbutton'] = "<button class='hint btn-db btn-success'>Прикажи помоћ</button>" 
+        else:
+             self.options['hint'] = ''
+             self.options['hintbutton'] = ''
+        
+        if 'showresult' in self.options and 'check' in self.options:
+            self.options['showresult'] = 'db-show-result'
+            self.options['showresultbutton'] = "<button class='showresult btn-db btn-success'>Прикажи очекивани резултат</button>"
+        else:
+             self.options['showresult'] = ''
+             self.options['showresultbutton'] = ''
 
         if 'checkcolumnname' in self.options:
             self.options['checkcolumnname'] = 'db-check-col-name'

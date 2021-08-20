@@ -2,7 +2,7 @@
 from pathlib import Path
 from docutils.core import publish_parts
 import yaml
-
+import os
 
 class Course:
     def __init__(self, courseId, lang, title, longDesc, shortDesc, willlearn, requirements, toc, extranalLinks,
@@ -43,6 +43,19 @@ class Course:
                                 '_sources/'+lesson.folder+'/'+activity.src)
                             missing_activities.append(activity.title)
                             missing_status = False
+                    if activity.get_src_ext() == 'ipynb':
+                        if activity.nbsrc:
+                            if not Path(activity.nbsrc).is_file():
+                                missing_activities_src.append(
+                                    activity.nbsrc)
+                                missing_activities.append(activity.title)
+                                missing_status = False
+                        else:
+                            if not Path('_sources/'+lesson.folder+'/'+activity.src).is_file():
+                                missing_activities_src.append(
+                                    '_sources/'+lesson.folder+'/'+activity.src)
+                                missing_activities.append(activity.title)
+                                missing_status = False
                     if activity.get_src_ext() == 'pdf':
                         if not Path('_static/'+activity.src).is_file():
                             missing_activities_src.append(
@@ -129,7 +142,7 @@ class Lesson:
     def __init__(self, title, folder, guid, description, archived_activities, active_activities):
         self.title = title
         self.guid = guid
-        self.description = description
+        self.description = description if description else ''
         self.archived_activities = archived_activities
         self.active_activies = active_activities
         self.folder = folder if folder else '_missing_folder_name'
@@ -137,9 +150,10 @@ class Lesson:
 
 
 class Activity:
-    def __init__(self, activity_type, title, src, guid, description):
+    def __init__(self, activity_type, title, src, guid, description, nbsrc):
         self.activity_type = activity_type
         self.title = title
+        self.nbsrc = nbsrc
         self.description = description if description else ''
         if self.activity_type == 'video':
             self.src = video_url(src)
@@ -149,7 +163,11 @@ class Activity:
             self.src = src
         else:
             self.src = src
+            if self.get_src_ext() == 'ipynb' and self.nbsrc:
+                self.nbsrc = os.path.join(self.nbsrc[3:], src)
             if self.get_src_ext() == 'pdf':
+                self.toc_url =  self.title.replace(" ", "%20")
+            if self.get_src_ext() == 'ipynb':
                 self.toc_url =  self.title.replace(" ", "%20")
             else:
                 self.toc_url = src.split('.')[0].replace(" ", "%20")
@@ -159,6 +177,7 @@ class Activity:
         else:
             self.guid = guid.split('/')[0]
             self.alias = guid.split('/')[1]
+
     def get_src_ext(self):
         if len(self.src.rsplit('.')) > 1:
             return self.src.rsplit('.')[1]
@@ -203,6 +222,7 @@ class YamlLoger:
     ATR_LESSON_FOLDER = 'folder'
     ATR_LESSON_GUID ='guid'
     ATR_LESSON_DESC = 'description'
+    ATR_LESSON_NBSRC = 'nbsrc-folder'
     ATR_LESSON_ACTIVITIES = 'lesson_activities'
     ATR_LESSON_ARCHIVED_ACTIVITIES = 'lesson_archived_activities'
     ATR_LESSON_ARCHIVED_ACTIVITIE_LINE = 'lesson_archived_activities_line'

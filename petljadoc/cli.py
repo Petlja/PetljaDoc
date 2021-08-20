@@ -21,6 +21,8 @@ from petljadoc import themes
 from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
+from nbconvert import HTMLExporter
+
 
 INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
@@ -44,6 +46,12 @@ PDF_TEMPLATE = '''
 
   <embed src="{}" width="100%" height="700px" type="application/pdf">
 '''
+
+HTML_FILE_TEMPLATE = '''
+.. raw:: html
+    :file: {}
+'''
+
 LINK_TEMPLATE = '''
     {}
 
@@ -437,6 +445,8 @@ def create_course():
                         lesson, LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_DESC], description = check_component(
                         lesson, LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_NBSRC], nbsrc = check_component(
+                        lesson, LESSON_LEVEL, YamlLoger.ATR_LESSON_NBSRC, required=False)
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES], lesson_activities = check_component(
                         lesson, LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIES], lesson_archived_activities = check_component(
@@ -482,7 +492,7 @@ def create_course():
 
                             else:
                                 active_activies.append(Activity(
-                                    activity_type, activity_title, activity_src, activity_guid, activity_description))
+                                    activity_type, activity_title, activity_src, activity_guid, activity_description, nbsrc if nbsrc else None))
 
                     active_lessons.append(
                         Lesson(title, folder, guid, description, archived_activities, active_activies))
@@ -597,6 +607,23 @@ def create_activity_RST(course, index, path, intermediatPath):
                     pdf_rst.write(rst_title(activity.title))
                     pdf_rst.write(PDF_TEMPLATE.format(
                         '/_static/'+activity.src))
+                    section_index.write(' '*4+activity.title+'.rst\n')
+                if activity.get_src_ext() == 'ipynb':
+                    html_exporter = HTMLExporter()
+                    template_paths_root = os.path.dirname(os.path.realpath(__file__))
+                    html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
+                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                                   mode='w+', encoding='utf-8')
+                    ipynb_rst.write(rst_title(activity.title))
+                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(activity.title+'.html'))
+                    if activity.nbsrc:
+                        jp_file = open(activity.nbsrc, encoding='UTF-8')
+                    else:
+                        jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
+                    (body, _)= html_exporter.from_file(jp_file)
+                    html_file = open(intermediatPath+lesson.folder+'/'+activity.title +'.html','w+',encoding='UTF-8')
+                    html_file.write(body)
+                    html_file.close()
                     section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'video':
                 video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
