@@ -9,6 +9,7 @@ class DbDirectives {
         this.run = opts.getElementsByClassName('runQuery')[0];
         this.stats = opts.getElementsByClassName('stats')[0];
         this.editor = this.opts.getElementsByClassName('query')[0];
+        this.test = opts.getElementsByClassName('test-q')[0];
         this.editor.value =  this.editor.value.endsWith("\n") ? this.editor.value: this.editor.value + "\n";
         this.checkColumnName = false;
 
@@ -26,6 +27,7 @@ class DbDirectives {
         if(opts.hasAttribute('db-check')){
             this.query = opts.getAttribute('db-check');
             opts.removeAttribute('db-check');
+            this.test.addEventListener('click', this.execute.bind(this))
             if(opts.hasAttribute('db-check-query')){
                 this.queryTest = opts.getAttribute('db-check-query');
                 opts.removeAttribute('db-check-query');
@@ -298,7 +300,7 @@ window.addEventListener('load',function(){
             try:
                 cur.execute(query)
                 conn.commit()
-            except Error as e:
+            except Exception as e:
                 js.writeErrorToOutput(str(e),id)
             else:
                 if cur.description:
@@ -339,7 +341,7 @@ window.addEventListener('load',function(){
                     resaultUserColumnName = [description[0] for description in cur.description]
                 resaultUser = list(cur.fetchall())
                 conn.rollback()
-            except Error as e:
+            except Exception as e:
                 js.writeErrorToOutput(str(e),id)
             else:
                 correctColumnName = True
@@ -378,7 +380,7 @@ window.addEventListener('load',function(){
                 cur.execute(testQuery)
                 resaultUser = list(cur.fetchall())
                 conn.rollback()
-            except Error as e:
+            except Exception as e:
                 js.writeErrorToOutput(str(e),id)
             else:
                 if 'order by' in query.lower():
@@ -405,7 +407,7 @@ window.addEventListener('load',function(){
             cur = conn.cursor()
             try:
                 cur.execute(query)
-            except Error as e:
+            except Exception as e:
                 js.writeErrorToOutput(str(e),id)
             else:
                 if cur.description:

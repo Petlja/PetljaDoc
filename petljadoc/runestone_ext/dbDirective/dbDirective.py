@@ -33,6 +33,7 @@ TEMPLATE_START = """
             <br>
             <div class="row">
                 <button class='runQuery btn-db btn-success'>Изврши упит</button>
+                %(testbutton)s
                 %(hintbutton)s
                 %(showresultbutton)s
             </div>
@@ -92,9 +93,11 @@ class dbDirective(Directive):
             self.error('No script path specified')
         if 'solutionquery' in self.options:
             self.options['solutionquery'] = 'db-check = "{}"'.format( self.options['solutionquery'])
+            self.options['testbutton'] = "<button class='test-q btn-db btn-success'>Тестирај упит</button>" 
             self.options['check'] = ''
         else:
             self.options['solutionquery'] = ''
+            self.options['testbutton'] = "" 
 
         if 'checkquery' in self.options:
             self.options['checkquery'] = 'db-check-query = "{}"'.format( self.options['checkquery'])
