@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long
+from genericpath import isdir
 import os
 import sys
 import re
@@ -618,9 +619,11 @@ def create_activity_RST(course, index, path, intermediatPath):
                     ipynb_rst.write(HTML_FILE_TEMPLATE.format(activity.title+'.html'))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
+                        (body, _)= html_exporter.from_file(jp_file)
+                        body = transfer_images(body, activity.nbsrc)
                     else:
                         jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
-                    (body, _)= html_exporter.from_file(jp_file)
+                        (body, _)= html_exporter.from_file(jp_file)
                     html_file = open(intermediatPath+lesson.folder+'/'+activity.title +'.html','w+',encoding='UTF-8')
                     html_file.write(body)
                     html_file.close()
@@ -693,6 +696,18 @@ def copy_dir(src_dir, dest_dir, filter_name=None):
 def rst_title(title):
     title_bar = '='*len(title)+'\n'
     return title_bar + title+'\n' + title_bar
+
+def transfer_images(html, file_path):
+    dir_path = os.path.dirname(file_path)
+    image_path_list = [x.group('image') for x in re.finditer(r"<img src=\"(?P<image>[^\"]+)\"",html)]
+    for image_path in image_path_list:
+        image = os.path.basename(image_path)
+        if not os.path.isdir('_build/_images/'):
+            os.mkdir('_build/_images/')
+        shutil.copyfile(os.path.join(dir_path, image_path), '_build/_images/'+image)
+        html = html.replace("<img src=\""+image_path+"\"","<img src=\"../_images/"+image+"\"")
+    return html
+
 
 
 class _WatchdogHandler(FileSystemEventHandler):
