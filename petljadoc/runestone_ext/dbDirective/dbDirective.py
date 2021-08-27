@@ -24,7 +24,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname) s%(hint) s%(showresult)s> 
+    <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname)s %(hint)s %(showresult)s> 
         <div class="row">
         <div class="db-input"> 
             <div class= "editor-div-db"> 
