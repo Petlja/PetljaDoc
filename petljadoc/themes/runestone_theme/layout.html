@@ -1,6 +1,8 @@
 {% extends "basic_layout.html" %}
 
 {% set script_files = ['_static/runestonebase.js'] + script_files + [
+    '_static'+'/skulpt-stdlib.js',
+    '_static'+'/skulpt.min.js'
     '_static'+ '/mchoice-i18n.sr-Cyrl.js',
     '_static'+ '/mchoice-i18n.sr.js',
     '_static'+ '/mchoice-i18n.sr-Latn.js',
@@ -30,8 +32,6 @@
     '_static'+'/processing-1.4.1.min.js',
     '_static'+'/jquery.hotkey.js',
     '_static'+'/jquery-migrate-1.2.1.min.js',
-    '_static'+'/skulpt-stdlib.js',
-    '_static'+'/skulpt.min.js',
     '_static'+ '/require.js'
   ]
 %}
