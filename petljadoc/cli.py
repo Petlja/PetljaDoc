@@ -23,6 +23,8 @@ from .templateutil import apply_template_dir, default_template_arguments
 from .cyr2lat import cyr2latTranslate
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
 from nbconvert import HTMLExporter
+from traitlets.config import Config
+from nbconvert.preprocessors import TagRemovePreprocessor
 
 
 INDEX_TEMPLATE_HIDDEN = '''
@@ -610,7 +612,14 @@ def create_activity_RST(course, index, path, intermediatPath):
                         '/_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
                 if activity.get_src_ext() == 'ipynb':
-                    html_exporter = HTMLExporter()
+                    c = Config()
+                    c.TagRemovePreprocessor.remove_cell_tags = ("remove_cell",)
+                    c.TagRemovePreprocessor.remove_all_outputs_tags = ('remove_output',)
+                    c.TagRemovePreprocessor.remove_input_tags = ('remove_input',)
+                    c.TagRemovePreprocessor.enabled = True
+                    c.HTMLExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
+
+                    html_exporter = HTMLExporter(config=c)                    
                     template_paths_root = os.path.dirname(os.path.realpath(__file__))
                     html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
                     ipynb_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
