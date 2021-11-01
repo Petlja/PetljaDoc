@@ -85,7 +85,7 @@ class Course:
             for activity in lesson.active_activies:
                 tmp_activities.append({'type': activity.activity_type,
                                        'title': activity.title,
-                                       'file': activity.src,
+                                       'file': activity.activity_html_file_src if activity.activity_type == 'reading' and activity.get_src_ext() == 'pdf' else activity.src,
                                        'description': activity.description,
                                        'guid': activity.guid}
                                       )
@@ -158,19 +158,25 @@ class Activity:
         if self.activity_type == 'video':
             self.src = video_url(src)
             self.toc_url = self.title.replace(" ", "%20")
+            self.activity_html_file_src =  self.title + '.html'
         elif self.activity_type == 'coding-quiz':
             self.toc_url =  self.title.replace(" ", "%20")
             self.src = src
+            self.activity_html_file_src = self.title + '.html'
+        # reading, quiz
         else:
             self.src = src
-            if self.get_src_ext() == 'ipynb' and self.nbsrc:
-                self.nbsrc = os.path.join(self.nbsrc[3:], src)
-            if self.get_src_ext() == 'pdf':
-                self.toc_url =  self.title.replace(" ", "%20")
             if self.get_src_ext() == 'ipynb':
+                if self.nbsrc:
+                    self.nbsrc = os.path.join(self.nbsrc[3:], src)
                 self.toc_url =  self.title.replace(" ", "%20")
+                self.activity_html_file_src = self.title + '.html'
+            elif self.get_src_ext() == 'pdf':
+                self.toc_url =  self.title.replace(" ", "%20")
+                self.activity_html_file_src = self.title + '.html'
             else:
                 self.toc_url = src.split('.')[0].replace(" ", "%20")
+                self.activity_html_file_src = self.src.replace('.rst','.html')
         if guid.find('/') == -1:
             self.guid = guid
             self.alias = ''
