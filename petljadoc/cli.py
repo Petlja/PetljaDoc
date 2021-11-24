@@ -641,12 +641,12 @@ def create_activity_RST(course, index, path, intermediatPath):
                         file.write(META_DATA.format(activity.title,
                                                     activity.activity_type) + content)
                 if activity.get_src_ext() == 'pdf':
-                    pdf_rst = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title)+'.rst',
+                    pdf_rst = open(intermediatPath+lesson.folder+'/'+ activity.title+'.rst',
                                    mode='w+', encoding='utf-8')
                     pdf_rst.write(rst_title(activity.title))
                     pdf_rst.write(PDF_TEMPLATE.format(
                         '/_static/'+activity.src))
-                    section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
+                    section_index.write(' '*4+activity.title+'.rst\n')
                 if activity.get_src_ext() == 'ipynb':
                     c = Config()
                     c.TagRemovePreprocessor.remove_cell_tags = ("remove_cell",)
@@ -658,10 +658,10 @@ def create_activity_RST(course, index, path, intermediatPath):
                     html_exporter = HTMLExporter(config=c)                    
                     template_paths_root = os.path.dirname(os.path.realpath(__file__))
                     html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
-                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title) +'.rst',
+                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ activity.title +'.rst',
                                    mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
-                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(sanitize_title(activity.title)+'.html'))
+                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(activity.title+'.html'))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
@@ -669,23 +669,23 @@ def create_activity_RST(course, index, path, intermediatPath):
                     else:
                         jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
-                    html_file = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title) +'.html','w+',encoding='UTF-8')
+                    html_file = open(intermediatPath+lesson.folder+'/'+ activity.title +'.html','w+',encoding='UTF-8')
                     html_file.write(body)
                     html_file.close()
-                    section_index.write(' '*4+ sanitize_title(activity.title) +'.rst\n')
+                    section_index.write(' '*4+ activity.title +'.rst\n')
             if activity.activity_type == 'video':
-                video_rst = open(intermediatPath+lesson.folder+'/'+sanitize_title(activity.title)+'.rst',
+                video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                  mode='w+', encoding='utf-8')
                 video_rst.write(rst_title(activity.title))
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
-                section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
+                section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'coding-quiz':
-                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+sanitize_title(activity.title)+'.rst',
+                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                        mode='w+', encoding='utf-8')
                 coding_quiz_rst.write(rst_title(activity.title))
                 for s in activity.src:
                     coding_quiz_rst.write(LINK_TEMPLATE.format(s))
-                section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
+                section_index.write(' '*4+activity.title+'.rst\n')
 
 
 def read_course():
@@ -923,7 +923,3 @@ def make_zip(base_name, base_dir):
                         zf.write(path, path.replace('_build\\',''))
 
     return zip_filename
-    
-def sanitize_title(title : str):
-    return title.replace("?","")
-    
