@@ -11,7 +11,7 @@ window.addEventListener('load', function () {
 		});
 	});
 
-	var path = decodeURI(document.location.pathname).replace('/', '');
+	var path = decodeURI(document.location.pathname).split('/').slice(-2).join('/');
 	path = path.replaceAll(' ', '%20');
 	var lecture = path.substring(0, path.indexOf('/'));
 	var activity = path.substring(path.indexOf('/') + 1).replace('.html', '');

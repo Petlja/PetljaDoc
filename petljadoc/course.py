@@ -85,7 +85,7 @@ class Course:
             for activity in lesson.active_activies:
                 tmp_activities.append({'type': activity.activity_type,
                                        'title': activity.title,
-                                       'file': activity.activity_html_file_src if activity.activity_type == 'reading' and activity.get_src_ext() == 'pdf' else activity.src,
+                                       'file': activity.activity_html_file_src if activity.activity_type in  ['reading','quiz'] and activity.get_src_ext() != 'pdf' else activity.src,
                                        'description': activity.description,
                                        'guid': activity.guid}
                                       )

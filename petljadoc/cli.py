@@ -25,6 +25,7 @@ from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityT
 from nbconvert import HTMLExporter
 from traitlets.config import Config
 from nbconvert.preprocessors import TagRemovePreprocessor
+from .package import create_SCORM_manifest
 
 
 INDEX_TEMPLATE_HIDDEN = '''
@@ -178,6 +179,31 @@ def main():
     """
     check_for_runestone_package()
 
+@main.command("clean")
+def clean():
+    if os.path.exists('_build'):
+        shutil.rmtree('_build')
+    if os.path.exists('_intermediate'):
+        shutil.rmtree('_intermediate')
+    if os.path.exists('__pycache__'):
+        shutil.rmtree('__pycache__')
+    if os.path.exists('course'):
+        os.remove('course')
+
+
+@main.command("export")
+def export():
+    """
+    Export course
+    """
+    path = project_path()
+    if path.joinpath('conf-petljadoc.json').exists():
+        with open('conf-petljadoc.json') as f:
+            data = json.load(f)
+            #build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
+            create_SCORM_manifest()
+            make_zip('course-package', '_build')
+
 
 @main.command('init-course')
 @click.option("--yes", "-y", is_flag=True, help="Answer positive to all confirmation questions.")
@@ -212,7 +238,7 @@ def init_runestone(yes, defaults):
     init_template_arguments(template_dir, defaults, 'runestone')
 
 
-def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False):
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type = 'runestone'):
     path = project_path()
     if not path:
         raise click.ClickException(
@@ -242,6 +268,8 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         server.serve(port=port, host="127.0.0.1", root=outdir, open_url_delay=5)
 
     if sphinx_build:
+        if not os.path.exists(os.path.join(path, '_build')) and project_type == 'course':
+            build_intermediate(path)
         build_module = "sphinx.cmd.build"
         args.append('-a')
         args.append('-E')
@@ -269,8 +297,11 @@ def preview(port):
                 prebuild()
                 watch_server([os.path.realpath('_sources'),
                               os.path.realpath('_images')])
-    build_or_autobuild("preview", port=port, sphinx_build=True)
-    build_or_autobuild("preview", port=port, sphinx_autobuild=True)
+                build_or_autobuild("preview", port=port, sphinx_build=True, project_type=data["project_type"])
+                build_or_autobuild("preview", port=port, sphinx_autobuild=True, project_type=data["project_type"])
+    else:
+        build_or_autobuild("preview", port=port, sphinx_build=True)
+        build_or_autobuild("preview", port=port, sphinx_autobuild=True)
 
 
 @main.command()
@@ -278,8 +309,13 @@ def publish():
     """
     Build and copy the publish folder (docs)
     """
-    build_or_autobuild("publish", sphinx_build=True)
     path = project_path()
+    if path.joinpath('conf-petljadoc.json').exists():
+        with open('conf-petljadoc.json') as f:
+            data = json.load(f)
+            build_or_autobuild("publish", sphinx_build=True, project_type=data["project_type"])
+    else:
+        build_or_autobuild("publish", sphinx_build=True)
     if not path:
         raise click.ClickException(
             "You must be in a Runestone project to execute publish command")
@@ -605,12 +641,12 @@ def create_activity_RST(course, index, path, intermediatPath):
                         file.write(META_DATA.format(activity.title,
                                                     activity.activity_type) + content)
                 if activity.get_src_ext() == 'pdf':
-                    pdf_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                    pdf_rst = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title)+'.rst',
                                    mode='w+', encoding='utf-8')
                     pdf_rst.write(rst_title(activity.title))
                     pdf_rst.write(PDF_TEMPLATE.format(
                         '/_static/'+activity.src))
-                    section_index.write(' '*4+activity.title+'.rst\n')
+                    section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
                 if activity.get_src_ext() == 'ipynb':
                     c = Config()
                     c.TagRemovePreprocessor.remove_cell_tags = ("remove_cell",)
@@ -622,10 +658,10 @@ def create_activity_RST(course, index, path, intermediatPath):
                     html_exporter = HTMLExporter(config=c)                    
                     template_paths_root = os.path.dirname(os.path.realpath(__file__))
                     html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
-                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title) +'.rst',
                                    mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
-                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(activity.title+'.html'))
+                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(sanitize_title(activity.title)+'.html'))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
@@ -633,23 +669,23 @@ def create_activity_RST(course, index, path, intermediatPath):
                     else:
                         jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
-                    html_file = open(intermediatPath+lesson.folder+'/'+activity.title +'.html','w+',encoding='UTF-8')
+                    html_file = open(intermediatPath+lesson.folder+'/'+ sanitize_title(activity.title) +'.html','w+',encoding='UTF-8')
                     html_file.write(body)
                     html_file.close()
-                    section_index.write(' '*4+activity.title+'.rst\n')
+                    section_index.write(' '*4+ sanitize_title(activity.title) +'.rst\n')
             if activity.activity_type == 'video':
-                video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                video_rst = open(intermediatPath+lesson.folder+'/'+sanitize_title(activity.title)+'.rst',
                                  mode='w+', encoding='utf-8')
                 video_rst.write(rst_title(activity.title))
                 video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
-                section_index.write(' '*4+activity.title+'.rst\n')
+                section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
             if activity.activity_type == 'coding-quiz':
-                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+sanitize_title(activity.title)+'.rst',
                                        mode='w+', encoding='utf-8')
                 coding_quiz_rst.write(rst_title(activity.title))
                 for s in activity.src:
                     coding_quiz_rst.write(LINK_TEMPLATE.format(s))
-                section_index.write(' '*4+activity.title+'.rst\n')
+                section_index.write(' '*4+sanitize_title(activity.title)+'.rst\n')
 
 
 def read_course():
@@ -708,12 +744,15 @@ def rst_title(title):
 
 def transfer_images(html, file_path):
     dir_path = os.path.dirname(file_path)
-    image_path_list = [x.group('image') for x in re.finditer(r"<img src=\"(?P<image>[^\"]+)\"",html)]
+    image_path_list = [x.group('image') for x in re.finditer(r"<img src=\"(?!data:image)(?P<image>[^\"]+)\"",html)]
     for image_path in image_path_list:
         image = os.path.basename(image_path)
         if not os.path.isdir('_build/_images/'):
             os.mkdir('_build/_images/')
-        shutil.copyfile(os.path.join(dir_path, image_path), '_build/_images/'+image)
+        try:
+            shutil.copyfile(os.path.join(dir_path, image_path), '_build/_images/'+image)
+        except:
+            print_error('Missing image from Jupyter Folder: '+image, True)
         html = html.replace("<img src=\""+image_path+"\"","<img src=\"../_images/"+image+"\"")
     return html
 
@@ -845,3 +884,46 @@ def run_with_surrounding_separators(args, *, heading, include_footer=True):
     finally:
             stdout.close()
     sys.stdout.write(footer + "\n")
+
+def make_zip(base_name, base_dir):
+    """Create a zip file from all the files under 'base_dir'.
+
+    The output zip file will be named 'base_name' + ".zip".  Returns the
+    name of the output zip file.
+    """
+    import zipfile 
+    
+    zip_filename = base_name + ".zip"
+    archive_dir = os.path.dirname(base_name)
+
+    if os.path.exists(archive_dir):
+        os.makedirs(archive_dir)
+
+    file_filter = (".buildinfo", "search.html",
+                        "searchindex.js", "objects.inv","course-errors.js","genindex.html","index.html","index.yaml","objects.inv")
+    dir_filter = ("doctrees", "_sources")
+    with zipfile.ZipFile(zip_filename, "w",
+                        compression=zipfile.ZIP_DEFLATED) as zf:
+        for dirpath, dirnames, filenames in os.walk(base_dir):
+            dont_copy = False
+            for dir in dirpath.split(os.sep):
+                if dir in dir_filter:
+                    dont_copy = True
+            if dont_copy:
+                continue
+            for name in sorted(dirnames):
+                if name not in dir_filter:
+                    path = os.path.normpath(os.path.join(dirpath, name))
+                    zf.write(path, path.replace('_build\\',''))
+            for name in filenames:
+                path = os.path.normpath(os.path.join(dirpath, name))
+                if os.path.isfile(path):
+                    if name not in file_filter:
+                        path = os.path.normpath(os.path.join(dirpath, name))
+                        zf.write(path, path.replace('_build\\',''))
+
+    return zip_filename
+    
+def sanitize_title(title : str):
+    return title.replace("?","")
+    
