@@ -658,10 +658,10 @@ def create_activity_RST(course, index, path, intermediatPath):
                     html_exporter = HTMLExporter(config=c)                    
                     template_paths_root = os.path.dirname(os.path.realpath(__file__))
                     html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
-                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ activity.title +'.rst',
+                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.rst',
                                    mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
-                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(activity.title+'.html'))
+                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(normalize(activity.title)+'.html'))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
@@ -669,10 +669,10 @@ def create_activity_RST(course, index, path, intermediatPath):
                     else:
                         jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
-                    html_file = open(intermediatPath+lesson.folder+'/'+ activity.title +'.html','w+',encoding='UTF-8')
+                    html_file = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.html','w+',encoding='UTF-8')
                     html_file.write(body)
                     html_file.close()
-                    section_index.write(' '*4+ activity.title +'.rst\n')
+                    section_index.write(' '*4+ normalize(activity.title) +'.rst\n')
             if activity.activity_type == 'video':
                 video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                  mode='w+', encoding='utf-8')
@@ -923,3 +923,7 @@ def make_zip(base_name, base_dir):
                         zf.write(path, path.replace('_build\\',''))
 
     return zip_filename
+
+def normalize(string : str):
+    reserved_chars = ['?','>',':','"','/','\\','|','*']
+    return ''.join(char for char in string if char not in reserved_chars)

@@ -177,6 +177,7 @@ class Activity:
             else:
                 self.toc_url = src.split('.')[0].replace(" ", "%20")
                 self.activity_html_file_src = self.src.replace('.rst','.html')
+        self.toc_url = normalize(self.toc_url)
         if guid.find('/') == -1:
             self.guid = guid
             self.alias = ''
@@ -320,3 +321,7 @@ class ActivityTypeValueError(Exception):
             self.message = args[0]
         else:
             self.message = None
+
+def normalize(string : str):
+    reserved_chars = ['?','>',':','"','/','\\','|','*']
+    return ''.join(char for char in string if char not in reserved_chars)
