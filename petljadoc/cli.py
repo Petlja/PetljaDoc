@@ -25,7 +25,7 @@ from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityT
 from nbconvert import HTMLExporter
 from traitlets.config import Config
 from nbconvert.preprocessors import TagRemovePreprocessor
-from .package import create_SCORM_manifest
+from .package import ScormPackager
 
 
 INDEX_TEMPLATE_HIDDEN = '''
@@ -201,8 +201,14 @@ def export():
         with open('conf-petljadoc.json') as f:
             data = json.load(f)
             #build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
-            create_SCORM_manifest()
-            make_zip('course-package', '_build')
+            scrom_template = resource_filename('petljadoc', 'scorm-templates')
+            copy_dir(scrom_template,'_build')
+            scorm_package = ScormPackager()
+            scorm_package.load_data_from_yaml()
+            scorm_package.create_package()
+            scorm_package.zip_file()
+            #scorm_package.create_packages_for_lectures()
+            #make_zip('course-package', '_build')
 
 
 @main.command('init-course')
@@ -299,6 +305,10 @@ def preview(port):
                               os.path.realpath('_images')])
                 build_or_autobuild("preview", port=port, sphinx_build=True, project_type=data["project_type"])
                 build_or_autobuild("preview", port=port, sphinx_autobuild=True, project_type=data["project_type"])
+            else:
+                build_or_autobuild("preview", port=port, sphinx_build=True)
+                build_or_autobuild("preview", port=port, sphinx_autobuild=True)
+
     else:
         build_or_autobuild("preview", port=port, sphinx_build=True)
         build_or_autobuild("preview", port=port, sphinx_autobuild=True)
@@ -341,10 +351,8 @@ def cyr2lat():
     Translate from cyrilic to latin letters. Source folder must end with 'Cyrl'.
     """
     sourcePath = os.getcwd()
-    print(sourcePath)
     if sourcePath.endswith('Cyrl'):
         destinationPath = Path(sourcePath.split('Cyrl')[0] + "Lat")
-        print(destinationPath)
         cyr2latTranslate(sourcePath, destinationPath)
     else:
         print('Folder name must end with Cyrl')
@@ -657,7 +665,7 @@ def create_activity_RST(course, index, path, intermediatPath):
 
                     html_exporter = HTMLExporter(config=c)                    
                     template_paths_root = os.path.dirname(os.path.realpath(__file__))
-                    html_exporter.template_paths = [template_paths_root +'/nbtemplates/classic2/', template_paths_root+'/nbtemplates/classic2/base']
+                    html_exporter.template_paths = [template_paths_root +'/nb-templates/classic2/', template_paths_root+'/nb-templates/classic2/base']
                     ipynb_rst = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.rst',
                                    mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
@@ -719,7 +727,6 @@ def smart_reload(root_src_dir, root_dst_dir):
 
 
 def copy_dir(src_dir, dest_dir, filter_name=None):
-    # print(f"D {src_dir} -> {dest_dir}")
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
     for item in os.listdir(src_dir):
@@ -733,7 +740,6 @@ def copy_dir(src_dir, dest_dir, filter_name=None):
             d = os.path.join(dest_dir, item)
             try:
                 shutil.copyfile(s, d)
-                #print(f"C {s} -> {d}")
             except FileNotFoundError:
                 pass
 

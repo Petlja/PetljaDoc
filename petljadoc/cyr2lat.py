@@ -1,12 +1,9 @@
 import os
 import re
 import shutil
-import datetime
-import jinja2
-import sys
 import cyrtranslit
 
-extensionList = ['md', 'rst', 'ipynb', 'txt', 'html', 'js', 'css'] 
+extensionList = ['md', 'rst', 'ipynb', 'txt', 'html'] 
 
 
 def title_fix(srt_content):
@@ -25,7 +22,6 @@ def title_fix(srt_content):
     return srt_content.rstrip()+"\n"
 
 def cyr2latTranslate(src_dir, dest_dir):
-    # print(f"D {src_dir} -> {dest_dir}")
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
     for item in os.listdir(src_dir):
@@ -50,4 +46,3 @@ def cyr2latTranslate(src_dir, dest_dir):
             else:
                 newF.write(content)
             newF.close()
-            #print(f"C {s} -> {d}")

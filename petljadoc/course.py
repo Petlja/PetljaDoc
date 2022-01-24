@@ -97,10 +97,9 @@ class Course:
                                          'guid': lesson.guid,
                                          'description':  lesson.description,
                                          'folder': lesson.folder,
-                                         'activities': tmp_activities}
+                                         'activities': tmp_activities,
+                                         'archived-activities': tmp_archived,}
                                         )
-            if len(tmp_archived):
-                self.dict['lessons'].append({'archived-activities': tmp_archived})
             if len(self.archived_lessons):
                 self.dict['archived-lessons'] = []
                 for al in self.archived_lessons:
@@ -158,11 +157,11 @@ class Activity:
         if self.activity_type == 'video':
             self.src = video_url(src)
             self.toc_url = self.title.replace(" ", "%20")
-            self.activity_html_file_src =  self.title + '.html'
+            self.activity_html_file_src =  self.title.replace("?","") + '.html'
         elif self.activity_type == 'coding-quiz':
             self.toc_url =  self.title.replace(" ", "%20")
             self.src = src
-            self.activity_html_file_src = self.title + '.html'
+            self.activity_html_file_src = self.title.replace("?","")  + '.html'
         # reading, quiz
         else:
             self.src = src
@@ -170,13 +169,13 @@ class Activity:
                 if self.nbsrc:
                     self.nbsrc = os.path.join(self.nbsrc[3:], src)
                 self.toc_url =  self.title.replace(" ", "%20")
-                self.activity_html_file_src = self.title + '.html'
+                self.activity_html_file_src = self.title.replace("?","")  + '.html'
             elif self.get_src_ext() == 'pdf':
                 self.toc_url =  self.title.replace(" ", "%20")
-                self.activity_html_file_src = self.title + '.html'
+                self.activity_html_file_src = self.title.replace("?","")  + '.html'
             else:
                 self.toc_url = src.split('.')[0].replace(" ", "%20")
-                self.activity_html_file_src = self.src.replace('.rst','.html')
+                self.activity_html_file_src = self.src.replace('.rst','.html').replace("?","") 
         self.toc_url = normalize(self.toc_url)
         if guid.find('/') == -1:
             self.guid = guid
