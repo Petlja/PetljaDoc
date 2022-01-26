@@ -1,16 +1,15 @@
 # pylint: disable=line-too-long
-from genericpath import isdir
 import os
 import sys
 import re
 import shutil
 import json
-from pathlib import Path
 import getpass
 import filecmp
 import click
 import yaml
 import subprocess
+from pathlib import Path
 from yaml.loader import SafeLoader
 from colorama import Fore, init, Style, deinit, reinit
 from pkg_resources import resource_filename, working_set
@@ -19,54 +18,51 @@ from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from livereload import Server
 from petljadoc import themes
-from .templateutil import apply_template_dir, default_template_arguments
-from .cyr2lat import cyr2latTranslate
-from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
 from nbconvert import HTMLExporter
 from traitlets.config import Config
-from nbconvert.preprocessors import TagRemovePreprocessor
+from .util import *
+from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
 from .package import ScormPackager
 
-
-INDEX_TEMPLATE_HIDDEN = '''
+_INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
     :hidden:
     :maxdepth: {}
 
 '''
-INDEX_TEMPLATE = '''
+_INDEX_TEMPLATE = '''
 .. toctree:: 
     :maxdepth: {}
 
 '''
-YOUTUBE_TEMPLATE = '''
+_YOUTUBE_TEMPLATE = '''
 .. ytpopup:: {}
       :width: 735
       :height: 415
       :align: center
 '''
-PDF_TEMPLATE = '''
+_PDF_TEMPLATE = '''
 .. raw:: html
 
   <embed src="{}" width="100%" height="700px" type="application/pdf">
 '''
 
-HTML_FILE_TEMPLATE = '''
+_HTML_FILE_TEMPLATE = '''
 .. raw:: html
     :file: {}
 '''
 
-LINK_TEMPLATE = '''
+_LINK_TEMPLATE = '''
     {}
 
 '''
-META_DATA = '''
+_META_DATA = '''
 ..
   {}
   {}
 
 '''
-INDEX_META_DATA = '''
+_INDEX_META_DATA = '''
 {}
 ..  
     {}
@@ -78,17 +74,16 @@ INDEX_META_DATA = '''
 
 '''
 
-COLORAMA_INIT = True
+_COLORAMA_INIT = True
 
-TOP_LEVEL = 't'
-LESSON_LEVEL = 'l'
-ACTIVITY_LEVEL = 'a'
+_TOP_LEVEL = 't'
+_LESSON_LEVEL = 'l'
+_ACTIVITY_LEVEL = 'a'
 
-ACTIVITY_TYPES = ['reading', 'video', 'quiz', 'coding-quiz']
+_ACTIVITY_TYPES = ['reading', 'video', 'quiz', 'coding-quiz']
 
 # ISO Code : Sphinx language code https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language
-LANGUAGE_META_TAG = {'sr-Cyrl': 'sr_RS', 'sr-Latn': 'sr@latn'}
-
+_LANGUAGE_META_TAG = {'sr-Cyrl': 'sr_RS', 'sr-Latn': 'sr@latn'}
 
 def check_for_runestone_package():
     #pylint: disable=E1133
@@ -105,8 +100,8 @@ def init_template_arguments(template_dir, defaults, project_type):
     ta['language'] = _prompt("Project language: (supported languages: en, sr, sr-Cyrl, sr-Latn)",
                              default="en", force_default=defaults)
     ta['language_meta'] =  ta['language']
-    if ta['language'] in LANGUAGE_META_TAG:
-        ta['language'] = LANGUAGE_META_TAG[ta['language']]
+    if ta['language'] in _LANGUAGE_META_TAG:
+        ta['language'] = _LANGUAGE_META_TAG[ta['language']]
     while ' ' in ta['project_name']:
         ta['project_name'] = click.prompt(
             "Project name: (one word, NO SPACES)")
@@ -137,11 +132,13 @@ def init_template_arguments(template_dir, defaults, project_type):
                            default=False, force_default=defaults)
     if custom_theme:
         ta['html_theme'] = 'custom_theme'
+        ta['locale_dirs'] = '..\_templates\plugin_layouts\custom_theme\locale'
     else:
         if project_type == 'runestone':
             ta['html_theme'] = 'petljadoc_runestone_theme'
         if project_type == 'course':
             ta['html_theme'] = 'petljadoc_course_theme'
+        ta['locale_dirs'] = 'locals'
     apply_template_dir(template_dir, '.', ta)
     if custom_theme:
         if project_type == 'runestone':
@@ -179,16 +176,16 @@ def main():
     """
     check_for_runestone_package()
 
+
 @main.command("clean")
 def clean():
-    if os.path.exists('_build'):
-        shutil.rmtree('_build')
-    if os.path.exists('_intermediate'):
-        shutil.rmtree('_intermediate')
-    if os.path.exists('__pycache__'):
-        shutil.rmtree('__pycache__')
-    if os.path.exists('course'):
-        os.remove('course')
+    """
+    Delete all files created by running petljadoc preview command
+    """
+    delete_dir('_build')
+    delete_dir('_intermediate')
+    delete_dir('__pycache__')
+    delete_file('course')
 
 
 @main.command("export")
@@ -200,15 +197,15 @@ def export():
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
             data = json.load(f)
-            #build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
+            build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
             scrom_template = resource_filename('petljadoc', 'scorm-templates')
             copy_dir(scrom_template,'_build')
             scorm_package = ScormPackager()
-            scorm_package.load_data_from_yaml()
-            scorm_package.create_package()
-            scorm_package.zip_file()
-            #scorm_package.create_packages_for_lectures()
-            #make_zip('course-package', '_build')
+            scorm_package.create_package_for_course()
+            scorm_package.create_packages_for_lectures()
+            #scorm_package.create_package_for_single_sco_course() 
+            #scorm_package.create_single_sco_packages_for_lectures()       
+            print('The packages are in export directory')
 
 
 @main.command('init-course')
@@ -251,7 +248,7 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
             f"You must be in a Runestone project to execute {cmd_name} command")
     os.chdir(path)
     sys.path.insert(0, str(path))
-    from pavement import options as paver_options  # pylint: disable=import-error
+    from pavement import options as paver_options
     buildPath = Path(paver_options.build.builddir)
     if not buildPath.exists:
         os.makedirs(buildPath)
@@ -288,6 +285,7 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append(f'"{paver_options.build.builddir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+
 
 @main.command()
 @click.option("--port", "-p", default=8000, type=int, help="HTTP port numpber (default 8000)")
@@ -353,7 +351,7 @@ def cyr2lat():
     sourcePath = os.getcwd()
     if sourcePath.endswith('Cyrl'):
         destinationPath = Path(sourcePath.split('Cyrl')[0] + "Lat")
-        cyr2latTranslate(sourcePath, destinationPath)
+        cyrl_to_latin(sourcePath, destinationPath)
     else:
         print('Folder name must end with Cyrl')
 
@@ -378,11 +376,10 @@ def build_intermediate(rootPath, first_build=True):
             exit(-1)
 
 
-def create_or_recreate_dir(file):
-    path = Path(file)
-    if path.exists():
-        shutil.rmtree(file)
-    os.mkdir(file)
+def create_or_recreate_dir(dir):
+    dir_path = Path(dir)
+    delete_dir(dir_path)
+    os.mkdir(dir_path)
 
 
 def load_data_from_YAML():
@@ -420,7 +417,7 @@ def project_path():
 
 
 def create_course():
-    global ACTIVITY_TYPES
+    global _ACTIVITY_TYPES
     error_log = {}
     archived_lessons = []
     active_lessons = []
@@ -433,50 +430,50 @@ def create_course():
     if data:
         try:
             error_log[YamlLoger.ATR_COURSE_ID], courseId = check_component(
-                data, TOP_LEVEL, YamlLoger.ATR_COURSE_ID)
+                data, _TOP_LEVEL, YamlLoger.ATR_COURSE_ID)
             error_log[YamlLoger.ATR_LANG], lang = check_component(
-                data, TOP_LEVEL, YamlLoger.ATR_LANG)
+                data, _TOP_LEVEL, YamlLoger.ATR_LANG)
             error_log[YamlLoger.ATR_TITLE], title_course = check_component(
-                data, TOP_LEVEL, YamlLoger.ATR_TITLE)
+                data, _TOP_LEVEL, YamlLoger.ATR_TITLE)
             error_log[YamlLoger.ATR_DESC], _ = check_component(
-                data, TOP_LEVEL, YamlLoger.ATR_DESC)
+                data, _TOP_LEVEL, YamlLoger.ATR_DESC)
             if error_log[YamlLoger.ATR_DESC]['status']:
                 desc_line_number = data[YamlLoger.ATR_DESC]['__line__']
                 error_log[YamlLoger.ATR_LONG_DESC], longDesc = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_LONG_DESC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_LONG_DESC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_SHORT_DESC], shortDesc = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_SHORT_DESC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_SHORT_DESC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_WILL_LEARN], willLearn = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_WILL_LEARN, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_WILL_LEARN, args=[desc_line_number])
                 error_log[YamlLoger.ATR_REQUIREMENTS], requirements = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_REQUIREMENTS, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_REQUIREMENTS, args=[desc_line_number])
                 error_log[YamlLoger.ATR_TOC], toc = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_TOC, args=[desc_line_number])
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_TOC, args=[desc_line_number])
                 error_log[YamlLoger.ATR_EXTERNAL_LINK], externalLinks = check_component(
-                    data[YamlLoger.ATR_DESC], TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINK, required=False)
+                    data[YamlLoger.ATR_DESC], _TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINK, required=False)
 
                 if externalLinks != '':
                     for i, external_link in enumerate(externalLinks, start=1):
                         order_prefix = str(i)+'_'
                         link_line_number = external_link['__line__']
                         error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_TEXT], text = check_component(
-                            external_link, TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_TEXT, args=[link_line_number, i])
+                            external_link, _TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_TEXT, args=[link_line_number, i])
                         error_log[order_prefix + YamlLoger.ATR_EXTERNAL_LINKS_LINK], link = check_component(
-                            external_link, TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_LINK, args=[link_line_number, i])
+                            external_link, _TOP_LEVEL, YamlLoger.ATR_EXTERNAL_LINKS_LINK, args=[link_line_number, i])
                         external_links.append(ExternalLink(text, link))
 
             error_log[YamlLoger.ATR_LESSONS], _ = check_component(
-                data, TOP_LEVEL, YamlLoger.ATR_LESSONS)
+                data, _TOP_LEVEL, YamlLoger.ATR_LESSONS)
 
             if error_log[YamlLoger.ATR_LESSONS]['status']:
                 error_log[YamlLoger.ATR_ARCHIVED_LESSON], archived_lessons_list = check_component(
-                    data, TOP_LEVEL, YamlLoger.ATR_ARCHIVED_LESSON, required=False)
+                    data, _TOP_LEVEL, YamlLoger.ATR_ARCHIVED_LESSON, required=False)
                 if archived_lessons_list != '':
                     for j, archived_lesson in enumerate(archived_lessons_list, start=1):
                         order_prefix = str(j)+'_'
                         archived_lesson_line = archived_lesson['__line__']
                         error_log[order_prefix+YamlLoger.ATR_ARCHIVED_LESSON_GUID], archived_lesson_guid = check_component(
-                            archived_lesson, TOP_LEVEL, YamlLoger.ATR_GUID, args=[archived_lesson_line, j])
+                            archived_lesson, _TOP_LEVEL, YamlLoger.ATR_GUID, args=[archived_lesson_line, j])
                         archived_lessons.append(archived_lesson_guid)
 
                 for i, lesson in enumerate(data['lessons'], start=1):
@@ -485,26 +482,26 @@ def create_course():
                     order_prefix_lesson = str(i)+'_'
                     lesson_line = lesson['__line__']
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_TITLE], title = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_TITLE, args=[lesson_line, i])
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_TITLE, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_FOLDER], folder = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_FOLDER, args=[lesson_line, i])
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_FOLDER, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_GUID], guid = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_DESC], description = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_NBSRC], nbsrc = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_LESSON_NBSRC, required=False)
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_LESSON_NBSRC, required=False)
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES], lesson_activities = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIES], lesson_archived_activities = check_component(
-                        lesson, LESSON_LEVEL, YamlLoger.ATR_ARCHIVED_ACTIVITY, required=False)
+                        lesson, _LESSON_LEVEL, YamlLoger.ATR_ARCHIVED_ACTIVITY, required=False)
 
                     if lesson_archived_activities != '':
                         for j, archived_activity in enumerate(lesson_archived_activities, start=1):
                             order_prefix_archived_lessons = str(i)+'_'+str(j)+'_'
                             archived_activity_line = archived_activity['__line__']
                             error_log[order_prefix_archived_lessons + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIE_GUID], archived_activity_guid = check_component(
-                                archived_activity, ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
+                                archived_activity, _ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
                             archived_activities.append(archived_activity_guid)
 
                     if error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES]:
@@ -513,28 +510,28 @@ def create_course():
                             activity_line = activity['__line__']
                             try:
                                 error_log[order_prefix_activitie +
-                                          YamlLoger.ATR_ACTIVITY_TYPE], activity_type = check_component(activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TYPE, args=[i, j, activity_line])
-                                if activity_type not in ACTIVITY_TYPES:
+                                          YamlLoger.ATR_ACTIVITY_TYPE], activity_type = check_component(activity, _ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TYPE, args=[i, j, activity_line])
+                                if activity_type not in _ACTIVITY_TYPES:
                                     raise ActivityTypeValueError(activity_type)
                                 error_log[order_prefix_activitie + YamlLoger.ATR_ACTIVITY_TITLE], activity_title = check_component(
-                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TITLE, args=[i, j, activity_line])
+                                    activity, _ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_TITLE, args=[i, j, activity_line])
                                 error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_GUID], activity_guid = check_component(
-                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_GUID, args=[i, j, activity_line])
+                                    activity, _ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_GUID, args=[i, j, activity_line])
                                 error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_DESC], activity_description = check_component(
-                                    activity, ACTIVITY_LEVEL, YamlLoger.ATR_DESC, required=False)
+                                    activity, _ACTIVITY_LEVEL, YamlLoger.ATR_DESC, required=False)
                                 if error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['video']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_URL, args=[i, j, activity_line])
+                                        activity, _ACTIVITY_LEVEL, YamlLoger.ATR_URL, args=[i, j, activity_line])
                                 elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['reading', 'quiz']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
+                                        activity, _ACTIVITY_LEVEL, YamlLoger.ATR_FILE, args=[i, j, activity_line])
                                 elif error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_TYPE] and activity_type in ['coding-quiz']:
                                     error_log[order_prefix_activitie+YamlLoger.ATR_ACTIVITY_SRC], activity_src = check_component(
-                                        activity, ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_PROBLEMS, args=[i, j, activity_line])
+                                        activity, _ACTIVITY_LEVEL, YamlLoger.ATR_ACTIVITY_PROBLEMS, args=[i, j, activity_line])
 
                             except ActivityTypeValueError as e:
                                 error_log[order_prefix_activitie +
-                                          YamlLoger.ATR_ACTIVITY_TYPE_VALUE] = {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[ACTIVITY_LEVEL][YamlLoger.ATR_ACTIVITY_TYPE_VALUE].format(e.message)}
+                                          YamlLoger.ATR_ACTIVITY_TYPE_VALUE] = {'status': False, 'atribute': None, 'error': YamlLoger.ERROR_MSGS[_ACTIVITY_LEVEL][YamlLoger.ATR_ACTIVITY_TYPE_VALUE].format(e.message)}
                                 continue
 
                             else:
@@ -554,7 +551,7 @@ def create_course():
 
         except TypeError:
             error_log[YamlLoger.YAML_TYPE_ERROR] = {
-                'status': False, 'atribute': None, 'error':  YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.YAML_TYPE_ERROR]}
+                'status': False, 'atribute': None, 'error':  YamlLoger.ERROR_MSGS[_TOP_LEVEL][YamlLoger.YAML_TYPE_ERROR]}
             return None, error_log
     else:
         return None, error_log
@@ -575,9 +572,9 @@ def check_component(dictionary, atr_type, component, required=True, args=None):
 
 
 def write_to_index(index, course):
-    index.write(INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
+    index.write(_INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
                                        course.shortDesc, course.willlearn, course.requirements, course.toc, course.externalLinks))
-    index.write(INDEX_TEMPLATE_HIDDEN.format(3))
+    index.write(_INDEX_TEMPLATE_HIDDEN.format(3))
 
 
 def handle_errors(errors, first_build):
@@ -589,11 +586,11 @@ def handle_errors(errors, first_build):
             if key == 'guid_integrity':
                 for guid in value['guid_duplicate_list']:
                     error_log.append(
-                        YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.DUPLICATE_GUID].format(guid))
+                        YamlLoger.ERROR_MSGS[_TOP_LEVEL][YamlLoger.DUPLICATE_GUID].format(guid))
             elif key == 'source_integrity':
                 for titile, src in zip(value['missing_activitie_titles'], value['missing_activitie_src']):
                     error_log.append(
-                        YamlLoger.ERROR_MSGS[TOP_LEVEL][YamlLoger.SOURCE_MISSING].format(titile, src))
+                        YamlLoger.ERROR_MSGS[_TOP_LEVEL][YamlLoger.SOURCE_MISSING].format(titile, src))
             else:
                 error_log.append(value['error'])
     if error_flag:
@@ -603,11 +600,11 @@ def handle_errors(errors, first_build):
 
 
 def print_error(error, first_build):
-    global COLORAMA_INIT
+    global _COLORAMA_INIT
     if first_build:
-        if COLORAMA_INIT:
+        if _COLORAMA_INIT:
             init()
-            COLORAMA_INIT = False
+            _COLORAMA_INIT = False
         else:
             reinit()
         print(Fore.RED, error)
@@ -638,7 +635,7 @@ def create_activity_RST(course, index, path, intermediatPath):
                              mode='w+',
                              encoding='utf-8')
         section_index.write(rst_title(lesson.title))
-        section_index.write(INDEX_TEMPLATE.format(1))
+        section_index.write(_INDEX_TEMPLATE.format(1))
         for activity in lesson.active_activies:
             if activity.activity_type in ['reading', 'quiz']:
                 if activity.get_src_ext() == 'rst':
@@ -646,13 +643,13 @@ def create_activity_RST(course, index, path, intermediatPath):
                     with open(intermediatPath+lesson.folder+'/'+activity.src, mode='r+', encoding='utf8') as file:
                         content = file.read()
                         file.seek(0, 0)
-                        file.write(META_DATA.format(activity.title,
+                        file.write(_META_DATA.format(activity.title,
                                                     activity.activity_type) + content)
                 if activity.get_src_ext() == 'pdf':
                     pdf_rst = open(intermediatPath+lesson.folder+'/'+ activity.title+'.rst',
                                    mode='w+', encoding='utf-8')
                     pdf_rst.write(rst_title(activity.title))
-                    pdf_rst.write(PDF_TEMPLATE.format(
+                    pdf_rst.write(_PDF_TEMPLATE.format(
                         '/_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
                 if activity.get_src_ext() == 'ipynb':
@@ -669,7 +666,7 @@ def create_activity_RST(course, index, path, intermediatPath):
                     ipynb_rst = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.rst',
                                    mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
-                    ipynb_rst.write(HTML_FILE_TEMPLATE.format(normalize(activity.title)+'.html'))
+                    ipynb_rst.write(_HTML_FILE_TEMPLATE.format(normalize(activity.title)+'.html'))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
                         (body, _)= html_exporter.from_file(jp_file)
@@ -685,14 +682,14 @@ def create_activity_RST(course, index, path, intermediatPath):
                 video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                  mode='w+', encoding='utf-8')
                 video_rst.write(rst_title(activity.title))
-                video_rst.write(YOUTUBE_TEMPLATE.format(activity.src))
+                video_rst.write(_YOUTUBE_TEMPLATE.format(activity.src))
                 section_index.write(' '*4+activity.title+'.rst\n')
             if activity.activity_type == 'coding-quiz':
                 coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
                                        mode='w+', encoding='utf-8')
                 coding_quiz_rst.write(rst_title(activity.title))
                 for s in activity.src:
-                    coding_quiz_rst.write(LINK_TEMPLATE.format(s))
+                    coding_quiz_rst.write(_LINK_TEMPLATE.format(s))
                 section_index.write(' '*4+activity.title+'.rst\n')
 
 
@@ -890,45 +887,6 @@ def run_with_surrounding_separators(args, *, heading, include_footer=True):
     finally:
             stdout.close()
     sys.stdout.write(footer + "\n")
-
-def make_zip(base_name, base_dir):
-    """Create a zip file from all the files under 'base_dir'.
-
-    The output zip file will be named 'base_name' + ".zip".  Returns the
-    name of the output zip file.
-    """
-    import zipfile 
-    
-    zip_filename = base_name + ".zip"
-    archive_dir = os.path.dirname(base_name)
-
-    if os.path.exists(archive_dir):
-        os.makedirs(archive_dir)
-
-    file_filter = (".buildinfo", "search.html",
-                        "searchindex.js", "objects.inv","course-errors.js","genindex.html","index.html","index.yaml","objects.inv")
-    dir_filter = ("doctrees", "_sources")
-    with zipfile.ZipFile(zip_filename, "w",
-                        compression=zipfile.ZIP_DEFLATED) as zf:
-        for dirpath, dirnames, filenames in os.walk(base_dir):
-            dont_copy = False
-            for dir in dirpath.split(os.sep):
-                if dir in dir_filter:
-                    dont_copy = True
-            if dont_copy:
-                continue
-            for name in sorted(dirnames):
-                if name not in dir_filter:
-                    path = os.path.normpath(os.path.join(dirpath, name))
-                    zf.write(path, path.replace('_build\\',''))
-            for name in filenames:
-                path = os.path.normpath(os.path.join(dirpath, name))
-                if os.path.isfile(path):
-                    if name not in file_filter:
-                        path = os.path.normpath(os.path.join(dirpath, name))
-                        zf.write(path, path.replace('_build\\',''))
-
-    return zip_filename
 
 def normalize(string : str):
     reserved_chars = ['?','>',':','"','/','\\','|','*']

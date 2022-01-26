@@ -9,7 +9,6 @@
       "description": "Course identifier",
       "type": "string"
     }
-    // ...
   },
   "required": [ "productId" ]
 }

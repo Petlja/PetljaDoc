@@ -146,16 +146,17 @@
 <div class="long-desc">
   {{ course.longDesc}}
 </div>
-{% if( course.willlearn|length > 0) %}
+</div>
+{% if( course.willLearn|length > 0) %}
 <div>
   <div class="label-course">
     {{_('You will learn:')}}
   </div>
-  {% for el in course.willlearn %}
+  {% for el in course.willLearn %}
   <p class="p-course"> {{el}}</p>
   {% endfor %}
-  {% endif %}
 </div>
+{% endif %}
 {% if( course.requirements|length > 0) %}
 <div>
   <div class="label-course">
@@ -187,7 +188,6 @@
 </div>
 {% endif %}
 
-</div>
 </div>
 
 {% else %}
