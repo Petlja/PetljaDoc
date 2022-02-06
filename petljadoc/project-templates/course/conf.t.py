@@ -129,7 +129,8 @@ html_context = {'course_id': '{{project_name}}',
                 'proxy_uri_files': '/jobe/index.php/restapi/files/',
                 'downloads_enabled': '{{downloads_enabled}}',
                 'enable_chatcodes': '{{enable_chatcodes}}',
-                'course':petljadoc.cli.read_course()
+                'course':petljadoc.cli.read_course(),
+                'page_settings':petljadoc.cli.read_page_settings(),
                }
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

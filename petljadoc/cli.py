@@ -24,6 +24,7 @@ from .util import *
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
 from .package import ScormPackager
 
+
 _INDEX_TEMPLATE_HIDDEN = '''
 .. toctree:: 
     :hidden:
@@ -191,20 +192,41 @@ def clean():
 @main.command("export")
 def export():
     """
-    Export course
+    Export course as a SCORM package
     """
     path = project_path()
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
+            _course_export_type = _prompt("Do you wish to export as single or multy sco",
+                                 default="single")
             data = json.load(f)
+            if _course_export_type == "single":
+                settings = {
+            "navigation": True,
+            "copy_right": True,
+            "header": True,
+            "petlja_links" :True
+            }
+            else:
+                settings = {
+            "navigation": False,
+            "copy_right": True,
+            "header": True,
+            "petlja_links" :True
+            }
+
+            old_settings = write_page_settings(settings)
             build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
+            write_page_settings(old_settings)
             scrom_template = resource_filename('petljadoc', 'scorm-templates')
             copy_dir(scrom_template,'_build')
             scorm_package = ScormPackager()
-            scorm_package.create_package_for_course()
-            scorm_package.create_packages_for_lectures()
-            #scorm_package.create_package_for_single_sco_course() 
-            #scorm_package.create_single_sco_packages_for_lectures()       
+            if _course_export_type == "single":
+                scorm_package.create_package_for_single_sco_course() 
+                scorm_package.create_single_sco_packages_for_lectures()    
+            else:
+                scorm_package.create_package_for_course()
+                scorm_package.create_packages_for_lectures()   
             print('The packages are in export directory')
 
 
@@ -616,7 +638,7 @@ def print_error(error, first_build):
 
 
 def template_toc(course):
-    with open('course', mode='w', encoding='utf8') as file:
+    with open('course.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.to_dict()))
 
 
@@ -694,9 +716,28 @@ def create_activity_RST(course, index, path, intermediatPath):
 
 
 def read_course():
-    with open('course', mode='r', encoding='utf8') as file:
+    with open('course.json', mode='r', encoding='utf8') as file:
         course = json.load(file)
         return course
+
+def read_page_settings():
+    try:
+        file = open('template_settings.json', mode='r', encoding='utf8')
+        template = json.load(file)
+    except:
+        template = {
+            "navigation": True,
+            "copy_right": True,
+            "header" : True,
+            "petlja_links" :True
+            }
+    return template
+
+def write_page_settings(new_settings):
+    old_settings = read_page_settings()
+    with open('template_settings.json', mode='w', encoding='utf8') as file:
+        file.write(json.dumps(new_settings))
+    return old_settings
 
 
 def smart_reload(root_src_dir, root_dst_dir):

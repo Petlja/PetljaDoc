@@ -14,6 +14,13 @@ from .util import _BUILD_PATH, _EXPORT_PATH, _BUILD_YAML_PATH,_BUILD_STATIC_PATH
 
 class ScormPackager:      
     
+    _LOCALAZIE_STRIGNS = {
+        'en' : {"About" : "About the course"},
+        'sr' : {"About" : "O kursu"},
+        'sr-Latn' : {"About" : "O kursu"},
+        'sr-Cyrl' : {"About" : "О курсу"},
+    }
+
     def __init__(self) -> None:
         manifest = ET.Element("manifest", 
                     identifier="manifest_"+ datetime.now().strftime("%d-%b-%Y-%H-%M-"),
@@ -55,7 +62,14 @@ class ScormPackager:
             for lesson in self.course_data["lessons"]:
                 self._skip_files.append(lesson["folder"])
 
-            self.course_lang = self.course_data['lang']
+            self.course_lang = self.course_data['lang'] if  self.course_data['lang'] in ScormPackager._LOCALAZIE_STRIGNS else 'en'
+
+    def _load_data_from_yaml(self) -> None:
+        try:
+            with open(_BUILD_YAML_PATH, encoding="utf8") as f:
+                self.course_data = yaml.load(f, Loader=yaml.FullLoader)
+        except IOError: 
+            self.course_data = None
 
     def create_package_for_course(self) -> None:
         self._create_imsmanifest_for_course()
@@ -79,14 +93,13 @@ class ScormPackager:
 
             manifest, organizations, resources = copy.deepcopy(self.manifest_template)
             organization= ET.SubElement(organizations, "organization", identifier="petlja_org") 
-            ET.SubElement(organization, "title").text = cyrtranslit.to_latin(
-                lesson["title"])
+            ET.SubElement(organization, "title").text = lesson["title"]
             lecture_item = ET.SubElement(organization, "item", identifier=self._get_random_string_for_id())
             ET.SubElement(lecture_item, "title").text =  lesson["title"]
             for activity in lesson["activities"]:
                 resource_id = self._create_id(lesson["title"], activity["title"])
                 activity_item = ET.SubElement(lecture_item, "item", identifier=self._get_random_string_for_id(), identifierref=resource_id)
-                ET.SubElement(activity_item, "title").text = cyrtranslit.to_latin(activity["title"])
+                ET.SubElement(activity_item, "title").text = activity["title"]
                 resource = ET.SubElement(resources, "resource", identifier=resource_id, type="webcontent", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))
                 resource.set("adlcp:scormtype","sco")
                 ET.SubElement(resource, "file", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))
@@ -117,15 +130,14 @@ class ScormPackager:
 
             manifest, organizations, resources = copy.deepcopy(self.manifest_template)
             organization= ET.SubElement(organizations, "organization", identifier="petlja_org") 
-            ET.SubElement(organization, "title").text = cyrtranslit.to_latin(
-                lesson["title"])
+            ET.SubElement(organization, "title").text = lesson["title"]
             lecture_item = ET.SubElement(organization, "item", identifier=self._get_random_string_for_id())
             ET.SubElement(lecture_item, "title").text =  lesson["title"]
 
             activity = lesson["activities"][0]
             resource_id = self._create_id(lesson["title"], activity["title"])
             activity_item = ET.SubElement(lecture_item, "item", identifier=self._get_random_string_for_id(), identifierref=resource_id)
-            ET.SubElement(activity_item, "title").text = cyrtranslit.to_latin(activity["title"])
+            ET.SubElement(activity_item, "title").text = activity["title"]
             resource = ET.SubElement(resources, "resource", identifier=resource_id, type="webcontent", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))
             resource.set("adlcp:scormtype","sco")
             ET.SubElement(resource, "file", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))        
@@ -143,35 +155,29 @@ class ScormPackager:
 
             self._create_archive_for_lecutres(cyrtranslit.to_latin(lesson["title"]))
 
-    def _load_data_from_yaml(self) -> None:
-        try:
-            with open(_BUILD_YAML_PATH, encoding="utf8") as f:
-                self.course_data = yaml.load(f, Loader=yaml.FullLoader)
-        except IOError: 
-            self.course_data = None
 
     def _create_imsmanifest_for_course(self) -> None:
         if not self.course_data:
             return None
         manifest, organizations, resources = copy.deepcopy(self.manifest_template)
         organization= ET.SubElement(organizations, "organization", identifier="petlja_org")
-        ET.SubElement(organization, "title").text = cyrtranslit.to_latin(self.course_data["title"]) 
+        ET.SubElement(organization, "title").text = self.course_data["title"]
         #Setup a homepage as index.html 
         lecture_item = ET.SubElement(organization, "item", identifier="home_page")
-        ET.SubElement(lecture_item, "title").text =  cyrtranslit.to_latin(self.course_data["title"])
+        ET.SubElement(lecture_item, "title").text =  self.course_data["title"]
         activity_item = ET.SubElement(lecture_item, "item", identifier="indexid", identifierref="index")
-        ET.SubElement(activity_item, "title").text = "O kursu"
+        ET.SubElement(activity_item, "title").text =  ScormPackager._LOCALAZIE_STRIGNS[self.course_lang]['About']
         resource = ET.SubElement(resources, "resource", identifier="index", type="webcontent", href="index.html")
         resource.set("adlcp:scormtype","sco")
         ET.SubElement(resource, "file", href="index.html")
 
         for lesson in self.course_data["lessons"]:
             lecture_item = ET.SubElement(organization, "item", identifier=self._get_random_string_for_id())
-            ET.SubElement(lecture_item, "title").text = cyrtranslit.to_latin(lesson["title"]) 
+            ET.SubElement(lecture_item, "title").text = lesson["title"]
             for activity in lesson["activities"]:
                 resource_id = self._create_id(lesson["title"], activity["title"])
                 activity_item = ET.SubElement(lecture_item, "item", identifier=self._get_random_string_for_id(), identifierref=resource_id)
-                ET.SubElement(activity_item, "title").text = cyrtranslit.to_latin(activity["title"])
+                ET.SubElement(activity_item, "title").text = activity["title"]
                 resource = ET.SubElement(resources, "resource", identifier=resource_id, type="webcontent", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))
                 resource.set("adlcp:scormtype","sco")
                 ET.SubElement(resource, "file", href=os.path.join(lesson["folder"], activity["file"]).replace("\\","/"))
@@ -190,12 +196,12 @@ class ScormPackager:
             return None
         manifest, organizations, resources = copy.deepcopy(self.manifest_template)
         organization= ET.SubElement(organizations, "organization", identifier="petlja_org")
-        ET.SubElement(organization, "title").text = cyrtranslit.to_latin(self.course_data["title"]) 
+        ET.SubElement(organization, "title").text = self.course_data["title"]
         #Setup a homepage as index.html 
         lecture_item = ET.SubElement(organization, "item", identifier="home_page")
-        ET.SubElement(lecture_item, "title").text =  cyrtranslit.to_latin(self.course_data["title"])
+        ET.SubElement(lecture_item, "title").text =  self.course_data["title"]
         activity_item = ET.SubElement(lecture_item, "item", identifier="indexid", identifierref="index")
-        ET.SubElement(activity_item, "title").text = "O kursu"
+        ET.SubElement(activity_item, "title").text = ScormPackager._LOCALAZIE_STRIGNS[self.course_lang]['About']
         resource = ET.SubElement(resources, "resource", identifier="index", type="webcontent", href="index.html")
         resource.set("adlcp:scormtype","sco")
         ET.SubElement(resource, "file", href="index.html")

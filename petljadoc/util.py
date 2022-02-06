@@ -121,4 +121,4 @@ def delete_file(file: str) -> None:
         try:
             os.remove(file)
         except:
-            print("Unable to delete file the {}. Check if they are open in another program.".format(file))
+            print("Unable to delete the file {}. Check if they are open in another program.".format(file))
