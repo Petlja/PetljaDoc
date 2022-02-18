@@ -42,10 +42,7 @@
 {%- endmacro %}
 
 {%- macro sidebar() %}
-      {%- if render_sidebar %}
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-          
+      {%- if render_sidebar %}          
           {%- if sidebars != None %}
             {#- new style sidebar: explicitly include/exclude templates #}
             {%- for sidebartemplate in sidebars %}
@@ -69,8 +66,6 @@
             {%- include "searchbox.html" %}
             {%- endblock %}
           {%- endif %}
-        </div>
-      </div>
       {%- endif %}
 {%- endmacro %}
 
@@ -170,7 +165,7 @@
 {%- endblock %}
 
 {%- block relbar2 %}{{ relbar() }}{% endblock %}
-
+<!--
 {%- block footer %}
     <div class="footer" role="contentinfo">
     {%- if show_copyright %}
@@ -188,5 +183,6 @@
     {%- endif %}
     </div>
 {%- endblock %}
+  -->
   </body>
 </html>

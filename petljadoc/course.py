@@ -113,6 +113,7 @@ class Course:
         course_dict = dict()
         course_dict['active_lessons'] = []
         course_dict['longDesc'] = self.longDesc
+        course_dict['shortDesc'] = self.shortDesc
         course_dict['willLearn'] = self.willlearn
         course_dict['requirements'] = self.requirements
         course_dict['toc'] = self.toc

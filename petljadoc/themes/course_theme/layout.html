@@ -30,6 +30,7 @@
   [
     '_static'+'/user-highlights.css',
     'https://use.fontawesome.com/releases/v5.1.1/css/all.css',
+    'https://fonts.googleapis.com/css?family=Source+Sans+Pro',
     '_static'+'/bootstrap-4.0.0-dist/css/bootstrap.min.css',
     '_static'+'/flatly.min.css',
     '_static'+'/petlja-course.css',
@@ -46,17 +47,35 @@
 {%- endblock %}
 
 {% macro navBar() %}
-<nav id="navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <a href="https://petlja.org"><img src="{{pathto('_static/img/petlja-logo-wt.svg', 1)}}" style="width:80px; float: left;"> </a>
-  <a href="https://petlja.org/net.kabinet"><img src="{{pathto('_static/img/netkabinet-logo-strelica-wt.svg', 1)}}" style="width: 30px; margin-left: 15px; float: left;"> </a>
-  <div class="container">
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="margin-left: 25px; text-align: center;">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="{{pathto('', 1)}}">{{ course.title }}</a></li>
-      </ul>
+<div id="navbar" class="content-header">
+  <div class="right-side-nav">
+    <div id="usefulLinksToggle" class="useful-links-toggle">
+        <a class="dropdown-toggle dropdown-toggle-burger" role="button" href="#" id="usefulLinksDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-bars fa-2x"></i>
+        </a>
+        <div class="dropdown-menu dropdown-nav-links shadow-lg" aria-labelledby="usefulLinksDropdown" x-placement="bottom-start" style="position: absolute; transform: translate3d(-55px, 32px, 0px); top: 0px; left: 0px; will-change: transform;">
+          <div class="links-title">_('Korisni linkovi')</div>
+          {% for n in range(course.externalLinkTexts| length) -%}
+          <div class="useful-link">
+            <a href="{{course.externalLinkLinks[n]}}" target="_blank">{{course.externalLinkTexts[n]}}</a></div>
+          {% endfor %}
+        </div>
     </div>
+</div>
+<div class="left-side-nav">
+  <div class="course-logo-nav">
+      <a target="_blank" href="https://petlja.org">
+          <img src="{{pathto('_static/img/petlja-logo-wt.svg', 1)}}" alt="petlja.org" id="lightPetljaLogo">
+      </a>
   </div>
-</nav>
+  <div class="course-logo-nav-kabinet">
+      <a target="_blank" href="https://petlja.org/net.kabinet">
+          <img src="{{pathto('_static/img/netkabinet-logo-strelica-wt.svg', 1)}}" alt="petlja.org" id="lightNetKabinetLogo">
+      </a>
+  </div>
+</div>
+<div class="content-header-label" id = "content-header-label" href="{{pathto('', 1)}}">{{ course.shortDesc }}</div>
+</div>
 {% endmacro %}
 
 {%- block extrahead %}
@@ -97,84 +116,48 @@
 {% if page_settings.header %}
 {{ navBar() }}
 {% endif %}
+{% if pagename == 'index' %}
+{% block homepage %}
+{% include "course_homepage.html" %}
+{% endblock %}
+{% else %}
 
+<div class="petljaCourseContainer">
 {% if page_settings.navigation%}
-<div style="margin-top: 65px;font-size: 20px; width: 20%; float: left; height: calc(100vh - 115px);">
+<div class="petljaCourseContent">
   {{ sidebar()}}
 </div>
 {% endif %}
 
 {% if page_settings.navigation%}
-<div class="container" id="main-content" style="float: left;  padding-left: 20px; height: calc(100vh - 115px);">
+<div class="lectureContent" id="main-content">
 {% else %}
 <div class="container" id="main-content" style="padding-left: 20px; height: calc(100vh - 115px);">
 {% endif %}
   <div id="errors">
   </div>
-  {% if pagename == 'index' %}
-  <div class="course-index">
-    <div class="course-title-index">
-      <h2> {{ course.title }}</h2>
+  <div class="lectureContentMaterial">
+    <div id="main-content">
+    {% block body %}
+    {% endblock %}
     </div>
-    <div class="long-desc">
-      {{ course.longDesc}}
-    </div>
+    {% block nextprevious %}
+    {% include "subchapter.html" %}
+    {% endblock %}
   </div>
-  {% if( course.willLearn|length > 0) %}
-  <div>
-    <div class="label-course">
-      {{_('You will learn:')}}
-    </div>
-    {% for el in course.willLearn -%}
-    <p class="p-course"> {{el}}</p>
-    {% endfor %}</div>
-  {% endif %}
-
-  {% if( course.requirements|length > 0) %}
-  <div>
-    <div class="label-course">
-      {{_('Required:')}}
-    </div>
-    {% for el in course.requirements -%}
-    <p class="p-course"> {{el}}</p>
-    {% endfor %}</div>
-  {% endif %}
-
-  {% if( course.toc|length > 0) %}
-  <div>
-    <div class="label-course">
-      {{_('Table of content:')}}
-    </div>
-    {% for el in course.toc -%}
-    <p class="p-course">{{el}}</p>
-    {% endfor %}</div>
-  {% endif %}
-
-  {% if( course.externalLinkTexts|length > 0) %}
-  <div>
-    <div class="label-course">
-      {{_('Extern links:')}}
-    </div>
-    {% for n in range(course.externalLinkTexts| length) -%}
-    <a style="margin-left: 50px" href="{{course.externalLinkLinks[n]}}">{{course.externalLinkTexts[n]}}</a><br>
-    {% endfor %}</div>
-  {% endif %}
-  {% else %}
-  {% block body %}
-  {% endblock %}
-  {% endif %}
 </div>
+<div class="lectureToolbox">
 
-{% if page_settings.navigation%}
-<div style="position: fixed; bottom: 0px; width: 100%;z-index: 1000;">
-  {% block nextprevious %}
-  {% include "subchapter.html" %}
-  {% endblock %}
+  <label class="font-size-toggle" id="fontSizeToggle">
+
+      <i class="fas fa-font"></i><label>Слова</label>
+  </label>
+  <div class="font-change d-none" id="fontChangeModal">
+      <span class="dec-letter-icon" id="decLetterIcon">A-</span>
+      <label id="currentFontSize">16</label>
+      <span class="inc-letter-icon" id="incLetterIcon">A+</span>
+  </div>
+</div>
 </div>
 {% endif %}
 {%- endblock %}
-
-{%- block footer %}
-
-
-{% endblock %}

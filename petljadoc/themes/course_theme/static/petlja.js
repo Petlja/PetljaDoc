@@ -6,8 +6,8 @@ window.addEventListener('load', function () {
 	Array.prototype.forEach.call(allLectures, function (e) {
 		e.addEventListener('click', function () {
 			this.nextElementSibling.classList.toggle('d-none');
-			this.children[0].classList.toggle('d-none');
 			this.children[1].classList.toggle('d-none');
+			this.children[2].classList.toggle('d-none');
 		});
 	});
 
@@ -34,7 +34,7 @@ window.addEventListener('load', function () {
                 document.getElementById("activity-" + activity).parentElement.previousElementSibling.click();
             }
             else {
-                document.getElementById("lecture-" + lecture).previousElementSibling.lastElementChild.click();
+                document.getElementById("activity-" + activity).parentElement.parentElement.parentElement.previousElementSibling.children[1].lastElementChild.click()
             }
 		});
 
@@ -50,13 +50,42 @@ window.addEventListener('load', function () {
                     document.getElementById("activity-" + activity).parentElement.nextElementSibling.click();
                 }
                 else {
-                    document.getElementById("lecture-" + lecture).nextElementSibling.nextElementSibling.nextElementSibling.firstElementChild.click();
+					document.getElementById("lecture-" + lecture).parentElement.nextElementSibling.children[1].firstChild.click()
                 }
 			}
         });
         
     if (activeLecture != '') {
-        if (document.getElementById("activity-" + activity).parentElement.previousElementSibling == null && document.getElementById("lecture-" + lecture).previousElementSibling == null)
+        if (document.getElementById("activity-" + activity).parentElement.parentElement.parentElement.previousElementSibling == null && document.getElementById("activity-" + activity).parentElement.previousElementSibling == null)
             document.getElementById('prevLectureLink').classList.add('invisible');
     }
+
+	if (document.getElementsByClassName('course-requirements').length > 0) {
+		var learningDiv = document.getElementsByClassName("course-requirements")[0].firstElementChild;
+		var learningDivList = learningDiv.querySelector('ul');
+		var numberOfLiElements = learningDivList.querySelectorAll('li').length;
+
+
+		var btnSeeMore = document.getElementById('seeMoreReqs')
+		var btnSeeLess = document.getElementById('seeLessReqs')
+
+		btnSeeMore.addEventListener('click', function () {
+			learningDivList.setAttribute('style', 'max-height: none !important; overflow: auto;');
+			document.getElementById('seeMoreReqs').style.display = 'none';
+			document.getElementById('seeLessReqs').style.display = 'block';
+		})
+
+		btnSeeLess.addEventListener('click', function () {
+			learningDivList.setAttribute('style', '');
+			document.getElementById('seeMoreReqs').style.display = 'block';
+			document.getElementById('seeLessReqs').style.display = 'none';
+		})
+
+	}
+
+	document.getElementById("content-header-label").addEventListener("click",function(){
+		window.location.href = "../"
+	})
+
 });
+
