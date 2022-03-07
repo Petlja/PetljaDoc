@@ -189,7 +189,7 @@ def clean():
     delete_file('course')
 
 
-@main.command("export")
+#@main.command("export")
 def export():
     """
     Export course as a SCORM package
