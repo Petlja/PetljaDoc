@@ -423,7 +423,7 @@ ul:first-child {
     max-width: 780px;
     margin-left: auto;
     margin-right: auto;
-    font-size: 16px !important;
+    font-size: 16px;
     font-weight: normal;
     font-stretch: normal !important;
     font-style: normal !important;
