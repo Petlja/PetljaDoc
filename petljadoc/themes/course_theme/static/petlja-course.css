@@ -182,6 +182,7 @@ ul:first-child {
 .quiz-question{
 	border: 1px solid black;
 	padding: 10px;
+	margin-bottom: 10px;
 }
 
 @media only screen and (max-width: 900px) {
@@ -269,16 +270,19 @@ ul:first-child {
 }
 
 .petljadoc-resources {
-	width: 500px;
-	float: left;
-	color: white;
-	position: absolute;
+	height: 70px;
+	margin-top: 20px;
+	position: fixed;
+	bottom: 0;
 	left: 0;
-	top: 15px;
+	z-index: 1000;
+	width: 20%;
+	background: #f7f8fa;
+	border-top: 1px solid #dedfe0;
 }
 
 .petljadoc-resources a {
-	color: white;
+	color: #179c74;
 	font-weight: 700;
 	font-style: italic;
 }
@@ -396,7 +400,10 @@ ul:first-child {
     color: #333
 }
 
-
+.petljacourseContainer img{
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
 .lectureContent {
     width: calc(80% - 60px);
     height: calc(100vh - 68px);
@@ -416,13 +423,29 @@ ul:first-child {
     max-width: 780px;
     margin-left: auto;
     margin-right: auto;
-    font-size: 16px;
+    font-size: 16px !important;
     font-weight: normal;
-    font-stretch: normal;
-    font-style: normal;
+    font-stretch: normal !important;
+    font-style: normal !important;
     line-height: 1.38;
-    letter-spacing: normal;
-    color: #666
+    letter-spacing: normal !important;
+    color: #666;
+	font-family: 'Source Sans Pro' !important; 
+}
+
+.lectureContentMaterial p{
+	margin-bottom: 10px !important;
+	margin-top: 10px !important;
+}
+
+.lectureContentMaterial img{
+	margin-bottom: 15px !important;
+	margin-top: 15px !important;
+}
+
+.lectureContentMaterial div{
+	margin-bottom: 10px !important;
+	margin-top: 10px !important;
 }
 
 .lectureContentMaterial a {
@@ -434,7 +457,8 @@ ul:first-child {
     margin-left: auto;
     margin-right: auto;
     color: #333;
-    font-weight: 600
+    font-weight: 600;
+	font-family: 'Source Sans Pro' !important;
 }
 
 .lectureToolbox {
@@ -489,10 +513,10 @@ ul:first-child {
     border: 1px solid #fff;
     border-radius: 10px;
     font-size: 14px !important;
-    font-weight: 600 !important;
+    font-weight: 900 !important;
     line-height: 1.57 !important;
     text-align: left !important;
-    color: #333 !important
+    color: #333 !important;
 }
 #nextLectureLink{
 	float: right;
@@ -504,6 +528,7 @@ ul:first-child {
     color: #333;
     border-bottom: 1px solid #dedfe0;
     min-height: 60px;
+	height: 60px;
     padding: 20px 107px 20px 21px
 }
 
@@ -681,6 +706,7 @@ ul:first-child {
     -webkit-user-select: none;
     -o-user-select: none;
     user-select: none;
+	font-family: Source Sans Pro !important;
    }
    .courseContentsSubSection {
 	border-bottom:1px solid #dedfe0
@@ -975,7 +1001,7 @@ ul:first-child {
    }
    .course-tableofcontent div>span {
 	float:right;
-	width:90px;
+	width:110px;
 	min-height:1px
    }
    .course-logo {
@@ -1076,3 +1102,44 @@ ul:first-child {
 	width:20px;
 	margin-top:3px
    }
+
+   .inc-letter-icon {
+    font-size: 18px !important;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.dec-letter-icon {
+    font-size: 12px !important;
+    cursor: pointer;
+    margin: 5px;
+}
+
+#currentFontSize {
+    font-size: 16px !important;
+    background-color: white;
+    border: 1px solid #dedfe0;
+    padding: 5px;
+}
+.font-change {
+	text-align: center;
+	position: absolute;
+	right: 105%;
+	top: 55px;
+	width: 140px;
+	height: 63px;
+	flex-grow: 0;
+	padding: 15px 14px 15px 15px;
+	border-radius: 10px;
+	box-shadow: 0 1px 3px 0 rgba(0,0,0,.25);
+	border: solid 1px rgba(222,223,224,.15);
+	background-color: #f7f8fa;
+	color: #666;
+	cursor: default;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+  }

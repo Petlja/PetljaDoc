@@ -82,10 +82,68 @@ window.addEventListener('load', function () {
 		})
 
 	}
+	if(document.getElementById("content-header-label")){
+		document.getElementById("content-header-label").addEventListener("click",function(){
+			window.location.href = "../"
+		})
+	}
+    if (document.getElementById('decLetterIcon')){
+        document.getElementById('decLetterIcon').addEventListener('click', function () {
+            decrAllFontSize();
+        });
+	}
+    if (document.getElementById('fontSizeToggle')) {
+        document.getElementById('fontSizeToggle').addEventListener('click', function () {
+            document.getElementById('fontChangeModal').classList.toggle('d-none');
+        });
+    }
 
-	document.getElementById("content-header-label").addEventListener("click",function(){
-		window.location.href = "../"
-	})
-
+    if (document.getElementById('incLetterIcon')){
+        document.getElementById('incLetterIcon').addEventListener('click', function () {
+            incrAllFontSize();
+        });
+	}
 });
 
+function incrAllFontSize() {
+    $("*").each(function (index, elem) {
+        var $this = $(this);//caching for perf. opt.
+
+        var curr = $this.css("fontSize");//get the fontSize string
+        if (curr != "" && curr != undefined) {//check if it exist
+            curr = curr.replace(/px$/, "");//get rid of "px" in the string
+
+            var float_curr = parseFloat(curr);//convert string to float
+
+            if(float_curr < 49)
+                float_curr += 1;//actual incr
+
+            var new_val = "" + float_curr + "px";//back to string
+            $this.css("fontSize", new_val);//set the fontSize string
+        }
+    });
+
+
+    document.getElementById('currentFontSize').innerHTML = parseInt(document.getElementById('currentFontSize').innerHTML) + 1;
+}
+
+
+function decrAllFontSize() {
+    $("*").each(function (index, elem) {
+        var $this = $(this);//caching for perf. opt.
+
+        var curr = $this.css("fontSize");//get the fontSize string
+        if (curr != "" && curr != undefined) {//check if it exist
+            curr = curr.replace(/px$/, "");//get rid of "px" in the string
+
+            var float_curr = parseFloat(curr);//convert string to float
+            if (float_curr > 6)
+                float_curr -= 1;//actual incr
+
+            var new_val = "" + float_curr + "px";//back to string
+            $this.css("fontSize", new_val);//set the fontSize string
+        }
+    });
+
+    document.getElementById('currentFontSize').innerHTML = parseInt(document.getElementById('currentFontSize').innerHTML) - 1;
+}

@@ -8,20 +8,20 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2022-03-06 14:03+0100\n"
-"PO-Revision-Date: 2022-03-06 14:20+0100\n"
+"PO-Revision-Date: 2022-03-06 14:08+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: sr\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: Babel 2.9.1\n"
 "X-Generator: Poedit 3.0.1\n"
 
 #: basic_layout.html:21
 msgid "Navigation"
-msgstr "Навигација"
+msgstr ""
 
 #: basic_layout.html:129
 #, python-format
@@ -30,52 +30,52 @@ msgstr ""
 
 #: course_homepage.html:7
 msgid "Go to course"
-msgstr "Погледај курс одмах"
+msgstr "Go to course"
 
 #: course_homepage.html:21
 msgid "What you will learn"
-msgstr "Шта ћеш научити"
+msgstr "What you will learn"
 
 #: course_homepage.html:27
 msgid "More"
-msgstr "прикажи више"
+msgstr "More"
 
 #: course_homepage.html:27
 msgid "Less"
-msgstr "мање"
+msgstr "Less"
 
 #: course_homepage.html:29
 msgid "Course requires"
-msgstr "Потребне ствари за курс"
+msgstr "Course requires"
 
 #: course_homepage.html:38 globaltoc.html:3 localtoc.html:3
 msgid "Table of content"
-msgstr "Садржај"
+msgstr "Table of content"
 
 #: course_homepage.html:44
 msgid "Lecture"
-msgstr "лекција"
+msgstr "Lecture"
 
 #: layout.html:58
 msgid "Useful links"
-msgstr "Корисни линкови"
+msgstr "Useful links"
 
 #: layout.html:172
 msgid "Letters"
-msgstr "Слова"
+msgstr "Letters"
 
 #: localtoc.html:2
 msgid "Page"
-msgstr "Страна"
+msgstr "Page"
 
 #: relations.html:4 subchapter.html:4 subchapter.html:6
 msgid "Previous chapter"
-msgstr "Претходно лекција"
+msgstr "Previous chapter"
 
 #: relations.html:7 subchapter.html:9
 msgid "Next chapter"
-msgstr "Следећа лекција"
+msgstr "Next chapter"
 
 #: sourcelink.html:3
 msgid "Source"
-msgstr "Извор"
+msgstr "Source"

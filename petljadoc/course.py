@@ -153,7 +153,8 @@ class Activity:
     def __init__(self, activity_type, title, src, guid, description, nbsrc):
         self.activity_type = activity_type
         self.title = title
-        self.nbsrc = nbsrc
+        self.guid = guid
+        self.nbsrc = nbsrc if nbsrc else ''
         self.description = description if description else ''
         if self.activity_type == 'video':
             self.src = video_url(src)
@@ -178,13 +179,7 @@ class Activity:
                 self.toc_url = src.split('.')[0].replace(" ", "%20")
                 self.activity_html_file_src = self.src.replace('.rst','.html').replace("?","") 
         self.toc_url = normalize(self.toc_url)
-        if guid.find('/') == -1:
-            self.guid = guid
-            self.alias = ''
-        else:
-            self.guid = guid.split('/')[0]
-            self.alias = guid.split('/')[1]
-
+        
     def get_src_ext(self):
         if len(self.src.rsplit('.')) > 1:
             return self.src.rsplit('.')[1]
@@ -314,7 +309,6 @@ def video_url(src):
 
 
 class ActivityTypeValueError(Exception):
-
     def __init__(self, *args):
         super(ActivityTypeValueError, self).__init__(args[0])
         if args:

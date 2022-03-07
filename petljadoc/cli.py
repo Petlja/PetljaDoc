@@ -200,24 +200,7 @@ def export():
             _course_export_type = _prompt("Do you wish to export as single or multy sco",
                                  default="single")
             data = json.load(f)
-            if _course_export_type == "single":
-                settings = {
-            "navigation": True,
-            "copy_right": True,
-            "header": True,
-            "petlja_links" :True
-            }
-            else:
-                settings = {
-            "navigation": False,
-            "copy_right": True,
-            "header": True,
-            "petlja_links" :True
-            }
-
-            old_settings = write_page_settings(settings)
             build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
-            write_page_settings(old_settings)
             scrom_template = resource_filename('petljadoc', 'scorm-templates')
             copy_dir(scrom_template,'_build')
             scorm_package = ScormPackager()
@@ -511,7 +494,7 @@ def create_course():
                         lesson, _LESSON_LEVEL, YamlLoger.ATR_LESSON_GUID, args=[lesson_line, i])
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_DESC], description = check_component(
                         lesson, _LESSON_LEVEL, YamlLoger.ATR_DESC, required=False)
-                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_NBSRC], nbsrc = check_component(
+                    error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_NBSRC], lesson_nbsrc = check_component(
                         lesson, _LESSON_LEVEL, YamlLoger.ATR_LESSON_NBSRC, required=False)
                     error_log[order_prefix_lesson + YamlLoger.ATR_LESSON_ACTIVITIES], lesson_activities = check_component(
                         lesson, _LESSON_LEVEL, YamlLoger.ATR_ACTIVITY, args=[lesson_line, i])
@@ -558,7 +541,7 @@ def create_course():
 
                             else:
                                 active_activies.append(Activity(
-                                    activity_type, activity_title, activity_src, activity_guid, activity_description, nbsrc if nbsrc else None))
+                                    activity_type, activity_title, activity_src, activity_guid, activity_description, lesson_nbsrc))
 
                     active_lessons.append(
                         Lesson(title, folder, guid, description, archived_activities, active_activies))
@@ -732,13 +715,6 @@ def read_page_settings():
             "petlja_links" :True
             }
     return template
-
-def write_page_settings(new_settings):
-    old_settings = read_page_settings()
-    with open('template_settings.json', mode='w', encoding='utf8') as file:
-        file.write(json.dumps(new_settings))
-    return old_settings
-
 
 def smart_reload(root_src_dir, root_dst_dir):
     for src_dir, _, files in os.walk(root_dst_dir):

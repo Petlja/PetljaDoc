@@ -28,6 +28,7 @@
 
 {% set css_files = css_files + 
   [
+    '_static'+'/basic.css',
     '_static'+'/user-highlights.css',
     'https://use.fontawesome.com/releases/v5.1.1/css/all.css',
     'https://fonts.googleapis.com/css?family=Source+Sans+Pro',
@@ -39,7 +40,7 @@
 %}
 
 {%- if page_settings is not defined -%}
-{% set page_settings = namespace(header=true,navigation=true) %}
+{% set page_settings = namespace(copy_right=true,navigation=true,header_nav=true,petlja_links=true) %}
 {%- endif -%}
 
 {%block lang %}
@@ -49,19 +50,23 @@
 {% macro navBar() %}
 <div id="navbar" class="content-header">
   <div class="right-side-nav">
+    {% if course.externalLinkLinks|length > 0 %}
     <div id="usefulLinksToggle" class="useful-links-toggle">
         <a class="dropdown-toggle dropdown-toggle-burger" role="button" href="#" id="usefulLinksDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-bars fa-2x"></i>
         </a>
         <div class="dropdown-menu dropdown-nav-links shadow-lg" aria-labelledby="usefulLinksDropdown" x-placement="bottom-start" style="position: absolute; transform: translate3d(-55px, 32px, 0px); top: 0px; left: 0px; will-change: transform;">
-          <div class="links-title">_('Korisni linkovi')</div>
+          <div class="links-title"> {{ _('Useful links' )}}</div>
           {% for n in range(course.externalLinkTexts| length) -%}
           <div class="useful-link">
             <a href="{{course.externalLinkLinks[n]}}" target="_blank">{{course.externalLinkTexts[n]}}</a></div>
           {% endfor %}
         </div>
     </div>
+
+    {% endif %}
 </div>
+{%if page_settings.petlja_links %}
 <div class="left-side-nav">
   <div class="course-logo-nav">
       <a target="_blank" href="https://petlja.org">
@@ -74,7 +79,10 @@
       </a>
   </div>
 </div>
+{% endif %}
+{% if pagename != 'index' %}
 <div class="content-header-label" id = "content-header-label" href="{{pathto('', 1)}}">{{ course.shortDesc }}</div>
+{% endif %}
 </div>
 {% endmacro %}
 
@@ -113,7 +121,7 @@
 {% block sidebarsourcelink %}{% endblock %}
 
 {%- block content %}
-{% if page_settings.header %}
+{% if page_settings.header_nav %}
 {{ navBar() }}
 {% endif %}
 {% if pagename == 'index' %}
@@ -123,20 +131,28 @@
 {% else %}
 
 <div class="petljaCourseContainer">
-{% if page_settings.navigation%}
+{% if page_settings.navigation %}
 <div class="petljaCourseContent">
+  {{ sidebar()}}
+</div>
+{% else %}
+<div class="petljaCourseContent d-none">
   {{ sidebar()}}
 </div>
 {% endif %}
 
 {% if page_settings.navigation%}
-<div class="lectureContent" id="main-content">
+<div class="lectureContent">
 {% else %}
-<div class="container" id="main-content" style="padding-left: 20px; height: calc(100vh - 115px);">
+<div class="container" style="padding-left: 20px; height: calc(100vh - 115px);">
 {% endif %}
   <div id="errors">
   </div>
+  {% if page_settings.navigation%}
   <div class="lectureContentMaterial">
+  {% else %}
+  <div class="lectureContentMaterial" style="overflow-x: visible;">
+  {% endif %}
     <div id="main-content">
     {% block body %}
     {% endblock %}
@@ -146,11 +162,15 @@
     {% endblock %}
   </div>
 </div>
+<div class="petljadoc-resources">
+  <span class="pull-left">(Created using  <a href="https://pypi.org/project/Sphinx/">Swinx</a>, <a href="http://runestoneinteractive.org/">RunestoneComponents</a> and <a href="https://github.com/Petlja/PetljaDoc">PetljaDoc</a>) <br> © 2022 Petlja</span>
+</div>
+{% if page_settings.navigation%}
 <div class="lectureToolbox">
 
   <label class="font-size-toggle" id="fontSizeToggle">
 
-      <i class="fas fa-font"></i><label>Слова</label>
+      <i class="fas fa-font"></i><label>{{ _('Letters') }}</label>
   </label>
   <div class="font-change d-none" id="fontChangeModal">
       <span class="dec-letter-icon" id="decLetterIcon">A-</span>
@@ -158,6 +178,7 @@
       <span class="inc-letter-icon" id="incLetterIcon">A+</span>
   </div>
 </div>
+{% endif %}
 </div>
 {% endif %}
 {%- endblock %}
