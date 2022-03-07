@@ -33,7 +33,7 @@ Commands:
   - `init-course`&nbsp;&nbsp;&nbsp;&nbsp;Create a new online course project in your current directory
   - `init-runestone`&nbsp;&nbsp;&nbsp;&nbsp;Create a new Runestone project in your current directory
   - `preview`&nbsp;&nbsp;&nbsp;&nbsp;Build the project, open it in a web browser, watch for changes, rebuild changed files and refresh browser after rebuild (using [sphinx-autobuild](https://github.com/GaretJax/sphinx-autobuild))
-  - `publish`&nbsp;&nbsp;&nbsp;&nbsp;Build a Runestone project (like `runestone build --all`) and copy produced content in `docs` subfolder (ready to be published using GitHub Pages)
+  - `publish`&nbsp;&nbsp;&nbsp;&nbsp;Build the project and copy produced content in `docs` subfolder (ready to be published using GitHub Pages)
 
 By using `petljadoc preview`, an author may keep opened a browser window for preview. Any saved changes will be updated in browser in about 5-10 seconds.
 
