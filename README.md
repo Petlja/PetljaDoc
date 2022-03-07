@@ -1,4 +1,4 @@
-# PetljaDoc - Petlja's tool for interactive books
+# PetljaDoc - Petlja's tool for eLearning content
 
 The tool is based on https://github.com/RunestoneInteractive/RunestoneComponents and https://github.com/sphinx-doc/sphinx and includes:
 
