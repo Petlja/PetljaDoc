@@ -190,7 +190,7 @@ def clean():
     delete_file('course.json')
 
 
-@main.command("export")
+#@main.command("export")
 def export():
     """
     Export course as a SCORM package
