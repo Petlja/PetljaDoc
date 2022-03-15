@@ -17,9 +17,9 @@
                         <a href=../{{lesson.folder_url}}/{{activity.toc_url}}.html>
                     {%- endif -%}
                     <div class="studioLecture" id=activity-{{activity.toc_url}}>
-                        {%- if "reading" == activity.activity_type -%}
+                        {%- if "reading" == activity.type -%}
                         <i class="fas fa-file-alt activity-icon"></i>
-                        {%- elif "video" == activity.activity_type -%}
+                        {%- elif "video" == activity.type -%}
                         <i class="fas fa-film activity-icon"></i>
                         {%- else -%}
                         <i class="far fa-question-circle activity-icon"></i>

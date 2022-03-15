@@ -86,6 +86,7 @@ _ACTIVITY_TYPES = ['reading', 'video', 'quiz', 'coding-quiz']
 # ISO Code : Sphinx language code https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-language
 _LANGUAGE_META_TAG = {'sr-Cyrl': 'sr_RS', 'sr-Latn': 'sr@latn'}
 
+
 def check_for_runestone_package():
     #pylint: disable=E1133
     if 'runestone' in {pkg.key for pkg in working_set}:
@@ -100,7 +101,7 @@ def init_template_arguments(template_dir, defaults, project_type):
                                  default=default_project_name, force_default=defaults)
     ta['language'] = _prompt("Project language: (supported languages: en, sr, sr-Cyrl, sr-Latn)",
                              default="en", force_default=defaults)
-    ta['language_meta'] =  ta['language']
+    ta['language_meta'] = ta['language']
     if ta['language'] in _LANGUAGE_META_TAG:
         ta['language'] = _LANGUAGE_META_TAG[ta['language']]
     while ' ' in ta['project_name']:
@@ -186,10 +187,10 @@ def clean():
     delete_dir('_build')
     delete_dir('_intermediate')
     delete_dir('__pycache__')
-    delete_file('course')
+    delete_file('course.json')
 
 
-#@main.command("export")
+@main.command("export")
 def export():
     """
     Export course as a SCORM package
@@ -198,18 +199,19 @@ def export():
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
             _course_export_type = _prompt("Do you wish to export as single or multy sco",
-                                 default="single")
+                                          default="single")
             data = json.load(f)
-            build_or_autobuild("export", sphinx_build=True, project_type=data["project_type"])
+            build_or_autobuild("export", sphinx_build=True,
+                               project_type=data["project_type"])
             scrom_template = resource_filename('petljadoc', 'scorm-templates')
-            copy_dir(scrom_template,'_build')
+            copy_dir(scrom_template, '_build')
             scorm_package = ScormPackager()
             if _course_export_type == "single":
-                scorm_package.create_package_for_single_sco_course() 
-                scorm_package.create_single_sco_packages_for_lectures()    
+                scorm_package.create_package_for_single_sco_course()
+                scorm_package.create_single_sco_packages_for_lectures()
             else:
                 scorm_package.create_package_for_course()
-                scorm_package.create_packages_for_lectures()   
+                scorm_package.create_packages_for_lectures()
             print('The packages are in export directory')
 
 
@@ -246,7 +248,7 @@ def init_runestone(yes, defaults):
     init_template_arguments(template_dir, defaults, 'runestone')
 
 
-def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type = 'runestone'):
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone'):
     path = project_path()
     if not path:
         raise click.ClickException(
@@ -258,7 +260,7 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     if not buildPath.exists:
         os.makedirs(buildPath)
     args = []
-    
+
     if sphinx_autobuild:
         srcdir = os.path.realpath(paver_options.build.sourcedir)
         outdir = os.path.realpath(paver_options.build.builddir)
@@ -273,7 +275,8 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
 
-        server.serve(port=port, host="127.0.0.1", root=outdir, open_url_delay=5)
+        server.serve(port=port, host="127.0.0.1",
+                     root=outdir, open_url_delay=5)
 
     if sphinx_build:
         if not os.path.exists(os.path.join(path, '_build')) and project_type == 'course':
@@ -306,8 +309,10 @@ def preview(port):
                 prebuild()
                 watch_server([os.path.realpath('_sources'),
                               os.path.realpath('_images')])
-                build_or_autobuild("preview", port=port, sphinx_build=True, project_type=data["project_type"])
-                build_or_autobuild("preview", port=port, sphinx_autobuild=True, project_type=data["project_type"])
+                build_or_autobuild(
+                    "preview", port=port, sphinx_build=True, project_type=data["project_type"])
+                build_or_autobuild(
+                    "preview", port=port, sphinx_autobuild=True, project_type=data["project_type"])
             else:
                 build_or_autobuild("preview", port=port, sphinx_build=True)
                 build_or_autobuild("preview", port=port, sphinx_autobuild=True)
@@ -326,7 +331,8 @@ def publish():
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
             data = json.load(f)
-            build_or_autobuild("publish", sphinx_build=True, project_type=data["project_type"])
+            build_or_autobuild("publish", sphinx_build=True,
+                               project_type=data["project_type"])
     else:
         build_or_autobuild("publish", sphinx_build=True)
     if not path:
@@ -341,7 +347,7 @@ def publish():
 
     def filter_name(item):
         if item not in {"doctrees", "_sources", ".buildinfo", "search.html",
-                        "searchindex.js", "objects.inv", "pavement.py","course-errors.js"}:
+                        "searchindex.js", "objects.inv", "pavement.py", "course-errors.js"}:
             return True
 
     copy_dir(buildPath, publishPath, filter_name)
@@ -503,7 +509,8 @@ def create_course():
 
                     if lesson_archived_activities != '':
                         for j, archived_activity in enumerate(lesson_archived_activities, start=1):
-                            order_prefix_archived_lessons = str(i)+'_'+str(j)+'_'
+                            order_prefix_archived_lessons = str(
+                                i)+'_'+str(j)+'_'
                             archived_activity_line = archived_activity['__line__']
                             error_log[order_prefix_archived_lessons + YamlLoger.ATR_LESSON_ARCHIVED_ACTIVITIE_GUID], archived_activity_guid = check_component(
                                 archived_activity, _ACTIVITY_LEVEL, YamlLoger.ATR_GUID, args=[i, j, archived_activity_line])
@@ -578,7 +585,7 @@ def check_component(dictionary, atr_type, component, required=True, args=None):
 
 def write_to_index(index, course):
     index.write(_INDEX_META_DATA.format(rst_title(course.title), course.longDesc.replace('\n', ' '),
-                                       course.shortDesc, course.willlearn, course.requirements, course.toc, course.externalLinks))
+                                        course.shortDesc, course.willlearn, course.requirements, course.toc, (' '.join(map(str, course.externalLinks)))))
     index.write(_INDEX_TEMPLATE_HIDDEN.format(3))
 
 
@@ -634,6 +641,8 @@ def create_intermediate_folder(course, path, intermediatPath):
 
 def create_activity_RST(course, index, path, intermediatPath):
     for lesson in course.active_lessons:
+        os.makedirs(intermediatPath+lesson.folder, exist_ok=True)
+        os.makedirs('_sources/'+lesson.folder, exist_ok=True)
         copy_dir('_sources/'+lesson.folder, intermediatPath+lesson.folder)
         index.write(' '*4+lesson.title+' <' + lesson.folder + '/index>\n')
         section_index = open(path.joinpath(lesson.folder).joinpath('index.rst'),
@@ -642,60 +651,69 @@ def create_activity_RST(course, index, path, intermediatPath):
         section_index.write(rst_title(lesson.title))
         section_index.write(_INDEX_TEMPLATE.format(1))
         for activity in lesson.active_activies:
-            if activity.activity_type in ['reading', 'quiz']:
-                if activity.get_src_ext() == 'rst':
+            if activity.type in ['reading', 'quiz']:
+                if activity.get_src_type() == 'rst':
                     section_index.write(' '*4+activity.src+'\n')
                     with open(intermediatPath+lesson.folder+'/'+activity.src, mode='r+', encoding='utf8') as file:
                         content = file.read()
                         file.seek(0, 0)
                         file.write(_META_DATA.format(activity.title,
-                                                    activity.activity_type) + content)
-                if activity.get_src_ext() == 'pdf':
-                    pdf_rst = open(intermediatPath+lesson.folder+'/'+ activity.title+'.rst',
+                                                     activity.type) + content)
+                if activity.get_src_type() == 'pdf':
+                    pdf_rst = open(intermediatPath+lesson.folder+'/' + activity.rst_file_src,
                                    mode='w+', encoding='utf-8')
                     pdf_rst.write(rst_title(activity.title))
                     pdf_rst.write(_PDF_TEMPLATE.format(
-                        '/_static/'+activity.src))
+                        '../_static/'+activity.src))
                     section_index.write(' '*4+activity.title+'.rst\n')
-                if activity.get_src_ext() == 'ipynb':
+                if activity.get_src_type() == 'ipynb':
                     c = Config()
                     c.TagRemovePreprocessor.remove_cell_tags = ("remove_cell",)
-                    c.TagRemovePreprocessor.remove_all_outputs_tags = ('remove_output',)
-                    c.TagRemovePreprocessor.remove_input_tags = ('remove_input',)
+                    c.TagRemovePreprocessor.remove_all_outputs_tags = (
+                        'remove_output',)
+                    c.TagRemovePreprocessor.remove_input_tags = (
+                        'remove_input',)
                     c.TagRemovePreprocessor.enabled = True
-                    c.HTMLExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
-
-                    html_exporter = HTMLExporter(config=c)                    
-                    template_paths_root = os.path.dirname(os.path.realpath(__file__))
-                    html_exporter.template_paths = [template_paths_root +'/nb-templates/classic2/', template_paths_root+'/nb-templates/classic2/base']
-                    ipynb_rst = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.rst',
-                                   mode='w+', encoding='utf-8')
+                    c.HTMLExporter.preprocessors = [
+                        "nbconvert.preprocessors.TagRemovePreprocessor"]
+                    html_exporter = HTMLExporter(config=c)
+                    template_paths_root = resource_filename(
+                        'petljadoc', 'nb-templates/classic2')
+                    template_paths_base = resource_filename(
+                        'petljadoc', 'nb-templates/classic2/base')
+                    html_exporter.template_paths = [
+                        template_paths_root, template_paths_base]
+                    ipynb_rst = open(intermediatPath+lesson.folder+'/' + activity.rst_file_src,
+                                     mode='w+', encoding='utf-8')
                     ipynb_rst.write(rst_title(activity.title))
-                    ipynb_rst.write(_HTML_FILE_TEMPLATE.format(normalize(activity.title)+'.html'))
+                    ipynb_rst.write(_HTML_FILE_TEMPLATE.format(
+                        activity.html_file_src))
                     if activity.nbsrc:
                         jp_file = open(activity.nbsrc, encoding='UTF-8')
-                        (body, _)= html_exporter.from_file(jp_file)
+                        (body, _) = html_exporter.from_file(jp_file)
                         body = transfer_images(body, activity.nbsrc)
                     else:
-                        jp_file = open('_sources/'+lesson.folder+'/'+activity.src, encoding='UTF-8')
-                        (body, _)= html_exporter.from_file(jp_file)
-                    html_file = open(intermediatPath+lesson.folder+'/'+ normalize(activity.title) +'.html','w+',encoding='UTF-8')
+                        jp_file = open('_sources/'+lesson.folder +
+                                       '/'+activity.src, encoding='UTF-8')
+                        (body, _) = html_exporter.from_file(jp_file)
+                    html_file = open(intermediatPath+lesson.folder+'/' +
+                                     activity.html_file_src, 'w+', encoding='UTF-8')
                     html_file.write(body)
                     html_file.close()
-                    section_index.write(' '*4+ normalize(activity.title) +'.rst\n')
-            if activity.activity_type == 'video':
-                video_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                    section_index.write(' '*4 + activity.rst_file_src + '\n')
+            if activity.type == 'video':
+                video_rst = open(intermediatPath+lesson.folder+'/'+activity.rst_file_src,
                                  mode='w+', encoding='utf-8')
                 video_rst.write(rst_title(activity.title))
                 video_rst.write(_YOUTUBE_TEMPLATE.format(activity.src))
-                section_index.write(' '*4+activity.title+'.rst\n')
-            if activity.activity_type == 'coding-quiz':
-                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.title+'.rst',
+                section_index.write(' '*4+activity.rst_file_src+'\n')
+            if activity.type == 'coding-quiz':
+                coding_quiz_rst = open(intermediatPath+lesson.folder+'/'+activity.rst_file_src,
                                        mode='w+', encoding='utf-8')
                 coding_quiz_rst.write(rst_title(activity.title))
                 for s in activity.src:
                     coding_quiz_rst.write(_LINK_TEMPLATE.format(s))
-                section_index.write(' '*4+activity.title+'.rst\n')
+                section_index.write(' '*4+activity.rst_file_src+'\n')
 
 
 def read_course():
@@ -703,18 +721,6 @@ def read_course():
         course = json.load(file)
         return course
 
-def read_page_settings():
-    try:
-        file = open('template_settings.json', mode='r', encoding='utf8')
-        template = json.load(file)
-    except:
-        template = {
-            "navigation": True,
-            "copy_right": True,
-            "header" : True,
-            "petlja_links" :True
-            }
-    return template
 
 def smart_reload(root_src_dir, root_dst_dir):
     for src_dir, _, files in os.walk(root_dst_dir):
@@ -762,20 +768,23 @@ def rst_title(title):
     title_bar = '='*len(title)+'\n'
     return title_bar + title+'\n' + title_bar
 
+
 def transfer_images(html, file_path):
     dir_path = os.path.dirname(file_path)
-    image_path_list = [x.group('image') for x in re.finditer(r"<img src=\"(?!data:image)(?P<image>[^\"]+)\"",html)]
+    image_path_list = [x.group('image') for x in re.finditer(
+        r"<img src=\"(?!data:image)(?P<image>[^\"]+)\"", html)]
     for image_path in image_path_list:
         image = os.path.basename(image_path)
         if not os.path.isdir('_build/_images/'):
             os.mkdir('_build/_images/')
         try:
-            shutil.copyfile(os.path.join(dir_path, image_path), '_build/_images/'+image)
+            shutil.copyfile(os.path.join(dir_path, image_path),
+                            '_build/_images/'+image)
         except:
             print_error('Missing image from Jupyter Folder: '+image, True)
-        html = html.replace("<img src=\""+image_path+"\"","<img src=\"../_images/"+image+"\"")
+        html = html.replace("<img src=\""+image_path+"\"",
+                            "<img src=\"../_images/"+image+"\"")
     return html
-
 
 
 class _WatchdogHandler(FileSystemEventHandler):
@@ -861,6 +870,7 @@ class SafeLineLoader(SafeLoader):
 def get_builder(watcher, sphinx_args, *, pre_build_commands):
     """Prepare the function that calls sphinx."""
     sphinx_command = [sys.executable, "-m", "sphinx"] + sphinx_args
+
     def build():
         """Generate the documentation using ``sphinx``."""
         if watcher.filepath:
@@ -870,6 +880,7 @@ def get_builder(watcher, sphinx_args, *, pre_build_commands):
         run_with_surrounding_separators(sphinx_command, heading=heading)
 
     return build
+
 
 def run_with_surrounding_separators(args, *, heading, include_footer=True):
     """Run a subprocess with the output surrounded by a box.
@@ -902,9 +913,10 @@ def run_with_surrounding_separators(args, *, heading, include_footer=True):
     except IOError:
         pass
     finally:
-            stdout.close()
+        stdout.close()
     sys.stdout.write(footer + "\n")
 
-def normalize(string : str):
-    reserved_chars = ['?','>',':','"','/','\\','|','*']
+
+def normalize(string: str):
+    reserved_chars = ['?', '>', ':', '"', '/', '\\', '|', '*']
     return ''.join(char for char in string if char not in reserved_chars)
