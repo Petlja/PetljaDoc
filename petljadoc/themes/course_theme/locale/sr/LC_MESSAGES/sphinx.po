@@ -70,7 +70,7 @@ msgstr "Страна"
 
 #: relations.html:4 subchapter.html:4 subchapter.html:6
 msgid "Previous chapter"
-msgstr "Претходно лекција"
+msgstr "Претходна лекција"
 
 #: relations.html:7 subchapter.html:9
 msgid "Next chapter"
