@@ -721,6 +721,13 @@ def read_course():
         course = json.load(file)
         return course
 
+def read_page_settings():
+    try:
+        file = open('template_settings.json', mode='r', encoding='utf8')
+        template = json.load(file)
+    except FileNotFoundError:
+        template = None
+    return template
 
 def smart_reload(root_src_dir, root_dst_dir):
     for src_dir, _, files in os.walk(root_dst_dir):

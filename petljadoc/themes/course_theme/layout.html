@@ -39,7 +39,7 @@
   ]
 %}
 
-{%- if page_settings is not defined -%}
+{%- if page_settings is none -%}
 {% set page_settings = namespace(copy_right=true,navigation=true,header_nav=true,petlja_links=true) %}
 {%- endif -%}
 
@@ -162,9 +162,11 @@
     {% endblock %}
   </div>
 </div>
+{% if page_settings.copy_right %}
 <div class="petljadoc-resources">
   <span class="pull-left">(Created using  <a href="https://pypi.org/project/Sphinx/">Swinx</a>, <a href="http://runestoneinteractive.org/">RunestoneComponents</a> and <a href="https://github.com/Petlja/PetljaDoc">PetljaDoc</a>) <br> © 2022 Petlja</span>
 </div>
+{% endif %}
 {% if page_settings.navigation%}
 <div class="lectureToolbox">
 
