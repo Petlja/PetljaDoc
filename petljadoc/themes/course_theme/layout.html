@@ -38,7 +38,9 @@
     '_static'+'/nbstyle.css'
   ]
 %}
-
+{%- if page_settings is not defined -%}
+{% set page_settings = none %}
+{%- endif -%}
 {%- if page_settings is none -%}
 {% set page_settings = namespace(copy_right=true,navigation=true,header_nav=true,petlja_links=true) %}
 {%- endif -%}
