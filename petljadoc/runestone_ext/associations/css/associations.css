@@ -1,0 +1,63 @@
+.asc-clue{
+    width: 250px;
+    height: 25px;
+    margin:auto;
+    margin-bottom: 10px;
+    background-color: aquamarine;
+    text-align: center;
+}
+
+.asc-input{
+    width: 250px;
+    margin-left:10px;
+    margin-bottom: 15px;
+}
+.asc-test-answer{
+    width: 250px;
+    height: 25px;
+    margin:auto;
+    background-color: aquamarine;
+    text-align: center;
+}
+.asc-test-answer:hover{
+    cursor: pointer;
+}
+.correct-msg{
+    text-align: center;
+    width: 250px;
+    display: none;
+}
+
+.asc-group{
+    width: 270px;
+    padding: 10px;
+    position: relative;
+    float: left;
+    margin-right: 4px;
+}
+
+.asc{
+    width: 600px;
+    height:  auto;
+    border: 1px solid green;
+    overflow: hidden;
+}
+
+.odgovor{
+    margin-top:25px;
+    width: 600px;
+    position: relative;
+    float: left;
+}
+.odgovor input{
+    width: 300px;
+    margin-left:150px;
+}
+.asc-final-test-answer{
+    width: 300px;
+    height: 25px;
+    margin-left:150px;
+    margin-top:10px;
+    background-color: aquamarine;
+    text-align: center;
+}
