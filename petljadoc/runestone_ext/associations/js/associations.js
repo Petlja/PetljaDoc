@@ -32,7 +32,7 @@ function WrappingAscorinaion(){
             clue_div.setAttribute("data-ord",feald);
             clue_div.innerText = feald;
             clue_div.addEventListener("click",function(clicked){
-                clicked.srcElement.innerText = this.clueGroupFealdMap[clicked.srcElement.getAttribute("data-ord")];
+                clicked.event.target.innerText = this.clueGroupFealdMap[clicked.event.target.getAttribute("data-ord")];
             }.bind(this), {once : true});
             group_div.appendChild(clue_div);
         }
@@ -47,12 +47,12 @@ function WrappingAscorinaion(){
         input_button.setAttribute("data-input-id", "group" + opts["group"])
         input_button.setAttribute("data-answerRe",opts["group-answ"])
         input_button.addEventListener("click",function(clicked){
-            userAnswer = document.getElementById(clicked.srcElement.getAttribute("data-input-id")).value.trim()
+            userAnswer = document.getElementById(clicked.event.target.getAttribute("data-input-id")).value.trim()
             if(userAnswer.match(opts["answer"])){
                 group_div.style.border = "2px solid green"
-                clicked.srcElement.parentElement.nextElementSibling.innerText = userAnswer;
-                clicked.srcElement.parentElement.nextElementSibling.style.display = "block";
-                clicked.srcElement.parentElement.remove()
+                clicked.event.target.parentElement.nextElementSibling.innerText = userAnswer;
+                clicked.event.target.parentElement.nextElementSibling.style.display = "block";
+                clicked.event.target.parentElement.remove()
             }
             else{
                 input.style.border = "2px solid red"
