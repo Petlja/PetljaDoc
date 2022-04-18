@@ -24,8 +24,16 @@
 }
 .correct-msg{
     text-align: center;
-    width: 250px;
+    height: 60px;
+    width: 270px;
     display: none;
+    position: relative;
+    top: 20px;
+}
+
+.correct-msg-final{
+    text-align: center;
+    width: 100%;
 }
 
 .asc-group{
@@ -34,13 +42,15 @@
     position: relative;
     float: left;
     margin-right: 4px;
+    margin-bottom: 4px;
 }
 
 .asc{
     width: 600px;
     height:  auto;
-    border: 1px solid green;
     overflow: hidden;
+    padding: 10px;
+    border: 2px solid transparent;
 }
 
 .odgovor{
