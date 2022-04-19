@@ -9,3 +9,5 @@ pyyaml>=5
 watchdog>=0.10
 livereload>=2.6.3
 nbconvert>=6.1.0
+lxml
+jinja2==3.0
