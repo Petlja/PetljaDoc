@@ -1,5 +1,11 @@
 function WrappingAscorinaion(){
-    associationsList = [];
+    var associationsList = [];
+
+    const checkMarkSVG =  `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+        <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+    </svg>
+    `;
 
     function Associations(opts){
         if(opts){
@@ -15,84 +21,85 @@ function WrappingAscorinaion(){
         this.finalAnswerRegex = new RegExp(this.finalAnswer);
         this.clueGroupFealdMap = {}
         for(var i=0;i<this.groupList.length;i++){
-            this.createAscGroup(this.groupList[i]);
+            if (this.groupList[i]["clues"].length > 0 &&  this.groupList[i]["group-answ"] !== "")
+                this.createAscGroup(this.groupList[i]);
         }
         this.createFinalAnswerDiv();
     }
 
     Associations.prototype.createAscGroup = function(opts){
-        var group_div = document.createElement("div");
-        group_div.classList.add("asc-group")
+        var groupDiv = document.createElement("div");
+        groupDiv.classList.add("asc-group")
         for(var i=0;i<opts["clues"].length;i++){
-            const clue_div = document.createElement("div");
-            clue_div.classList.add("asc-clue");
-            clue_div.classList.add("asc-clue-hidden");
+            const clueDiv = document.createElement("div");
+            clueDiv.classList.add("asc-clue");
+            clueDiv.classList.add("asc-clue-hidden");
             var feald = opts["group"] + (i+1);
             this.clueGroupFealdMap[feald] = opts["clues"][i]
-            clue_div.setAttribute("data-ord",feald);
-            clue_div.innerText = feald;
-            clue_div.addEventListener("click",function(clicked){
-                clicked.event.target.innerText = this.clueGroupFealdMap[clicked.event.target.getAttribute("data-ord")];
+            clueDiv.setAttribute("data-ord",feald);
+            clueDiv.innerText = feald;
+            clueDiv.addEventListener("click",function(clicked){
+                clicked.currentTarget.innerText = this.clueGroupFealdMap[clicked.currentTarget.getAttribute("data-ord")];
             }.bind(this), {once : true});
-            group_div.appendChild(clue_div);
+            groupDiv.appendChild(clueDiv);
         }
-        var input_div = document.createElement("div");
-        var input_button_div = document.createElement("div");
+        var inputDiv = document.createElement("div");
+        var inputButtonDiv = document.createElement("div");
         var input = document.createElement("input");
         input.classList.add("asc-input")
         input.id = "group" + opts["group"]
-        var input_button = document.createElement("div");
-        input_button.classList.add("asc-test-answer")
-        input_button.innerText = "Resi Kolonu"
-        input_button.setAttribute("data-input-id", "group" + opts["group"])
-        input_button.setAttribute("data-answerRe",opts["group-answ"])
-        input_button.addEventListener("click",function(clicked){
-            userAnswer = document.getElementById(clicked.event.target.getAttribute("data-input-id")).value.trim()
+        var inputButton = document.createElement("div");
+        inputButton.classList.add("asc-test-answer")
+        inputButton.innerText = "Resi Kolonu"
+        inputButton.setAttribute("data-input-id", "group" + opts["group"])
+        inputButton.setAttribute("data-answerRe",opts["group-answ"])
+        inputButton.addEventListener("click",function(clicked){
+            userAnswer = document.getElementById(clicked.currentTarget.getAttribute("data-input-id")).value.trim()
             if(userAnswer.match(opts["answer"])){
-                group_div.style.border = "2px solid green"
-                clicked.event.target.parentElement.nextElementSibling.innerText = userAnswer;
-                clicked.event.target.parentElement.nextElementSibling.style.display = "block";
-                clicked.event.target.parentElement.remove()
+                clicked.currentTarget.parentElement.nextElementSibling.innerText = userAnswer;
+                clicked.currentTarget.parentElement.nextElementSibling.style.display = "block";
+                clicked.currentTarget.parentElement.nextElementSibling.innerHtml = clicked.currentTarget.parentElement.nextElementSibling.innerHtml + checkMarkSVG
+                clicked.currentTarget.parentElement.remove()
             }
             else{
-                input.style.border = "2px solid red"
+                input.classList.add("error-border");
             }
         });
-        var corect_msg = document.createElement("div");
-        corect_msg.classList.add("correct-msg")
+        var corectMsg = document.createElement("div");
+        corectMsg.classList.add("correct-msg")
 
-        input_button_div.appendChild(input);
-        input_button_div.appendChild(input_button);
+        inputButtonDiv.appendChild(input);
+        inputButtonDiv.appendChild(inputButton);
 
-        input_div.appendChild(input_button_div);
-        input_div.appendChild(corect_msg);
+        inputDiv.appendChild(inputButtonDiv);
+        inputDiv.appendChild(corectMsg);
 
-        group_div.appendChild(input_div);
+        groupDiv.appendChild(inputDiv);
 
-        this.opts.appendChild(group_div);
+        this.opts.appendChild(groupDiv);
     }
 
     Associations.prototype.createFinalAnswerDiv = function(){
         var finalAnswerDiv = document.createElement("div");
-        finalAnswerDiv.classList.add("odgovor")
+        finalAnswerDiv.classList.add("answer")
 
         var input = document.createElement("input");
         var inputTestButton = document.createElement("div");
-        inputTestButton.classList.add("asc-final-test-answer")
-        inputTestButton.innerText = "Test"
+        inputTestButton.classList.add("asc-final-test-answer");
+        inputTestButton.innerText = "Konacno resenje";
         inputTestButton.addEventListener("click",function(){
             userAnswer = input.value.trim()
             if(userAnswer.match(this.finalAnswerRegex)){
-                this.opts.style.border = "2px solid green"
                 inputTestButton.remove()
                 input.remove()
                 var correctDiv = document.createElement("div");
                 correctDiv.classList.add("correct-msg-final")
                 correctDiv.innerText = userAnswer;
-                finalAnswerDiv.appendChild(correctDiv)
+                correctDiv.innerHTML = correctDiv.innerHTML + checkMarkSVG;
+                finalAnswerDiv.appendChild(correctDiv);
             }
             else{
-                input.style.border = "2px solid red"
+                input.classList.add("error-border");
             }
         }.bind(this));
 

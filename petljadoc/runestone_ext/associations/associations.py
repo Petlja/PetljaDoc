@@ -2,6 +2,8 @@ __author__ = 'petlja'
 
 import os
 import shutil
+import json
+from tokenize import group
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -23,7 +25,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="associations" data-code="%(code)s" %(imgpath)s %(scale)s>
+    <div id="%(divid)s" class="asc" data-game='%(data)s'>
 """
 
 TEMPLATE_END = """
@@ -56,15 +58,65 @@ class AssociationsDirective(Directive):
     has_content = False
     option_spec = {}
     option_spec.update({
-        'folder': directives.unchanged,
-        'script': directives.unchanged,
-        'images': directives.unchanged,
-        'scale': directives.unchanged,
+        'final_answer': directives.unchanged,
+        'answer_a': directives.unchanged,
+        'group_a': directives.unchanged,
+        'answer_b': directives.unchanged,
+        'group_b': directives.unchanged,
+        'answer_c': directives.unchanged,
+        'group_c': directives.unchanged,
+        'answer_d': directives.unchanged,
+        'group_d': directives.unchanged,
     })
     def run(self):
         env = self.state.document.settings.env 
         self.options['divid'] = self.arguments[0]
-        ascnode = AssociationsDirective(self.options)
+        if 'final_answer' not in self.options:
+            raise self.error('Missing final_anser')
+
+        group_dict_a = {"group":"A"}
+        group_dict_b = {"group":"B"}
+        group_dict_c = {"group":"C"}
+        group_dict_d = {"group":"D"}
+
+        if 'answer_a' in self.options: 
+            group_dict_a["group-answ"] = self.options['answer_a']
+        else:
+            group_dict_a["group-answ"] = ""
+        if 'answer_b' in self.options: 
+            group_dict_b["group-answ"] = self.options['answer_b']
+        else:
+            group_dict_b["group-answ"] = ""
+        if 'answer_c' in self.options: 
+            group_dict_c["group-answ"] = self.options['answer_c']
+        else:
+            group_dict_c["group-answ"] = ""
+        if 'answer_d' in self.options: 
+            group_dict_d["group-answ"] = self.options['answer_d']
+        else:
+            group_dict_d["group-answ"] = ""
+
+        if 'group_a' in self.options: 
+            group_dict_a["clues"] = self.options['group_a'].split(',')
+        else:
+            group_dict_a["clues"] = []
+        if 'group_b' in self.options: 
+            group_dict_b["clues"] = self.options['group_b'].split(',')
+        else:
+            group_dict_b["clues"] = []
+        if 'group_c' in self.options: 
+            group_dict_c["clues"] = self.options['group_c'].split(',')
+        else:
+            group_dict_c["clues"] = []
+        if 'group_d' in self.options: 
+            group_dict_d["clues"] = self.options['group_d'].split(',')
+        else:
+            group_dict_d["clues"] = []
+
+        self.options['data'] = json.dumps({"clues" : [group_dict_a,group_dict_b,group_dict_c,group_dict_d],"answer": self.options["final_answer"]})
+
+        #self.options['data'] = '{"clues":[{"group":"A", "clues" : ["test","test2","test","test2"], "group-answ" : "Odgovor"},{"group":"B", "clues" : ["test3","test4","test","test2"],"group-answ" : "(O|o)dgovor"},{"group":"A", "clues" : ["test","test2"], "group-answ" : "Odgovor"},{"group":"B", "clues" : ["test3","test4"],"group-answ" : "(O|o)dgovor"}], "answer":42}'
+        ascnode = AssociationsQNode(self.options)
         return [ascnode]
 
 html_escape_table = {

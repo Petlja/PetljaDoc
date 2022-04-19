@@ -7,4 +7,4 @@ graft petljadoc/themes/course_theme/static
 graft petljadoc/themes/runestone_theme/static
 graft petljadoc/project-templates
 
-graft petljadoc/nbtemplates
+graft petljadoc/nb-templates
