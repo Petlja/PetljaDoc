@@ -8,6 +8,7 @@ from tokenize import group
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import add_i18n_js
 
 
 def setup(app):
@@ -17,8 +18,9 @@ def setup(app):
     app.add_stylesheet('associations.css')
 
     app.add_javascript('associations.js')
+    add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"associations-i18n")
 
-    app.add_node(AssociationsQNode, html=(visit_info_note_node, depart_info_note_node))
+    app.add_node(AssociationsQNode, html=(visit_associations_note_node, depart_associations_note_node))
 
 
 def html_page_context_handler(app, pagename, templatename, context, doctree):
@@ -39,14 +41,14 @@ class AssociationsQNode(nodes.General, nodes.Element):
         self.components = content
 
 
-def visit_info_note_node(self, node):
+def visit_associations_note_node(self, node):
     node.delimiter = "_start__{}_".format(node.components['divid'])
     self.body.append(node.delimiter)
     res = TEMPLATE_START % node.components
     self.body.append(res)
 
 
-def depart_info_note_node(self, node):
+def depart_associations_note_node(self, node):
     res = TEMPLATE_END
     self.body.append(res)
     self.body.remove(node.delimiter)
