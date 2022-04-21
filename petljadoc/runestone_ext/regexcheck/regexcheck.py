@@ -26,7 +26,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="asc" data-game='%(data)s'>
+    <div id="%(divid)s" class="regex-check">
 """
 
 TEMPLATE_END = """
