@@ -27,7 +27,7 @@ function WrappingAscorinaion(){
         this.createFinalAnswerDiv();
     }
 
-    Associations.prototype.createAscGroup = function(group,){
+    Associations.prototype.createAscGroup = function(group){
         var groupDiv = document.createElement("div");
         groupDiv.classList.add("asc-group");
         var cluesDiv = document.createElement("div");
@@ -57,10 +57,9 @@ function WrappingAscorinaion(){
         inputButton.classList.add("asc-test-answer");
         inputButton.innerText = $.i18n("msg_asc_solve_group");
         inputButton.setAttribute("data-input-id", "group" + group["group"]);
-        inputButton.setAttribute("data-answerRe",group["group-answ"]);
         inputButton.addEventListener("click",function(clicked){
             userAnswer = document.getElementById(clicked.currentTarget.getAttribute("data-input-id")).value.trim()
-            if(userAnswer.match(group["answer"])){
+            if(userAnswer.match(group['group-answ'])){
                 clicked.currentTarget.parentElement.nextElementSibling.innerText = userAnswer;
                 clicked.currentTarget.parentElement.nextElementSibling.style.display = "block";
                 clicked.currentTarget.parentElement.remove();
