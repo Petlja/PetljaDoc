@@ -3,10 +3,12 @@
     margin-bottom: 10px;
 }
 
-.blue{
-    background-color: lightblue;
-    margin-left: 2px;
-    margin-right: 2px;
+.blue:nth-child(2n+1){
+    background-color: rgb(178, 212, 224);
+}
+
+.blue:nth-child(2n){
+    background-color: rgb(9, 161, 212);
 }
 
 .regex-input{
@@ -22,19 +24,29 @@
     resize: none;
     height: 40px;
 }
-.regex-text{
-    width: 500px;
-    position:absolute;
-    top:0%;
-    height: 300px;
-    z-index: 1;
-    pointer-events: none;
-}
+
 .editor-wrapper{
     position: relative;
 }
+
+.regex-text{
+    width: 100%;
+    position:absolute;
+    top:0%;
+    height: 500px;
+    pointer-events: none;
+    font-family: inherit;
+    font-size: 20px;
+    line-height: 20px;
+    padding: 10px 0px 0px 10px;
+}
+
+.regex-text span{
+    font-size: 20px;
+    line-height: 20px;
+}
+
 .hidden-ta{
-    z-index: 2;
     color:transparent;
     background-color: transparent;
     border: 1px solid black;
@@ -46,14 +58,20 @@
     font-size: 20px;
     line-height: 20px;
     outline: 0;
-    padding: 10px 0px;
+    padding: 10px 0px 0px 10px;
     width: 100%;
     height: 500px;
     resize: none;
+    caret-color: black;
 }
 
+.hidden-ta::selection{
+    background-color: #CBE69E;
+}
+
+
 .title{
-    border-bottom: 1px solid #344f71;
+
     color: #344f71;
     font-weight: 600;
     margin: 0 0 7px;
@@ -63,4 +81,22 @@
 
 .test-text{
     margin-top: 20px;
+}
+
+.flags{
+    width: 30%;
+    position: relative;
+    float: right;
+    border-bottom: 1px solid #344f71;
+}
+
+.flag-markers{
+    position: relative;
+    float: right;
+    letter-spacing: 5px;
+}
+
+.cheat-sheet{
+    position:  absolute;
+    display: none;
 }
