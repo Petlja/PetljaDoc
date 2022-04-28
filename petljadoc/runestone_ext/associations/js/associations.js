@@ -84,7 +84,7 @@ function WrappingAscorinaion(){
         var input = document.createElement("input");
         var inputTestButton = document.createElement("div");
         inputTestButton.classList.add("asc-final-test-answer");
-        inputTestButton.innerText = $.i18n("msg_asc_solve_final");;
+        inputTestButton.innerText = $.i18n("msg_asc_solve_final");
         inputTestButton.addEventListener("click",function(){
             userAnswer = input.value.trim();
             if(userAnswer.match(this.finalAnswerRegex)){

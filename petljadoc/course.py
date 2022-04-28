@@ -96,6 +96,7 @@ class Course:
                 tmp_archived.append({'guid': activity}
                                     )
             self.dict['lessons'].append({'title': lesson.title,
+                                         'normalized_title': lesson.normalized_title,
                                          'guid': lesson.guid,
                                          'description':  lesson.description,
                                          'folder': lesson.folder,
@@ -143,6 +144,7 @@ class Course:
 class Lesson:
     def __init__(self, title, folder, guid, description, archived_activities, active_activities):
         self.title = title
+        self.normalized_title = normalize(title)
         self.guid = guid
         self.description = description if description else ''
         self.archived_activities = archived_activities

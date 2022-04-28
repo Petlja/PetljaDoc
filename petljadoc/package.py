@@ -96,12 +96,12 @@ class ScormPackager:
         if not os.path.exists(_EXPORT_PATH):
             os.mkdir(_EXPORT_PATH)
         for lesson in self.course_data["lessons"]:
-            if not os.path.exists(os.path.join(_EXPORT_PATH, cyrtranslit.to_latin(lesson["title"]))):
+            if not os.path.exists(os.path.join(_EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"]))):
                 os.mkdir(os.path.join(_EXPORT_PATH,
-                                      cyrtranslit.to_latin(lesson["title"])))
+                                      cyrtranslit.to_latin(lesson["normalized_title"])))
             self._skip_files.remove(lesson["folder"])
             copy_dir(_BUILD_PATH, os.path.join(
-                _EXPORT_PATH, cyrtranslit.to_latin(lesson["title"])), self._filter_by_name)
+                _EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"])), self._filter_by_name)
             self._skip_files.append(lesson["folder"])
 
             manifest, organizations, resources = copy.deepcopy(
@@ -129,7 +129,7 @@ class ScormPackager:
             tree = ET.ElementTree(manifest)
 
             manifest_path = os.path.join(os.path.join(
-                _EXPORT_PATH, cyrtranslit.to_latin(lesson["title"])), "imsmanifest.xml")
+                _EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"])), "imsmanifest.xml")
             tree.write(manifest_path)
 
             x = etree.parse(manifest_path)
@@ -137,7 +137,7 @@ class ScormPackager:
                 file.write(etree.tostring(x, pretty_print=True, encoding=str))
 
             self._create_archive_for_lecutres(
-                cyrtranslit.to_latin(lesson["title"]))
+                cyrtranslit.to_latin(lesson["normalized_title"]))
 
     def create_single_sco_packages_for_lectures(self):
         if not self.course_data:
@@ -145,12 +145,12 @@ class ScormPackager:
         if not os.path.exists(_EXPORT_PATH):
             os.mkdir(_EXPORT_PATH)
         for lesson in self.course_data["lessons"]:
-            if not os.path.exists(os.path.join(_EXPORT_PATH, cyrtranslit.to_latin(lesson["title"]))):
+            if not os.path.exists(os.path.join(_EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"]))):
                 os.mkdir(os.path.join(_EXPORT_PATH,
-                                      cyrtranslit.to_latin(lesson["title"])))
+                                      cyrtranslit.to_latin(lesson["normalized_title"])))
             self._skip_files.remove(lesson["folder"])
             copy_dir(_BUILD_PATH, os.path.join(
-                _EXPORT_PATH, cyrtranslit.to_latin(lesson["title"])), self._filter_by_name)
+                _EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"])), self._filter_by_name)
             self._skip_files.append(lesson["folder"])
 
             manifest, organizations, resources = copy.deepcopy(
@@ -179,7 +179,7 @@ class ScormPackager:
             ET.SubElement(resource, "dependency", identifierref="common_files")
             tree = ET.ElementTree(manifest)
             manifest_path = os.path.join(os.path.join(
-                _EXPORT_PATH, cyrtranslit.to_latin(lesson["title"])), "imsmanifest.xml")
+                _EXPORT_PATH, cyrtranslit.to_latin(lesson["normalized_title"])), "imsmanifest.xml")
             tree.write(manifest_path)
 
             x = etree.parse(manifest_path)
@@ -187,7 +187,7 @@ class ScormPackager:
                 file.write(etree.tostring(x, pretty_print=True, encoding=str))
 
             self._create_archive_for_lecutres(
-                cyrtranslit.to_latin(lesson["title"]))
+                cyrtranslit.to_latin(lesson["normalized_title"]))
 
     def _create_imsmanifest_for_course(self):
         if not self.course_data:
