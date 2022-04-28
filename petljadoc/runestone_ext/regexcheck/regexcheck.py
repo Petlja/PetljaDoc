@@ -26,10 +26,25 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="regex-check">
+    <div id="%(divid)s" class="regex-check" data-regex='%(data)s''>
+        <div>
+            <p class="title"></p>
+            <textarea type="text" spellcheck="false"  class="regex-input"></textarea>
+        </div>
+        <div>
+            <p class="title flags"><span class="flag-markers"></span></p>
+        </div>
+        <div class="editor-wrapper">
+            <p class="title"></p>
+            <div class="test-text">
+                <div class="regex-text front"></div>
+                <textarea spellcheck="false" autocomplete="false"  class="hidden-ta text-input"></textarea>
+            </div>
+            %(getsol)s
 """
 
 TEMPLATE_END = """
+        </div>
     </div>
 """
 
@@ -55,15 +70,36 @@ def depart_regex_check_note_node(self, node):
 
 class RegexCheckDirective(Directive):
     required_arguments = 1
-    optional_arguments = 0
-    has_content = False
+    optional_arguments = 3
+    has_content = True
     option_spec = {}
     option_spec.update({
-        'final_answer': directives.unchanged,
+        'solution': directives.unchanged,
+        'editable': directives.unchanged,
+        'flags': directives.unchanged,
     })
     def run(self):
         env = self.state.document.settings.env 
         self.options['divid'] = self.arguments[0]
+        data = {}
+        if 'solution' not in self.options: 
+            data['solution']  = ""
+            self.options['getsol'] = ""
+        else:
+            data['solution'] = self.options['solution']
+            self.options['getsol'] = '<div class="sol-button"></div>'
+        if 'editable' in self.options: 
+            data['editable'] = True
+        else:
+            data['editable'] = False
+        if 'flags' not in self.options: 
+            data['flags']= ""
+        else:
+            data['flags'] = self.options['flags']
+
+        data['text'] = self.content[0]
+
+        self.options['data'] = json.dumps(data)
         ascnode = RegexCheckQNode(self.options)
         return [ascnode]
 

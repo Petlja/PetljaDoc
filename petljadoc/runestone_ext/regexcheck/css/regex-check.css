@@ -1,6 +1,8 @@
 .regex-check{
     margin-top: 10px;
     margin-bottom: 10px;
+    height: auto;
+    overflow: hidden;
     width: 100%;
 }
 
@@ -37,11 +39,13 @@
     height: 500px;
     pointer-events: none;
     font-family: inherit;
-    font-size: 20px;
-    line-height: 20px;
+    font-size: 20px !important;
+    line-height: 20px !important;
     word-wrap: break-word;
     padding-left: 4px;
     padding-top: 5px;
+    white-space: pre-wrap;
+    tab-size: 1.6em;
 }
 
 .regex-text span{
@@ -55,8 +59,6 @@
     border: 1px solid black;
     border-radius: 3px;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
     font-family: inherit;
     font-size: 20px;
     line-height: 20px;
@@ -102,3 +104,17 @@
     position:  absolute;
     display: none;
 }
+
+.sol-button{
+    border: 1px solid black;
+    position: relative;
+    float: right;
+    width: 200px;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+    line-height: 25px;
+    cursor: pointer;
+}
+
