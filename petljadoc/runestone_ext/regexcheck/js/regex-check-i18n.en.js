@@ -4,5 +4,8 @@ $.i18n().load({
         "flag_title": "FLAGS",
         "text_title": "TEST STRING",
         "button_text": "SHOW SOLUTION",
+        "button_test" : "TEST ANSWER",
+        "correct": "Correct",
+        "incorrect" : "Wrong",
     }
 })

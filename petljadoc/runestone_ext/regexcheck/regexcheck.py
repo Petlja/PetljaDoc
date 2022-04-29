@@ -87,7 +87,7 @@ class RegexCheckDirective(Directive):
             self.options['getsol'] = ""
         else:
             data['solution'] = self.options['solution']
-            self.options['getsol'] = '<div class="sol-button"></div>'
+            self.options['getsol'] = '<div class="test-button"></div><div class="sol-button"></div>'
         if 'editable' in self.options: 
             data['editable'] = True
         else:
@@ -97,7 +97,7 @@ class RegexCheckDirective(Directive):
         else:
             data['flags'] = self.options['flags']
 
-        data['text'] = self.content[0]
+        data['text'] = '\n'.join(self.content)
 
         self.options['data'] = json.dumps(data)
         ascnode = RegexCheckQNode(self.options)

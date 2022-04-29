@@ -109,7 +109,7 @@
     border: 1px solid black;
     position: relative;
     float: right;
-    width: 200px;
+    width: 30%;
     text-align: center;
     margin-top: 10px;
     border-radius: 5px;
@@ -118,3 +118,39 @@
     cursor: pointer;
 }
 
+.test-button{
+    border: 1px solid black;
+    position: relative;
+    float: right;
+    width: 30%;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+    line-height: 25px;
+    cursor: pointer;
+    margin-left: 10px !important;
+}
+
+.eol{
+    width: 4px;
+    height: 17px;
+    display: inline-block;
+    position: relative;
+    bottom: -1px;
+}
+
+.correct{
+    color:#18bc9c !important; 
+}
+
+.incorrect{
+    color: red !important;
+}
+
+.msg-testing{
+    width: 30%;
+    float:left;
+    margin-top: 10px;
+    font-size: 20px !important;
+}

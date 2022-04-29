@@ -4,5 +4,8 @@ $.i18n().load({
         "flag_title": "Опције",
         "text_title": "Тест текст",
         "button_text": "Прикажи решење",
+        "button_test" : "Упореди решење",
+        "correct": "Тачно",
+        "incorrect" : "Нетачно",
     }
 })

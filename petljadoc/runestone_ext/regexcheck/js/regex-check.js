@@ -15,25 +15,29 @@ RegexCheck.prototype.init =  function(opts){
     this.hasSolution = this.solution.length != 0;
     this.editableText = this.data['editable'];
     this.regexFlags = this.data['flags'];
-    this.regex_area = this.opts.querySelector('.regex-input');
-    this.text_area =  this.opts.querySelector('.text-input'); 
+    this.regexArea = this.opts.querySelector('.regex-input');
+    this.textArea =  this.opts.querySelector('.text-input'); 
     this.customArea =  this.opts.querySelector('.front'); 
     // regex title
     this.opts.querySelectorAll('.title')[0].innerHTML =  $.i18n("regex_title");
-    // flags title
-     this.opts.querySelectorAll('.title')[1].innerHTML =  $.i18n("flag_title") + '<span class="flag-markers">'+this.regexFlags+'</span>';
+    // flags title`
+     this.opts.querySelectorAll('.title')[1].innerHTML =  `${$.i18n("flag_title")}  <span class="flag-markers">${this.regexFlags}</span>`;
     // text flags
     this.opts.querySelectorAll('.title')[2].innerHTML =  $.i18n("text_title");
 
     
-    this.text_area.value = this.text;
-    this.customArea.innerHTML =htmlEscape(this.text_area.value);
+    this.textArea.value = this.text;
+    this.customArea.innerHTML =htmlEscape(this.textArea.value);
 
     if(this.hasSolution){
+        this.msg = document.createElement('p');
+        this.msg.classList.add("msg-testing")
+        this.opts.appendChild(this.msg);
+    
         this.solButton = this.opts.querySelector('.sol-button');
         this.solButton.innerHTML = $.i18n("button_text"); 
         this.solButton.addEventListener("click", function(){
-            var text = this.text_area.value;
+            var text = this.textArea.value;
             try{
                var re = new RegExp('('+ this.solution+ ')',flag=this.regexFlags);
                this.customArea.innerHTML = htmlEscape(text.replace(re,"<span class='blue'>$1</span>"));
@@ -41,37 +45,61 @@ RegexCheck.prototype.init =  function(opts){
             catch{
             }
         }.bind(this));
+        this.testButton = this.opts.querySelector('.test-button');
+        this.testButton.innerHTML = $.i18n("button_test"); 
+        this.testButton.addEventListener("click", function(){
+            var text = this.textArea.value;         
+            try{
+               var re = new RegExp('('+ this.solution+ ')',flag=this.regexFlags);
+               var reUser =  new RegExp('('+ this.regexArea.value + ')',flag=this.regexFlags);
+               var match = text.match(re);
+               var matchUser = text.match(reUser);         
+               if( match.length === matchUser.length && match.every(function(value, index) { return value === matchUser[index]})){
+                    this.msg.innerText = $.i18n("correct")
+                    this.msg.classList.remove("incorrect");
+                    this.msg.classList.add("correct");
+               }
+               else{
+                    this.msg.innerText = $.i18n("incorrect")
+                    this.msg.classList.remove("correct");
+                    this.msg.classList.add("incorrect");
+               }
+            }
+            catch{
+            }
+        }.bind(this));
     }
     if(!this.editableText){
-        this.text_area.setAttribute('disabled', 'true');
+        this.textArea.setAttribute('disabled', 'true');
     }
     else{   
-        this.text_area.addEventListener('input', function(){
-            this.customArea.innerHTML = htmlEscape(this.text_area.value);
+        this.textArea.addEventListener('input', function(){
+            this.customArea.innerHTML = htmlEscape(this.textArea.value);
         }.bind(this));
 
 
-        this.text_area.addEventListener('keydown', function(e) {
+        this.textArea.addEventListener('keydown', function(e) {
            if (e.key == 'Tab') {
                e.preventDefault();
-               var start =  this.text_area.selectionStart;
-               var end =  this.text_area.selectionEnd;
+               var start =  this.textArea.selectionStart;
+               var end =  this.textArea.selectionEnd;
    
-               this.text_area.value =  this.text_area.value.substring(0, start) + '\t' + this.text_area.value.substring(end);
-               this.text_area.selectionStart =  this.text_area.selectionEnd = start + 1;
-               this.customArea.innerHTML = htmlEscape(this.text_area.value);
+               this.textArea.value =  this.textArea.value.substring(0, start) + '\t' + this.textArea.value.substring(end);
+               this.textArea.selectionStart =  this.textArea.selectionEnd = start + 1;
+               this.customArea.innerHTML = htmlEscape(this.textArea.value);
            }
          }.bind(this));
     }
 
-    this.regex_area.addEventListener('input', function(){
-        if (this.regex_area.value == ''){
-           this.customArea.innerHTML = htmlEscape(this.text_area.value);
+    this.regexArea.addEventListener('input', function(){
+        this.msg.innerText = ""
+        if (this.regexArea.value == ''){
+           this.customArea.innerHTML = htmlEscape(this.textArea.value);
            return 
         }
-        var text = this.text_area.value;
+        var text = this.textArea.value;
         try{
-           var re = new RegExp('('+ this.regex_area.value+ ')',flag=this.regexFlags);
+           var re = new RegExp('('+ this.regexArea.value+ ')',flag=this.regexFlags);
            this.customArea.innerHTML = htmlEscape(text.replace(re,"<span class='blue'>$1</span>"));
         }
         catch{
@@ -89,7 +117,7 @@ function popAttribute(element, atribute, fallback = ''){
     return atr;
 }
 function htmlEscape(str){
-    return str.replaceAll('\n' ,'<br>').replaceAll(' </span>', '&nbsp;</span>');
+    return str.replaceAll('\n' ,'<br>').replaceAll(' </span>', '&nbsp;</span>').replaceAll("<span class='blue'><br></span>","<span class='blue eol'></span><br>");
 }
 
 String.prototype.replaceAt = function(index, replacement) {
