@@ -16,7 +16,7 @@ m = re.search(r'\_\_version\_\_\s*=\s*\"([^"]*)\"', src)
 version = m.group(1)
 
 setuptools.setup(
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     name="petljadoc",
     version=version,
     author="Fondacija Petlja",
