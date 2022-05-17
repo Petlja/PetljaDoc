@@ -1,5 +1,18 @@
 function WrappingNimGame(){
 
+    const _PLAYER_ONE = "player-1";
+    const _PLAYER_TWO = "player-2";
+    const playerTunrSwitcher = {
+        "player-1" : _PLAYER_TWO,
+        "player-2" : _PLAYER_ONE
+    }
+    const _MULTY_PLAYER = "multy-player";
+    const _SINGLE_PLAYER = "single-player";
+    const gameModeSwitcher = {
+        "single-player" : _MULTY_PLAYER,
+        "multy-player" : _SINGLE_PLAYER
+    }
+
     var nimGameList = [];
 
     function NIMgame(opts){
@@ -7,46 +20,92 @@ function WrappingNimGame(){
          this.init(opts);
         }
     }
-
+    
     NIMgame.prototype.init =  function(opts){
         this.opts = opts;   
-        this.canvas = opts.querySelector('canvas')
+        this.canvas = opts.querySelector('canvas');
         this.canvasContext = this.canvas.getContext('2d');
         this.circles = [];
         this.msgDiv = opts.querySelector('.msg-banner');
-        this.maxTakeAway = 2;
-        this.numOfCircles = 20;
+        this.maxTakeAway = 3;
+        this.numOfCircles = 13;
         this.circleRadius = 30;
         this.removedCircleIndex = 0;
-        this.playersTurn = "player-1";
+        this.playersTurn = _PLAYER_ONE;
         this.canvasContext.canvas.width = Math.min(document.documentElement.clientWidth,780);
         this.canvasContext.canvas.height = 400;
-        this.takeButton = this.opts.querySelector('[data-id]');
+        this.takeButtonPlayerOne = this.opts.querySelector('[data-id=player-1]');
+        this.takeButtonPlayerTwo = this.opts.querySelector('[data-id=player-2]');
         this.slider = this.opts.querySelector('.slider.round');
         this.playerTwo = this.opts.querySelector('.player-two');
         this.sliderInput = this.opts.querySelector('input');
-        this.takeButton.addEventListener("click", function(){
-            this.displayMsg('');
-            var buttonId = this.takeButton.getAttribute('data-id');
-            if(buttonId !== this.playersTurn){
-                return
-            }
-            var value = this.opts.querySelector(`[data-input-id=${buttonId}]`).value;
-            if(value> this.maxTakeAway){
-                this.displayMsg('Ne toliko');
-                return
-            }
-            for(var i=0;i<value;i++){
-                if(this.removedCircleIndex + 1 > this.circles.length)
-                    break;
-                this.circles[this.removedCircleIndex].display = false;
-                this.removedCircleIndex++;
-            }
-            this.clearCanvas();
-            this.drawAllElements();
-        }.bind(this));
+        this.gameVersion = _SINGLE_PLAYER;
+        this.restartGameButton = this.opts.querySelector('[data-restart]');
+        this.thinking = false;
+        this.start;
+        [this.takeButtonPlayerOne, this.takeButtonPlayerTwo].forEach(function(button){
+            button.addEventListener("click", function(){
+                this.displayMsg('');
+                var buttonId = button.getAttribute('data-id');
+                if(buttonId !== this.playersTurn || this.thinking){
+                    return
+                }
+                var value = this.opts.querySelector(`[data-input-id=${buttonId}]`).value;
+                if(value> this.maxTakeAway && value<0){
+                    this.displayMsg('Ne toliko');
+                    return
+                }
+                for(var i=0;i<value;i++){
+                    if(this.removedCircleIndex + 1 > this.circles.length)
+                        break;
+                    this.circles[this.removedCircleIndex].color = "red";
+                    this.removedCircleIndex++;
+                }
+                if(this.gameVersion === _MULTY_PLAYER){
+                    this.playersTurn = playerTunrSwitcher[this.playersTurn];
+                }
+                this.clearCanvas();
+                this.drawAllElements();
+                if(this.removedCircleIndex + 1 > this.circles.length){
+                    this.displayMsg(`Pobedio je igrac ${this.playersTurn[this.playersTurn.length-1]}`);
+                    return
+                }
+                if(this.gameVersion === _SINGLE_PLAYER){
+                    this.thinking = true;
+                    setTimeout(() => { 
+                    var numberOfCircles = this.circles.reduce(function(n, circle) {
+                        return n + (circle.color == "blue");
+                    }, 0)
+                    var subract;
+                    var currentState = numberOfCircles % (this.maxTakeAway + 1);
+                    if(currentState === 0){
+                        subract = randomIntFromInterval(1,this.maxTakeAway);
+                    }
+                    else{
+                        subract =currentState;
+                    }
+                    for(var i=0;i<subract;i++){
+                        if(this.removedCircleIndex + 1 > this.circles.length)
+                            break;
+                        this.circles[this.removedCircleIndex].color = "orange";
+                        this.removedCircleIndex++;
+                    } 
+                    if(this.removedCircleIndex + 1 > this.circles.length){
+                        this.displayMsg("Algoritam je pobedio");
+                    }
+                    this.clearCanvas();
+                    this.drawAllElements();
+                    this.thinking = false;
+                },350);
+                }
+
+            }.bind(this));
+        }.bind(this)); 
         this.slider.addEventListener('click',function(){
-            this.circles = this.circles.map(circle => {circle.display = true;return circle});
+            this.displayMsg('');
+            this.circles = this.circles.map(circle => {circle.color = "blue";return circle});
+            this.playersTurn = _PLAYER_ONE;
+            this.gameVersion = gameModeSwitcher[this.gameVersion];
             this.removedCircleIndex = 0;    
             this.clearCanvas();
             this.drawAllElements();
@@ -57,9 +116,18 @@ function WrappingNimGame(){
                 this.playerTwo.style.display = "none";
             }
         }.bind(this))
+        this.restartGameButton.addEventListener("click",function(){
+            this.displayMsg('');
+            this.circles = this.circles.map(circle => {circle.color = "blue";return circle});
+            this.playersTurn = _PLAYER_ONE;
+            this.removedCircleIndex = 0;    
+            this.clearCanvas();
+            this.drawAllElements();
+        }.bind(this));
         this.initNIM();
         this.drawAllElements();
     }
+
 
     NIMgame.prototype.clearCanvas = function(){
         this.canvasContext.clearRect(0,0,this.canvasContext.canvas.width,this.canvasContext.canvas.height);
@@ -67,13 +135,13 @@ function WrappingNimGame(){
 
     NIMgame.prototype.drawAllElements = function(){
         for(var i=0;i<this.numOfCircles;i++){
-            if(this.circles[i].display)
-                draw(this.canvasContext,this.circles[i].x,this.circles[i].y);
-        }
+                draw(this.canvasContext,this.circles[i].x,this.circles[i].y,this.circles[i].color);
+       }
     }
 
+
     NIMgame.prototype.initNIM = function(){
-        this.circles.push({"x":this.canvasContext.canvas.width*0.5,"y":this.canvasContext.canvas.height*0.5,"display":true});
+        this.circles.push({"x":this.canvasContext.canvas.width*0.5,"y":this.canvasContext.canvas.height*0.5,"color":"blue"});
         for(var i=1;i<this.numOfCircles;i++){     
             // make sure new circle doesn't overlap any existing circles
             while(true){
@@ -96,7 +164,7 @@ function WrappingNimGame(){
                 }
                 // new circle doesn't overlap any other, so break
                 if(hit==0){
-                    this.circles.push({"x":x,"y":y,"display":true});
+                    this.circles.push({"x":x,"y":y,"color":"blue"});
                     break;
                 }
             }
@@ -115,12 +183,17 @@ function WrappingNimGame(){
         }
     });
 
-    function draw(canvasContext,x,y){
+    function draw(canvasContext,x,y,color){
+        canvasContext.fillStyle = color
         canvasContext.beginPath();
         canvasContext.arc(x,y, 30, 0, 2 * Math.PI);
+        canvasContext.fill();
         canvasContext.closePath();
         canvasContext.stroke();
     }
+    function randomIntFromInterval(min, max) { // min and max included 
+        return Math.floor(Math.random() * (max - min + 1) + min)
+      }
 };
 WrappingNimGame();
 
