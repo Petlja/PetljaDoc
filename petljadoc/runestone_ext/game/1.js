@@ -29,7 +29,7 @@ function WrappingNimGame(){
         this.msgDiv = opts.querySelector('.msg-banner');
         this.maxTakeAway = 3;
         this.numOfCircles = 13;
-        this.circleRadius = 30;
+        this.circleRadius = 40;
         this.removedCircleIndex = 0;
         this.playersTurn = _PLAYER_ONE;
         this.canvasContext.canvas.width = Math.min(document.documentElement.clientWidth,780);
@@ -39,7 +39,7 @@ function WrappingNimGame(){
         this.slider = this.opts.querySelector('.slider.round');
         this.playerTwo = this.opts.querySelector('.player-two');
         this.sliderInput = this.opts.querySelector('input');
-        this.gameVersion = _SINGLE_PLAYER;
+        this.gameVersion =  this.sliderInput.checked ? _SINGLE_PLAYER : _MULTY_PLAYER;
         this.restartGameButton = this.opts.querySelector('[data-restart]');
         this.thinking = false;
         this.start;
@@ -51,18 +51,18 @@ function WrappingNimGame(){
                     return
                 }
                 var value = this.opts.querySelector(`[data-input-id=${buttonId}]`).value;
-                if(value> this.maxTakeAway && value<0){
+                if(value> this.maxTakeAway || value<0){
                     this.displayMsg('Ne toliko');
                     return
                 }
                 for(var i=0;i<value;i++){
                     if(this.removedCircleIndex + 1 > this.circles.length)
                         break;
-                    this.circles[this.removedCircleIndex].color = "red";
+                    if(this.playersTurn == _PLAYER_ONE)
+                        this.circles[this.removedCircleIndex].color = "red";
+                    else
+                    this.circles[this.removedCircleIndex].color = "orange"; 
                     this.removedCircleIndex++;
-                }
-                if(this.gameVersion === _MULTY_PLAYER){
-                    this.playersTurn = playerTunrSwitcher[this.playersTurn];
                 }
                 this.clearCanvas();
                 this.drawAllElements();
@@ -70,11 +70,14 @@ function WrappingNimGame(){
                     this.displayMsg(`Pobedio je igrac ${this.playersTurn[this.playersTurn.length-1]}`);
                     return
                 }
+                if(this.gameVersion === _MULTY_PLAYER){
+                    this.playersTurn = playerTunrSwitcher[this.playersTurn];
+                }
                 if(this.gameVersion === _SINGLE_PLAYER){
                     this.thinking = true;
                     setTimeout(() => { 
                     var numberOfCircles = this.circles.reduce(function(n, circle) {
-                        return n + (circle.color == "blue");
+                        return n + (circle.color === "transparent");
                     }, 0)
                     var subract;
                     var currentState = numberOfCircles % (this.maxTakeAway + 1);
@@ -103,7 +106,7 @@ function WrappingNimGame(){
         }.bind(this)); 
         this.slider.addEventListener('click',function(){
             this.displayMsg('');
-            this.circles = this.circles.map(circle => {circle.color = "blue";return circle});
+            this.circles = this.circles.map(circle => {circle.color = "transparent";return circle});
             this.playersTurn = _PLAYER_ONE;
             this.gameVersion = gameModeSwitcher[this.gameVersion];
             this.removedCircleIndex = 0;    
@@ -118,7 +121,7 @@ function WrappingNimGame(){
         }.bind(this))
         this.restartGameButton.addEventListener("click",function(){
             this.displayMsg('');
-            this.circles = this.circles.map(circle => {circle.color = "blue";return circle});
+            this.circles = this.circles.map(circle => {circle.color = "transparent";return circle});
             this.playersTurn = _PLAYER_ONE;
             this.removedCircleIndex = 0;    
             this.clearCanvas();
@@ -135,13 +138,13 @@ function WrappingNimGame(){
 
     NIMgame.prototype.drawAllElements = function(){
         for(var i=0;i<this.numOfCircles;i++){
-                draw(this.canvasContext,this.circles[i].x,this.circles[i].y,this.circles[i].color);
+                draw(this.canvasContext,this.circles[i].x,this.circles[i].y,this.circles[i].color,this.circleRadius);
        }
     }
 
 
     NIMgame.prototype.initNIM = function(){
-        this.circles.push({"x":this.canvasContext.canvas.width*0.5,"y":this.canvasContext.canvas.height*0.5,"color":"blue"});
+        this.circles.push({"x":this.canvasContext.canvas.width*0.5,"y":this.canvasContext.canvas.height*0.5,"color":"transparent"});
         for(var i=1;i<this.numOfCircles;i++){     
             // make sure new circle doesn't overlap any existing circles
             while(true){
@@ -164,12 +167,12 @@ function WrappingNimGame(){
                 }
                 // new circle doesn't overlap any other, so break
                 if(hit==0){
-                    this.circles.push({"x":x,"y":y,"color":"blue"});
+                    this.circles.push({"x":x,"y":y,"color":"transparent"});
                     break;
                 }
             }
            
-        }       
+        }     
     }
 
     NIMgame.prototype.displayMsg = function(msg){
@@ -183,15 +186,15 @@ function WrappingNimGame(){
         }
     });
 
-    function draw(canvasContext,x,y,color){
+    function draw(canvasContext,x,y,color,radius){
         canvasContext.fillStyle = color
         canvasContext.beginPath();
-        canvasContext.arc(x,y, 30, 0, 2 * Math.PI);
+        canvasContext.arc(x,y, radius, 0, 2 * Math.PI);
         canvasContext.fill();
         canvasContext.closePath();
         canvasContext.stroke();
     }
-    function randomIntFromInterval(min, max) { // min and max included 
+    function randomIntFromInterval(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min)
       }
 };
