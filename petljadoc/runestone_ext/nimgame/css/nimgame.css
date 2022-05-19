@@ -1,7 +1,8 @@
 .nim-game{
     width: 100%;
     height: auto;
-    margin-top:10px
+    margin-top:10px;
+    margin-bottom:10px;
 }
 .nim-game canvas{
     width: 100%;
@@ -25,7 +26,7 @@
       margin:0px;
       position: relative;
       float: right;
-      margin-right: 10px;
+      margin-right: 10px !important;
   }
   
   .slider {
@@ -82,7 +83,7 @@
   }
 
   .game-input{
-      margin-top: 10px;
+      margin-top: 30px;
       height: auto;
       overflow: hidden;
   }
@@ -92,6 +93,16 @@
     position: relative;
     float: left;
   }
+
+  .game-input input{
+    width: 100px;
+    height: 45px;
+    line-height: 45px;
+    font-size: 45px;
+    margin-right: 15px;
+    text-align: center;
+  }
+
   .canvas-wrapper{
     width: 100%;
     height: 400px;
@@ -99,9 +110,41 @@
   
   .msg-banner{
     margin-top: 10px;
-    color:red;
+    color:red !important;
+    text-align: center;
+    width: 100%;
+    height: 20px;
+    font-size: 20px !important;
   }
 
   .player-two{
     display: none;
+    padding-left: 120px;
+  }
+  .res-btn{
+    margin-top: 10px;
+    width: 250px;
+  }
+  @media only screen and (max-width: 1045px) {
+
+    .player-two{
+      padding-left: 50px;
+    }
+  }
+
+  @media only screen and (max-width: 900px) {
+    .game-input input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .player-two{
+      padding-left: 0px;
+    }
+    .nim-game canvas{
+      width: 100%;
+      height: 100%;
+    }
+    .res-btn{
+      width: 100%;
+    }
   }

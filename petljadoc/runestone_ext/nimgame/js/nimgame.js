@@ -23,13 +23,14 @@ function WrappingNimGame(){
     
     NIMgame.prototype.init =  function(opts){
         this.opts = opts;   
+        this.data =  JSON.parse(popAttribute(opts,'data-nimgame'));
         this.canvas = opts.querySelector('canvas');
         this.canvasContext = this.canvas.getContext('2d');
         this.circles = [];
         this.msgDiv = opts.querySelector('.msg-banner');
-        this.maxTakeAway = 3;
-        this.numOfCircles = 13;
-        this.circleRadius = 40;
+        this.maxTakeAway = this.data['takeaway'];
+        this.numOfCircles = Math.min(this.data['count'],15);
+        this.circleRadius = document.documentElement.clientWidth < 900 ? 30 : 40;
         this.removedCircleIndex = 0;
         this.playersTurn = _PLAYER_ONE;
         this.canvasContext.canvas.width = Math.min(document.documentElement.clientWidth,780);
@@ -42,37 +43,68 @@ function WrappingNimGame(){
         this.gameVersion =  this.sliderInput.checked ? _SINGLE_PLAYER : _MULTY_PLAYER;
         this.restartGameButton = this.opts.querySelector('[data-restart]');
         this.thinking = false;
-        this.start;
+        this.takeButtonPlayerOne.innerText = $.i18n("nimgame_take");
+        this.takeButtonPlayerTwo.innerText = $.i18n("nimgame_take");
+        this.restartGameButton.innerText = $.i18n("nimgame_restart_buttnon");
+        this.opts.querySelector('[data-game-mode]').innerText = $.i18n("nimgame_single_player");
+        this.inputPlayerOne = this.opts.querySelector(`[data-input-id=player-1]`)
+        this.inputPlayerTwo = this.opts.querySelector(`[data-input-id=player-2]`)
+        this.inputPlayerOne.placeholder = `1-${this.maxTakeAway}`
+        this.inputPlayerTwo.placeholder = `1-${this.maxTakeAway}`
+        this.fristMove = true;
+        this.inputPlayerOne.addEventListener("keydown",  function(event) {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  this.takeButtonPlayerOne.click();
+                }
+        }.bind(this));
+        this.inputPlayerTwo.addEventListener("keydown",  function(event) {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              this.takeButtonPlayerTwo.click();
+            }
+        }.bind(this));
         [this.takeButtonPlayerOne, this.takeButtonPlayerTwo].forEach(function(button){
             button.addEventListener("click", function(){
                 this.displayMsg('');
                 var buttonId = button.getAttribute('data-id');
+                // bouth players can start
+                if(this.fristMove){
+                    if(this.gameVersion == _MULTY_PLAYER)
+                        this.playersTurn= buttonId;
+                    this.fristMove = false;
+                }
+                // cant play 2 times in a row or while computer is thinking
                 if(buttonId !== this.playersTurn || this.thinking){
                     return
                 }
-                var value = this.opts.querySelector(`[data-input-id=${buttonId}]`).value;
-                if(value> this.maxTakeAway || value<0){
-                    this.displayMsg('Ne toliko');
+                var value = Number.parseInt(this.opts.querySelector(`[data-input-id=${buttonId}]`).value);
+                // only permitted values
+                if(!Number.isInteger(value) || value> this.maxTakeAway || value<0){
+                    this.displayMsg($.i18n("nimgame_error", this.maxTakeAway));
                     return
                 }
                 for(var i=0;i<value;i++){
                     if(this.removedCircleIndex + 1 > this.circles.length)
                         break;
                     if(this.playersTurn == _PLAYER_ONE)
-                        this.circles[this.removedCircleIndex].color = "red";
+                        this.circles[this.removedCircleIndex].color = "#18bc9c";
                     else
                     this.circles[this.removedCircleIndex].color = "orange"; 
                     this.removedCircleIndex++;
                 }
                 this.clearCanvas();
                 this.drawAllElements();
+                //end game
                 if(this.removedCircleIndex + 1 > this.circles.length){
-                    this.displayMsg(`Pobedio je igrac ${this.playersTurn[this.playersTurn.length-1]}`);
+                    this.displayMsg($.i18n("nimgame_winner", this.playersTurn[this.playersTurn.length-1]));
                     return
                 }
+                // switch turn
                 if(this.gameVersion === _MULTY_PLAYER){
                     this.playersTurn = playerTunrSwitcher[this.playersTurn];
                 }
+                //"computer playes"
                 if(this.gameVersion === _SINGLE_PLAYER){
                     this.thinking = true;
                     setTimeout(() => { 
@@ -90,15 +122,17 @@ function WrappingNimGame(){
                     for(var i=0;i<subract;i++){
                         if(this.removedCircleIndex + 1 > this.circles.length)
                             break;
-                        this.circles[this.removedCircleIndex].color = "orange";
+                        this.circles[this.removedCircleIndex].color = "#d62c1a";
                         this.removedCircleIndex++;
                     } 
                     if(this.removedCircleIndex + 1 > this.circles.length){
-                        this.displayMsg("Algoritam je pobedio");
+                        this.displayMsg($.i18n("nimgame_alg_won"));
                     }
                     this.clearCanvas();
                     this.drawAllElements();
                     this.thinking = false;
+                    this.inputPlayerOne.placeholder = ""
+                    this.inputPlayerTwo.placeholder = ""
                 },350);
                 }
 
@@ -113,11 +147,12 @@ function WrappingNimGame(){
             this.clearCanvas();
             this.drawAllElements();
             if(this.sliderInput.checked){
-                this.playerTwo.style.display = "block";
+                this.playerTwo.style.display = "";
             }
             else{
                 this.playerTwo.style.display = "none";
             }
+            this.fristMove = true;
         }.bind(this))
         this.restartGameButton.addEventListener("click",function(){
             this.displayMsg('');
@@ -126,6 +161,7 @@ function WrappingNimGame(){
             this.removedCircleIndex = 0;    
             this.clearCanvas();
             this.drawAllElements();
+            this.fristMove = true;
         }.bind(this));
         this.initNIM();
         this.drawAllElements();
@@ -171,8 +207,13 @@ function WrappingNimGame(){
                     break;
                 }
             }
-           
-        }     
+        }  
+        if(this.sliderInput.checked){
+            this.playerTwo.style.display = "none";
+        }
+        else{
+            this.playerTwo.style.display = "";
+        }   
     }
 
     NIMgame.prototype.displayMsg = function(msg){
@@ -196,7 +237,16 @@ function WrappingNimGame(){
     }
     function randomIntFromInterval(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min)
-      }
+    }
+
+    function popAttribute(element, atribute, fallback = ''){
+        var atr = fallback;
+        if (element.hasAttribute(atribute)){
+            atr = element.getAttribute(atribute);
+            element.removeAttribute(atribute);
+        }
+        return atr;
+    }
 };
 WrappingNimGame();
 
