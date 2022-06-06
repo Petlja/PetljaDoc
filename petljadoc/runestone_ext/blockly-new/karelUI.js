@@ -54,19 +54,44 @@ $(document).ready(function() {
             mode: "python", indentUnit: 4,
             matchBrackets: true, autoMatchParens: true,
             extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}});
-	var config = (new Function('return '+configarea.value.replace('<!--x','').replace('x-->','')))();
-	var code = config.setup().code;
-	code = (code ?
-		(code.length ? code.join("\n") : code)
-		: "from karel import * \n");
-	editor.setValue(code);
+	    var config = (new Function('return '+configarea.value.replace('<!--x','').replace('x-->','')))();
+	    var code = config.setup().code;
+	    code = (code ?
+		    (code.length ? code.join("\n") : code)
+		    : "from karel import * \n");
+	    editor.setValue(code);
+
+        var div = document.getElementById("blocklyDiv")
+        var workspace = Blockly.inject(div, {toolbox: toolbox});
+               
+        var setup = config.setup();
+        var robot = setup.robot;
+        var world = setup.world;
+        robot.setWorld(world)
+        var drawer = new RobotDrawer(canvas, 500);
+        drawer.drawFrame(robot);
+
+
+        function initApi(interpreter, globalObject) {
+            drawer.start();
+                var wrapper = function(text) {
+                return alert(arguments.length ? text : '');
+            };
+            interpreter.setProperty(globalObject, 'alert',
+            interpreter.createNativeFunction(wrapper));
+            wrapper = function() {
+                robot.move();
+                drawer.addFrame(robot.clone());
+            };
+            interpreter.setProperty(globalObject, 'napred',
+            interpreter.createNativeFunction(wrapper));
+        }
 
         $(this).find(".run-button").click(function () {
-            var program = editor.getValue();
-
-            $('.run-button').attr('disabled', 'disabled');
-            $('.reset-button').attr('disabled', 'disabled');
-            executeProgram(program);
+            var code = Blockly.JavaScript.workspaceToCode(workspace);      
+            var myInterpreter = new Interpreter(code, initApi);
+            console.log(code)
+            myInterpreter.run();
         });
 
         $(this).find(".reset-button").click(function () {
@@ -89,70 +114,14 @@ $(document).ready(function() {
             console.log(text);
         }
 
+        function reset(){
+
+        }
+
         function builtinRead(x) {
             if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
                 throw "File not found: '" + x + "'";
             return Sk.builtinFiles["files"][x];
-        }
-        function executeProgram(program, skipValidation) {
-            Sk.configure({output: outf, read: builtinRead});
-            Sk.canvas = canvas;
- 	          var drawer = new RobotDrawer(canvas, 500);
-            Sk.Karel = {drawer: drawer, config: config};   
-            if(eBookConfig.staticDir === undefined)
-                eBookConfig.staticDir = '/_static/'
-            Sk.externalLibraries = {
-                karel : {
-                    path: eBookConfig.staticDir + 'karel.js',
-                }              }
-            ;
-            //Sk.pre = "edoutput";
-            try {
-                clearError();
-                var myPromise = Sk.misceval.asyncToPromise(function() {
-					drawer.start();
-                    return Sk.importMainWithBody("<stdin>",false,program,true);
-                });
-                myPromise.then(
-                    function(mod) {
-						drawer.stop(function(){
-							if(!skipValidation && Sk.Karel.config.isSuccess){
-								var robot = Sk.Karel.robot;
-								var world = robot.getWorld();
-								var result = Sk.Karel.config.isSuccess(robot, world);
-								if(result){
-									showEndMessageSuccess();
-								} else {
-                                    showEndMessageError($.i18n("msg_karel_incorrect"));
-								}
-							}
-						});
-                    },
-                    function (err) {
-                        drawer.stop(function () {
-                            var message = "";
-                            var otherError = false;
-                            if ((err.nativeError == "crashed") || (err.nativeError == "no_ball") || (err.nativeError == "out_of_bounds") || (err.nativeError == "no_balls_with_robot"))
-                                message = $.i18n("msg_karel_" + err.nativeError);
-                            else {
-                                showError(err);
-                                otherError = true;
-                            }
-                            if (!otherError)
-                                showEndMessageError(message);
-
-                        });
-                    }
-                );
-            } catch(e) {
-                outf("Error: " + e.toString() + "\n")
-            }
-        }
-
-        function reset() {
-            $('.run-button').removeAttr('disabled');
-            $('.reset-button').removeAttr('disabled');
-            executeProgram("import karel", true);
         }
 
 		function showEndMessageSuccess(){
@@ -212,3 +181,92 @@ $(document).ready(function() {
         reset();
     });
 });
+
+function turnLeft(robot,drawer) {
+	robot.turnLeft();
+	drawer.addFrame(robot.clone());
+    }
+
+    function turnRight() {
+	robot.turnRight();
+	drawer.addFrame(robot.clone());
+    }
+
+
+
+    function frontIsClear() {
+	return robot.frontIsClear();
+    }
+
+    function ballsPresent() {
+	return robot.ballsPresent();
+    }
+
+    function getBalls() {
+	return robot.getBalls();
+    }
+    
+    function hasBalls() {
+	return robot.getBalls() != 0;
+    }
+    
+
+    function countBalls() {
+	return robot.countBalls();
+    }
+    
+
+    function pickBall() {
+	robot.pickBall();
+	drawer.addFrame(robot.clone());
+    }
+    
+    function putBall() {
+	robot.putBall();
+	drawer.addFrame(robot.clone());
+    }
+
+    function showMessage(m) {
+	robot.turnMessagesOn();
+	robot.show(m);
+	drawer.addFrame(robot.clone());
+	robot.turnMessagesOff();
+    }
+
+    function move(robot,drawer) {
+        robot.move();
+        drawer.addFrame(robot); 
+    }
+
+
+   var  toolbox = `
+   <xml>
+   <block type="procedures_callnoreturn" id="?0N*#E8mUZumC}Sh./?G" deletable="false" movable="false" x="10" y="10">
+   <mutation connections="BOTH"/>
+   <field name="NAME">napred</field>
+   <field name="INLINE">AUTO</field>
+   <field name="CONNECTIONS">BOTH</field>
+   <value name="TOOLTIP">
+   <block type="text" id="{jRA5F3e1V$Xk$%9~Wf." deletable="false" movable="false">
+   <field name="TEXT">tooltip</field>
+   </block>
+   </value>
+   <value name="HELPURL">
+   <block type="text" id="I$ag3[+Kp4CxK2AbqIhg" deletable="false" movable="false">
+   <field name="TEXT"/>
+   </block>
+   </value>
+   <value name="BOTTOMTYPE">
+   <shadow type="type_null" id="[u(eK/%cX+~=,0_P!RAY"/>
+   </value>
+   <value name="TOPTYPE">
+   <shadow type="type_null" id="eHU{4U-sjeM$O+T7ASW"/>
+   </value>
+   <value name="COLOUR">
+   <block type="colour_hue" id="WRxQPm4nkt~W.1d#YD-9">
+   <mutation colour="#5b80a5"/>
+   <field name="HUE">210</field>
+   </block>
+   </value>
+   </block>
+   </xml>`
