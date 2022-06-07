@@ -2,7 +2,7 @@
 
 $(document).ready(function() {
     var errorText = {};
-    
+
     errorText.ErrorTitle = $.i18n("msg_activecode_error_title");
     errorText.DescriptionTitle = $.i18n("msg_activecode_description_title");
     errorText.ToFixTitle = $.i18n("msg_activecode_to_fix_title");
@@ -42,25 +42,16 @@ $(document).ready(function() {
     errorText.IndentationErrorFix = $.i18n("msg_activecode_indentation_error_fix");
     errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
     errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
+
+
+
     
     $('[data-component=karel]').each( function(index ) {
         var outerDiv = $(this)[0];
         var canvas = $(this).find(".world")[0];
-        var textarea = $(this).find(".codeArea")[0];
-        var configarea = $(this).find(".configArea")[0];
         var problemId  = this.id;
-
-        var editor = CodeMirror.fromTextArea(textarea,{lineNumbers: true,
-            mode: "python", indentUnit: 4,
-            matchBrackets: true, autoMatchParens: true,
-            extraKeys: {"Tab": "indentMore", "Shift-Tab": "indentLess"}});
-	    var config = (new Function('return '+configarea.value.replace('<!--x','').replace('x-->','')))();
-	    var code = config.setup().code;
-	    code = (code ?
-		    (code.length ? code.join("\n") : code)
-		    : "from karel import * \n");
-	    editor.setValue(code);
-
+        var configarea = $(this).find(".configArea")[0];
+        var config = (new Function('return '+configarea.value.replace('<!--x','').replace('x-->','')))();
         var div = document.getElementById("blocklyDiv")
         var workspace = Blockly.inject(div, {toolbox: toolbox});
                
@@ -88,6 +79,12 @@ $(document).ready(function() {
         }
 
         $(this).find(".run-button").click(function () {
+            setup = config.setup();
+            robot = setup.robot;
+            world = setup.world;
+            robot.setWorld(world)
+            drawer = new RobotDrawer(canvas, 500);
+            drawer.drawFrame(robot);
             var code = Blockly.JavaScript.workspaceToCode(workspace);      
             var myInterpreter = new Interpreter(code, initApi);
             console.log(code)
@@ -115,7 +112,12 @@ $(document).ready(function() {
         }
 
         function reset(){
-
+            var setup = config.setup();
+            var robot = setup.robot;
+            var world = setup.world;
+            robot.setWorld(world)
+            var drawer = new RobotDrawer(canvas, 500);
+            drawer.drawFrame(robot);
         }
 
         function builtinRead(x) {
@@ -239,34 +241,55 @@ function turnLeft(robot,drawer) {
     }
 
 
-   var  toolbox = `
-   <xml>
-   <block type="procedures_callnoreturn" id="?0N*#E8mUZumC}Sh./?G" deletable="false" movable="false" x="10" y="10">
-   <mutation connections="BOTH"/>
-   <field name="NAME">napred</field>
-   <field name="INLINE">AUTO</field>
-   <field name="CONNECTIONS">BOTH</field>
-   <value name="TOOLTIP">
-   <block type="text" id="{jRA5F3e1V$Xk$%9~Wf." deletable="false" movable="false">
-   <field name="TEXT">tooltip</field>
-   </block>
-   </value>
-   <value name="HELPURL">
-   <block type="text" id="I$ag3[+Kp4CxK2AbqIhg" deletable="false" movable="false">
-   <field name="TEXT"/>
-   </block>
-   </value>
-   <value name="BOTTOMTYPE">
-   <shadow type="type_null" id="[u(eK/%cX+~=,0_P!RAY"/>
-   </value>
-   <value name="TOPTYPE">
-   <shadow type="type_null" id="eHU{4U-sjeM$O+T7ASW"/>
-   </value>
-   <value name="COLOUR">
-   <block type="colour_hue" id="WRxQPm4nkt~W.1d#YD-9">
-   <mutation colour="#5b80a5"/>
-   <field name="HUE">210</field>
-   </block>
-   </value>
-   </block>
-   </xml>`
+    var toolbox = {
+        "kind": "flyoutToolbox",
+        "contents": [
+          {
+            "kind": "block",
+            "type": "controls_if"
+          },
+          {
+            "kind": "block",
+            "type": "controls_repeat_ext"
+          },
+          {
+            "kind": "block",
+            "type": "logic_compare"
+          },
+          {
+            "kind": "block",
+            "type": "math_number"
+          },
+          {
+            "kind": "block",
+            "type": "math_arithmetic"
+          },
+          {
+            "kind": "block",
+            "type": "maze_moveForward"
+          },
+        ]
+    };      
+
+
+    Blockly.Blocks['maze_moveForward'] = {
+        /**
+         * Block for moving forward.
+         * @this {Blockly.Block}
+         */
+        init: function() {
+          this.jsonInit({
+            "message0": 'napred',
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour":250,
+            "tooltip": 'napred'
+          });
+        }
+      };
+      
+      Blockly.JavaScript['maze_moveForward'] = function(block) {
+        // Generate JavaScript for moving forward.
+        return 'napred()\n';
+      };
+      
