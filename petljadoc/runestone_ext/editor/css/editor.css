@@ -1,0 +1,46 @@
+.petlja-editor {
+    position: relative;
+    overflow: hidden;
+}
+
+.petlja-editor .CodeMirror {
+    margin-top: 3px;
+    width: 100%;
+}
+
+.editor-container {
+    float: left;
+    height: 318px;
+    padding-top: 10px;
+    width: calc(50% - 3px);
+    margin-right: 3px;
+}
+
+.editor-container label {
+    background-color: #3d3d3d;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    padding: 5px 10px;
+    color: #fff;
+}
+
+.editor-iframe {
+    width: calc(49% - 3px); 
+    height: 297px; 
+    margin-top: 31px;
+    float: left; 
+    visibility: hidden;
+}
+
+.editor-play {
+    padding: 3px 7px;
+    background-color: #18bc9c;
+    color: white;
+    float: left;
+    margin-right: 10px;
+    margin-top: 10px;
+    width: calc(50% - 15px);
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+}

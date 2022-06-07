@@ -1,5 +1,7 @@
 function WrappingAscorinaion(){
-    var edtiorList = [];
+    var editorArray = [];
+
+    
 
     function Editor(opts){
         if(opts){
@@ -10,6 +12,7 @@ function WrappingAscorinaion(){
     Editor.prototype.init =  function(opts){
         this.opts = opts;
         this.data = JSON.parse(popAttribute(opts,"data"));
+        this.id = opts.id;
     }
 
     Editor.prototype.funkcija = function(group){
@@ -28,10 +31,145 @@ function WrappingAscorinaion(){
     }
 
     window.addEventListener('load',function() {
-        var edtior = document.getElementsByClassName('petlja-editor');
-        for (var i = 0; i < edtior.length; i++) {
-            edtiorList[edtior[i].id] = new Editor(edtior[i]);		
+        var editors = document.getElementsByClassName('petlja-editor');
+        for (var i = 0; i < editors.length; i++) {
+            editorArray[i] = new Editor(editors[i]);		
         }
+
+        editorArray.forEach(editor => {
+            if (editor.data.hasOwnProperty('js')) {
+                console.log('create js editor..');
+                var jsDiv = document.createElement('div');
+                jsDiv.setAttribute('class', 'editor-container');
+                var editorTitle = '<label class="editor-title">' + editor.data['js'].name  + '</h3>'
+                jsDiv.innerHTML = editorTitle;
+                document.getElementById(editor.id).append(jsDiv);
+                var jsCodeMirror = CodeMirror(jsDiv, {
+                    value: editor.data['js'].source,
+                    mode:  "javascript",
+                    theme: "ambiance",
+                    lineNumbers: true,
+                    hintOptions: {
+                        completeSingle: !1
+                    },
+
+                  });
+
+                editor.jsEditor  = jsCodeMirror;
+            }
+            if (editor.data.hasOwnProperty('css')) {
+                console.log('create css editor..');
+                var cssDiv = document.createElement('div');
+                cssDiv.setAttribute('class', 'editor-container');
+                var editorTitle = '<label class="editor-title">' + editor.data['css'].name  + '</h3>'
+                cssDiv.innerHTML = editorTitle;
+                document.getElementById(editor.id).append(cssDiv);
+                var cssCodeMirror = CodeMirror(cssDiv, {
+                    value: editor.data['css'].source,
+                    mode:  "css",
+                    theme: "ambiance",
+                    lineNumbers: true
+                  });
+                  editor.cssEditor  = cssCodeMirror;
+            }
+            if (editor.data.hasOwnProperty('html')) {
+                console.log('create html editor..');
+                var htmlDiv = document.createElement('div');
+                htmlDiv.setAttribute('class', 'editor-container');
+                var editorTitle = '<label class="editor-title">' + editor.data['html'].name  + '</h3>'
+                htmlDiv.innerHTML = editorTitle;
+                document.getElementById(editor.id).append(htmlDiv);
+                var htmlCodeMirror = CodeMirror(htmlDiv, {
+                    value: editor.data['html'].source,
+                    mode:  "javascript",
+                    theme: "ambiance",
+                    lineNumbers: true
+                  });
+                  editor.htmlEditor  = htmlCodeMirror;
+            }
+
+                var htmliframe = document.createElement('iframe');
+                htmliframe.setAttribute('class', 'editor-iframe');
+                htmliframe.setAttribute('id', editor.id + "-iframe");
+                document.getElementById(editor.id).append(htmliframe);
+                
+            var playBtn = document.createElement('div');
+            playBtn.innerHTML = 'Prikazi stranicu';
+            playBtn.setAttribute('data-editorId', editor.id);
+            playBtn.setAttribute('class', 'editor-play');
+            playBtn.addEventListener('click', function(e) {
+                var editorsId = e.currentTarget.dataset.editorid;
+                console.log(editorsId);
+                var editor = editorArray.find(e => e.id == editorsId);
+
+                var htmlData = editor.htmlEditor.getValue();
+
+                if (editor.data.hasOwnProperty('css')) {
+                    var cssBlob = new Blob(["" + editor.cssEditor.getValue()], {type: "text/css"});
+                    htmlData = htmlData.replaceAll(editor.data["css"].name, URL.createObjectURL(cssBlob));
+
+                }
+                
+                if (editor.data.hasOwnProperty('js')) {
+                    var jsBlob = new Blob(["" + editor.jsEditor.getValue()], {type: "text/javascript"});
+                    htmlData = htmlData.replaceAll(editor.data["js"].name, URL.createObjectURL(jsBlob));
+
+                }
+
+
+                var htmlBlob = new  Blob(["" + htmlData], {type: "text/html"});
+                var htmlURL = URL.createObjectURL(htmlBlob);
+
+                if(!document.getElementById(editor.id + "-iframe")) {
+                var htmliframe = document.createElement('iframe');
+                htmliframe.setAttribute('style', 'width: calc(50% - 3px); height: 330px; display: none;');
+                htmliframe.setAttribute('id', editor.id + "-iframe");
+                document.getElementById(editor.id).append(htmliframe);
+                } else {
+                    document.getElementById(editor.id + "-iframe").style.visibility = 'visible';
+                }
+                
+                document.getElementById(editor.id + "-iframe").setAttribute('src', htmlURL);
+
+                
+
+            });
+            document.getElementById(editor.id).append(playBtn);
+
+
+            var downloadBtn = document.createElement('div');
+            downloadBtn.innerHTML = 'Preuzmi fileove';
+            downloadBtn.setAttribute('data-editorId', editor.id);
+            downloadBtn.setAttribute('class', 'editor-play');
+            downloadBtn.addEventListener('click', function(e) {
+                var editorsId = e.currentTarget.dataset.editorid;
+                console.log(editorsId);
+                var editor = editorArray.find(e => e.id == editorsId);
+
+                var zip = new JSZip();
+
+                zip.file(editor.data["html"].name, editor.htmlEditor.getValue());
+                zip.file(editor.data["js"].name, editor.jsEditor.getValue());
+                zip.file(editor.data["css"].name, editor.cssEditor.getValue());
+
+                console.log('zipping');
+
+                zip.generateAsync({type:"base64"}).then(function (content) {
+                    var link = document.createElement('a');
+                    link.href = "data:application/zip;base64," + content;
+                    link.download = "petlja-files.zip";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+               });
+
+                
+
+            });
+            document.getElementById(editor.id).append(downloadBtn);
+        });
+
+
     });
 }
 WrappingAscorinaion();
