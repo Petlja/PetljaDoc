@@ -169,7 +169,7 @@ $(document).ready(function() {
 
 		function showEndMessageSuccess(){
             var eContainer = outerDiv.appendChild(document.createElement('div'));
-            eContainer.className = 'col-md-12 alert alert-success';
+            eContainer.className = 'col-md-12 alert alert-success mt-2';
             eContainer.id = problemId+"-success"; 
             var msgHead = $('<p>').html($.i18n("msg_karel_correct"));
             eContainer.appendChild(msgHead[0]);
@@ -179,7 +179,7 @@ $(document).ready(function() {
 
 		function showEndMessageError(message){
             var eContainer = outerDiv.appendChild(document.createElement('div'));
-            eContainer.className = 'col-md-12 alert alert-danger';
+            eContainer.className = 'col-md-12 alert alert-danger mt-2';
             eContainer.id = problemId+"-error";
             var msgHead = $('<p>').html(message);
             eContainer.appendChild(msgHead[0]);
@@ -191,7 +191,7 @@ $(document).ready(function() {
             //logRunEvent({'div_id': this.divid, 'code': this.prog, 'errinfo': err.toString()}); // Log the run event
             var errHead = $('<h3>').html(errorText.ErrorTitle);
             var eContainer = outerDiv.appendChild(document.createElement('div'));
-            eContainer.className = 'col-md-12 error alert alert-danger';
+            eContainer.className = 'col-md-12 error alert alert-danger mt-2';
             eContainer.appendChild(errHead[0]);
             var errText = eContainer.appendChild(document.createElement('pre'));
             var errString = err.toString();
@@ -269,26 +269,34 @@ $(document).ready(function() {
                 "colour" : 250,
                 "contents": [
                     {
-                        "kind": "block",
-                        "type": "controls_if"
+                      "kind": "block",
+                      "type": "controls_if"
                     },
                     {
-                        "kind": "block",
-                        "type": "controls_repeat_ext"
+                      "kind": "block",
+                      "type": "controls_repeat_ext"
                     },
                     {
-                        "kind": "block",
-                        "type": "logic_compare"
+                      "kind": "block",
+                      "type": "logic_compare"
                     },
                     {
-                        "kind": "block",
-                        "type": "math_number"
+                      "kind": "block",
+                      "type": "math_number"
                     },
                     {
-                        "kind": "block",
-                        "type": "math_arithmetic"
+                      "kind": "block",
+                      "type": "math_arithmetic"
                     },
-                ]
+                    {
+                      "kind": "block",
+                      "type": "text"
+                    },
+                    {
+                      "kind": "block",
+                      "type": "text_print"
+                    },
+                  ]
             },
             {
                 "kind": "category",

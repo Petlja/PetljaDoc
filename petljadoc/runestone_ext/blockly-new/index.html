@@ -1,86 +1,87 @@
-<html lang="en" >
-    <head>
-        <meta charset="UTF-8">
-        <script src="jquery.js"></script>
-        
-        <script type="text/javascript" src="jquery_i18n/CLDRPluralRuleParser.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.messagestore.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.fallbacks.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.language.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.parser.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.emitter.js"></script>
-        <script type="text/javascript" src="jquery_i18n/jquery.i18n.emitter.bidi.js"></script>
+<html lang="en">
 
-        <script src="blockly_compressed.js"></script>
-        <script src="blocks_compressed.js"></script>
-        <script src="javascript_compressed.js"></script>
-        <script src="acorn_interpreter.js"></script>
-        <script src="msg/js/en.js"></script>
-        <!-- <script src="msg/js/sr.js"></script> -->   
+<head>
+    <meta charset="UTF-8">
+    <script src="jquery.js"></script>
 
-        <script type="text/javascript" src="karelCorner.js"></script>
-        <script type="text/javascript" src="karelRobot.js"></script>
-        <script type="text/javascript" src="karelWorld.js"></script>
-        <script type="text/javascript" src="karelRobotDrawer.js"></script>
-        <script type="text/javascript" src="karelUI.js"></script>
-        <script type="text/javascript" src="karel-i18n.en.js"></script>
-        <script type="text/javascript" src="karel-i18n.sr-Cyrl.js"></script>        
+    <script type="text/javascript" src="jquery_i18n/CLDRPluralRuleParser.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.messagestore.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.fallbacks.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.language.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.parser.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.emitter.js"></script>
+    <script type="text/javascript" src="jquery_i18n/jquery.i18n.emitter.bidi.js"></script>
 
-        <script src="codemirror.js"></script>
-        <script src="skulpt.min.js"></script>
-        <script src="skulpt-stdlib.js"></script>
+    <script src="blockly_compressed.js"></script>
+    <script src="blocks_compressed.js"></script>
+    <script src="javascript_compressed.js"></script>
+    <script src="acorn_interpreter.js"></script>
+    <script src="msg/js/en.js"></script>
+    <!-- <script src="msg/js/sr.js"></script> -->
 
-        <link rel="stylesheet" type="text/css" href="karel.css" />
-        <link rel="stylesheet" type="text/css" href="codemirror.css" />
-        <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <style>
-            .karel_section{
-                height: 200px;
-                width: 780px;
-                margin: auto 0;
-            }
-            body{
-                margin: 0 auto;
-                width: 780px;
-            }
-        </style>
+    <script type="text/javascript" src="karelCorner.js"></script>
+    <script type="text/javascript" src="karelRobot.js"></script>
+    <script type="text/javascript" src="karelWorld.js"></script>
+    <script type="text/javascript" src="karelRobotDrawer.js"></script>
+    <script type="text/javascript" src="karelUI.js"></script>
+    <script type="text/javascript" src="karel-i18n.en.js"></script>
+    <script type="text/javascript" src="karel-i18n.sr-Cyrl.js"></script>
+
+    <script src="skulpt.min.js"></script>
+    <script src="skulpt-stdlib.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="karel.css" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        .karel_section {
+            height: 200px;
+            width: 780px;
+            margin: auto 0;
+        }
+
+        body {
+            margin: 0 auto;
+            width: 780px;
+        }
+    </style>
     <script type="text/javascript">
         eBookConfig = {};
         eBookConfig.host = 'http://127.0.0.1:8000' ? 'http://127.0.0.1:8000' : 'http://127.0.0.1:8000';
         eBookConfig.app = eBookConfig.host + '/runestone';
         eBookConfig.ajaxURL = eBookConfig.app + '/ajax/';
-        eBookConfig.course = 'Информатика и рачунарство за шести разред';
+        eBookConfig.course = 'Test';
         eBookConfig.logLevel = '0';
         eBookConfig.loginRequired = 'false';
         eBookConfig.build_info = "";
         eBookConfig.isLoggedIn = false;
         eBookConfig.useRunestoneServices = false;
         eBookConfig.python3 = true;
-        eBookConfig.basecourse = 'Информатика и рачунарство за шести разред';
+        eBookConfig.basecourse = 'Test';
         eBookConfig.runestone_version = '';
         eBookConfig.imagesDir = '';
         eBookConfig.staticDir = '';
         if (typeof (Sk) != "undefined")
-          Sk.imgPath = eBookConfig.imagesDir;
-      </script>
-    </head>
-    <body>
-        
-        <div id="blocklyDiv" style="height: 500px; width: 780px;"></div>
+            Sk.imgPath = eBookConfig.imagesDir;
+    </script>
+</head>
+
+<body>
+    <div>
+        <div id="blocklyDiv" style="height: 500px;width: 780px;margin-top: 20px;"></div>
         <div data-childcomponent="Карел_на_поље_33" class="karel_section course-box course-box-problem">
             <div class="course-content">
-                <p>
-        
-            <div data-component="karel" id="Карел_на_поље_33" class="karel_section">
-                    <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
-                    <button class="btn btn-default reset-button">Врати на почетак</button>
+                <div data-component="karel" id="Карел_на_поље_33" class="karel_section">
+                    <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени
+                            програм</button>
+                        <button class="btn btn-default reset-button">Врати на почетак</button>
                     </div>
-                <div style="overflow: hidden;" class="karel_actions col-md-12" >
-                    <section class="col-md-12">
-                        <article> 
-                            <textarea class="configArea" style="display:none"><!--x {
+                    <div style="overflow: hidden;" class="karel_actions col-md-12">
+                        <section class="col-md-12">
+                            <article>
+                                <textarea class="configArea" style="display:none"><!--x {
              setup:function() {
                  var world = new World(5,5);
                  world.setRobotStartAvenue(1);
@@ -113,17 +114,25 @@
                 robot.getBalls() === 1;
              },
         } x--></textarea>
-                        </article>
-                    </section>
-                    <section class="col-md-12">
-                        <article>
-                            <canvas class="world" style="border-style: solid; border-width: 2px; border-color: inherit; background: white;" width="300" height="300">
-                                <p>Please try loading this page in HTML5 enabled web browsers. All the latest versions of famous browsers such as Internet explorer, Chrome, Firefox, Opera support HTML5.</p>
-                            </canvas>
-                        </article>
-                    </section>
+                            </article>
+                        </section>
+                        <section class="col-md-12">
+                            <article>
+                                <canvas class="world"
+                                    style="border-style: solid; border-width: 2px; border-color: inherit; background: white;"
+                                    width="300" height="300">
+                                    <p>Please try loading this page in HTML5 enabled web browsers. All the latest
+                                        versions of famous browsers such as Internet explorer, Chrome, Firefox, Opera
+                                        support HTML5.</p>
+                                </canvas>
+                            </article>
+                        </section>
+                    </div>
                 </div>
+                </p>
             </div>
-        </p></div></div>
-    </body>
+        </div>
+    </div>
+</body>
+
 </html>
