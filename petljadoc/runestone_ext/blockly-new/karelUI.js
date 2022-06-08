@@ -59,39 +59,89 @@ $(document).ready(function() {
         var robot = setup.robot;
         var world = setup.world;
         robot.setWorld(world)
-        var drawer = new RobotDrawer(canvas, 500);
+        var drawer = new RobotDrawer(canvas, 0);
         drawer.drawFrame(robot);
 
 
         function initApi(interpreter, globalObject) {
-            drawer.start();
-                var wrapper = function(text) {
+            var wrapper = function(text) {
                 return alert(arguments.length ? text : '');
             };
-            interpreter.setProperty(globalObject, 'alert',
-            interpreter.createNativeFunction(wrapper));
+            interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(wrapper));
             wrapper = function() {
                 robot.move();
-                drawer.addFrame(robot.clone());
+                drawer.drawFrame(robot.clone());
             };
-            interpreter.setProperty(globalObject, 'napred',
-            interpreter.createNativeFunction(wrapper));
+            interpreter.setProperty(globalObject, 'napred', interpreter.createNativeFunction(wrapper));
+            wrapper = function() {
+                robot.turnLeft();
+                drawer.drawFrame(robot.clone());
+            };
+            interpreter.setProperty(globalObject, 'levo', interpreter.createNativeFunction(wrapper));
+            wrapper = function() {
+                robot.turnRight();
+                drawer.drawFrame(robot.clone());
+            };
+            interpreter.setProperty(globalObject, 'desno', interpreter.createNativeFunction(wrapper));
+            wrapper = function() {
+                robot.pickBall();
+                drawer.drawFrame(robot.clone());
+            };
+            interpreter.setProperty(globalObject, 'pokupi', interpreter.createNativeFunction(wrapper));
+            wrapper = function(id) {
+                workspace.highlightBlock(id);
+            };
+            interpreter.setProperty(globalObject, 'highlightBlock', interpreter.createNativeFunction(wrapper));
         }
 
         $(this).find(".run-button").click(function () {
+            $('.run-button').attr('disabled', 'disabled');
+            clearError();
             setup = config.setup();
             robot = setup.robot;
             world = setup.world;
             robot.setWorld(world)
-            drawer = new RobotDrawer(canvas, 500);
+            drawer = new RobotDrawer(canvas, 0);
             drawer.drawFrame(robot);
             var code = Blockly.JavaScript.workspaceToCode(workspace);      
             var myInterpreter = new Interpreter(code, initApi);
-            console.log(code)
-            myInterpreter.run();
+            drawer.start()
+            function nextStep() {
+                try{
+                    if (myInterpreter.step()) {
+                    setTimeout(nextStep, 75);
+                    }
+                    else{
+                        var result =config.isSuccess(robot, world);
+                        if(result){
+                            showEndMessageSuccess();
+                        } else {
+                            showEndMessageError($.i18n("msg_karel_incorrect"));
+                        }
+                    }    
+                }
+                catch(err){
+                    drawer.stop(function () {
+                        var message = "";
+                        var otherError = false;
+                        if ((err == "crashed") || (err == "no_ball") || (err == "out_of_bounds") || (err == "no_balls_with_robot"))
+                            message = $.i18n("msg_karel_" + err);
+                        else {
+                            showError(err);
+                            otherError = true;
+                        }
+                        if (!otherError)
+                            showEndMessageError(message);
+    
+                    });
+                }
+            }
+            nextStep();                     
+            setTimeout(() => {$('.run-button').removeAttr('disabled', 'disabled');},drawer.frames.length * drawer.sleep);
         });
 
         $(this).find(".reset-button").click(function () {
+            clearError();
             reset();
         });
 
@@ -107,23 +157,14 @@ $(document).ready(function() {
                });
         });
 
-        function outf(text){
-            console.log(text);
-        }
 
         function reset(){
             var setup = config.setup();
             var robot = setup.robot;
             var world = setup.world;
             robot.setWorld(world)
-            var drawer = new RobotDrawer(canvas, 500);
+            var drawer = new RobotDrawer(canvas, 0);
             drawer.drawFrame(robot);
-        }
-
-        function builtinRead(x) {
-            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-                throw "File not found: '" + x + "'";
-            return Sk.builtinFiles["files"][x];
         }
 
 		function showEndMessageSuccess(){
@@ -184,17 +225,6 @@ $(document).ready(function() {
     });
 });
 
-function turnLeft(robot,drawer) {
-	robot.turnLeft();
-	drawer.addFrame(robot.clone());
-    }
-
-    function turnRight() {
-	robot.turnRight();
-	drawer.addFrame(robot.clone());
-    }
-
-
 
     function frontIsClear() {
 	return robot.frontIsClear();
@@ -217,12 +247,6 @@ function turnLeft(robot,drawer) {
 	return robot.countBalls();
     }
     
-
-    function pickBall() {
-	robot.pickBall();
-	drawer.addFrame(robot.clone());
-    }
-    
     function putBall() {
 	robot.putBall();
 	drawer.addFrame(robot.clone());
@@ -235,39 +259,60 @@ function turnLeft(robot,drawer) {
 	robot.turnMessagesOff();
     }
 
-    function move(robot,drawer) {
-        robot.move();
-        drawer.addFrame(robot); 
-    }
-
 
     var toolbox = {
-        "kind": "flyoutToolbox",
+        "kind": "categoryToolbox",
         "contents": [
-          {
-            "kind": "block",
-            "type": "controls_if"
-          },
-          {
-            "kind": "block",
-            "type": "controls_repeat_ext"
-          },
-          {
-            "kind": "block",
-            "type": "logic_compare"
-          },
-          {
-            "kind": "block",
-            "type": "math_number"
-          },
-          {
-            "kind": "block",
-            "type": "math_arithmetic"
-          },
-          {
-            "kind": "block",
-            "type": "maze_moveForward"
-          },
+            {
+                "kind": "category",
+                "name": "JavaScript Native",
+                "colour" : 250,
+                "contents": [
+                    {
+                        "kind": "block",
+                        "type": "controls_if"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "controls_repeat_ext"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "logic_compare"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "math_number"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "math_arithmetic"
+                    },
+                ]
+            },
+            {
+                "kind": "category",
+                "name": "Karel",
+                "colour" : 150,
+                "contents": [
+                    {
+                        "kind": "block",
+                        "type": "maze_moveForward"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "turn_left"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "turn_right"
+                    },
+                    {
+                        "kind": "block",
+                        "type": "pick_up"
+                    },     
+                ]
+            },
         ]
     };      
 
@@ -293,3 +338,68 @@ function turnLeft(robot,drawer) {
         return 'napred()\n';
       };
       
+      Blockly.Blocks['turn_left'] = {
+        /**
+         * Block for moving forward.
+         * @this {Blockly.Block}
+         */
+        init: function() {
+          this.jsonInit({
+            "message0": 'levo',
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour":250,
+            "tooltip": 'levo'
+          });
+        }
+      };
+      
+      Blockly.JavaScript['turn_left'] = function(block) {
+        // Generate JavaScript for moving forward.
+        return 'levo()\n';
+      };
+      Blockly.Blocks['turn_right'] = {
+        /**
+         * Block for moving forward.
+         * @this {Blockly.Block}
+         */
+        init: function() {
+          this.jsonInit({
+            "message0": 'desno',
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour":250,
+            "tooltip": 'desno'
+          });
+        }
+      };
+      
+      Blockly.JavaScript['turn_right'] = function(block) {
+        // Generate JavaScript for moving forward.
+        return 'desno()\n';
+      };
+
+      Blockly.Blocks['pick_up'] = {
+        /**
+         * Block for moving forward.
+         * @this {Blockly.Block}
+         */
+        init: function() {
+          this.jsonInit({
+            "message0": 'pokupi',
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour":250,
+            "tooltip": 'pokupi'
+          });
+        }
+      };
+      
+      Blockly.JavaScript['pick_up'] = function(block) {
+        // Generate JavaScript for moving forward.
+        return 'pokupi()\n';
+      };
+
+      Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
+      Blockly.JavaScript.addReservedWords('highlightBlock');  
+
