@@ -330,6 +330,82 @@ var toolbox = {
         },
       ]
     },
+    {
+      "kind": "category",
+      "name": "For each",
+      "colour": 300,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "controls_forEach",
+        },      
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Arithmetic",
+      "colour": 270,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "math_arithmetic",
+        }, 
+        {
+          "kind": "block",
+          "type": "math_round",
+        },      
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Values",
+      "colour": 105,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "text",
+        },      
+        {
+          "kind": "block",
+          "type": "math_number",
+        },  
+        {
+          "kind": "block",
+          "type": "logic_boolean",
+        },  
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Conversion",
+      "colour": 290,
+      "contents": [
+        {
+          "kind": "block",
+          "inline" : "true",
+          "type": "to_int",
+        },         
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Conversion",
+      "colour": 30,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "lists_create_with",
+        },      
+        {
+          "kind": "block",
+          "type": "lists_create_empty",
+        },   
+        {
+          "kind": "block",
+          "type": "range_list1",
+        },
+      ]
+    },
   ]
 };
 
@@ -539,6 +615,33 @@ Blockly.Blocks['count_balls_on_hand'] = {
 Blockly.JavaScript['count_balls_on_hand'] = function (block) {
   // Generate JavaScript for moving forward.
   return ['koliko_loptica_kod_sebe()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
+};
+
+
+Blockly.Blocks['range_list1'] = {
+  init: function() {
+    this.appendValueInput('LIMIT')
+        .setCheck('Number')
+        .appendField("lista od ")
+    this.appendDummyInput()
+        .appendField(" brojeva");
+    this.setInputsInline(true);
+    this.setOutput(true, 'Array');
+    this.setColour(30);
+    var thisBlock = this;
+    this.setTooltip(function() {
+      return "lista od %1 uzastopnih brojeva počevši od broja 0.".replace('%1',
+          Blockly.JavaScript.valueToCode(thisBlock, 'LIMIT', Blockly.JavaScript.ORDER_RELATIONAL) || '___');
+    });
+    this.setHelpUrl('');
+  }
+};
+
+Blockly.JavaScript['range_list1'] = function(block) {
+  var value = Blockly.JavaScript.valueToCode(block, 'LIMIT',
+      Blockly.JavaScript.ORDER_NONE) || '___';
+  var code = '[...Array('+ value + ').keys()]\n';
+  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
 
