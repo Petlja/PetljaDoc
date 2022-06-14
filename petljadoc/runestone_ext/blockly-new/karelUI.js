@@ -68,6 +68,10 @@ $(document).ready(function () {
         return alert(arguments.length ? text : '');
       };
       interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(wrapper));
+      wrapper = function(text) {
+        return prompt(text);
+      };
+      interpreter.setProperty(globalObject, 'prompt', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.move();
         drawer.drawFrame(robot.clone());
@@ -117,6 +121,10 @@ $(document).ready(function () {
         workspace.highlightBlock(id);
       };
       interpreter.setProperty(globalObject, 'highlightBlock', interpreter.createNativeFunction(wrapper));
+      wrapper = function (value) {
+      return JSON.stringify([...Array(value).keys()]);    
+      };
+      interpreter.setProperty(globalObject, 'range', interpreter.createNativeFunction(wrapper));
     }
 
     $(this).find(".run-button").click(function () {
@@ -129,6 +137,7 @@ $(document).ready(function () {
       drawer = new RobotDrawer(canvas, 0);
       drawer.drawFrame(robot);
       var code = Blockly.JavaScript.workspaceToCode(workspace);
+      console.log(code)
       var myInterpreter = new Interpreter(code, initApi);
       drawer.start()
       function nextStep() {
@@ -137,6 +146,7 @@ $(document).ready(function () {
             setTimeout(nextStep, 75);
           }
           else {
+            $('.run-button').removeAttr('disabled', 'disabled');
             var result = config.isSuccess(robot, world);
             if (result) {
               showEndMessageSuccess();
@@ -146,6 +156,7 @@ $(document).ready(function () {
           }
         }
         catch (err) {
+          $('.run-button').removeAttr('disabled', 'disabled');
           drawer.stop(function () {
             var message = "";
             var otherError = false;
@@ -162,7 +173,6 @@ $(document).ready(function () {
         }
       }
       nextStep();
-      setTimeout(() => { $('.run-button').removeAttr('disabled', 'disabled'); }, drawer.frames.length * drawer.sleep);
     });
 
     $(this).find(".reset-button").click(function () {
@@ -257,11 +267,11 @@ var toolbox = {
     {
       "kind": "category",
       "name": "Karel",
-      "colour": 150,
+      "colour": 275,
       "contents": [
         {
           "kind": "block",
-          "type": "maze_moveForward"
+          "type": "maze_moveForward",
         },
         {
           "kind": "block",
@@ -304,13 +314,13 @@ var toolbox = {
     {
       "kind": "category",
       "name": "Variables",
-      "colour": 50,
+      "colour": 240,
       "custom": "VARIABLE"
     },
     {
       "kind": "category",
       "name": "Logic",
-      "colour": 150,
+      "colour": 330,
       "contents": [
         {
           "kind": "block",
@@ -359,7 +369,7 @@ var toolbox = {
     {
       "kind": "category",
       "name": "Values",
-      "colour": 105,
+      "colour": 100,
       "contents": [
         {
           "kind": "block",
@@ -378,13 +388,9 @@ var toolbox = {
     {
       "kind": "category",
       "name": "Conversion",
-      "colour": 290,
+      "colour": 275,
       "contents": [
-        {
-          "kind": "block",
-          "inline" : "true",
-          "type": "to_int",
-        },         
+        
       ]
     },
     {
@@ -410,239 +416,7 @@ var toolbox = {
 };
 
 
-Blockly.Blocks['maze_moveForward'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'napred',
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": 250,
-      "tooltip": 'napred'
-    });
-  }
-};
 
-Blockly.JavaScript['maze_moveForward'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return 'napred()\n';
-};
-
-Blockly.Blocks['turn_left'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'levo',
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": 250,
-      "tooltip": 'levo'
-    });
-  }
-};
-
-Blockly.JavaScript['turn_left'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return 'levo()\n';
-};
-Blockly.Blocks['turn_right'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'desno',
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": 250,
-      "tooltip": 'desno'
-    });
-  }
-};
-
-Blockly.JavaScript['turn_right'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return 'desno()\n';
-};
-
-Blockly.Blocks['pick_up'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'pokupi',
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": 250,
-      "tooltip": 'pokupi'
-    });
-  }
-};
-
-Blockly.JavaScript['pick_up'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return 'pokupi()\n';
-};
-
-
-Blockly.Blocks['drop_off'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'ostavi',
-      "previousStatement": null,
-      "nextStatement": null,
-      "colour": 250,
-      "tooltip": 'ostavi'
-    });
-  }
-};
-
-Blockly.JavaScript['drop_off'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return 'ostavi()\n';
-};
-
-Blockly.Blocks['can_move'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'moze_napred',
-      "output": "Boolean",
-      "colour": 250,
-      "tooltip": 'moze_napred'
-    });
-  }
-};
-
-Blockly.JavaScript['can_move'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return ['moze_napred()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-
-Blockly.Blocks['balls_present'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'ima_loptica',
-      "output": "Boolean",
-      "colour": 250,
-      "tooltip": 'ima_loptica'
-    });
-  }
-};
-
-Blockly.JavaScript['balls_present'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return ['ima_loptica()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-
-Blockly.Blocks['has_balls'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'ima_lopticu_kod_sebe',
-      "output": "Boolean",
-      "colour": 250,
-      "tooltip": 'ima_lopticu_kod_sebe'
-    });
-  }
-};
-
-Blockly.JavaScript['has_balls'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return ['ima_lopticu_kod_sebe()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.Blocks['count_balls'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'koliko_loptica_na_polju',
-      "output": "Number",
-      "colour": 250,
-      "tooltip": 'koliko_loptica_na_polju'
-    });
-  }
-};
-
-Blockly.JavaScript['count_balls'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return ['koliko_loptica_na_polju()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.Blocks['count_balls_on_hand'] = {
-  /**
-   * Block for moving forward.
-   * @this {Blockly.Block}
-   */
-  init: function () {
-    this.jsonInit({
-      "message0": 'koliko_loptica_kod_sebe',
-      "output": "Number",
-      "colour": 250,
-      "tooltip": 'koliko_loptica_kod_sebe'
-    });
-  }
-};
-
-Blockly.JavaScript['count_balls_on_hand'] = function (block) {
-  // Generate JavaScript for moving forward.
-  return ['koliko_loptica_kod_sebe()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-
-Blockly.Blocks['range_list1'] = {
-  init: function() {
-    this.appendValueInput('LIMIT')
-        .setCheck('Number')
-        .appendField("lista od ")
-    this.appendDummyInput()
-        .appendField(" brojeva");
-    this.setInputsInline(true);
-    this.setOutput(true, 'Array');
-    this.setColour(30);
-    var thisBlock = this;
-    this.setTooltip(function() {
-      return "lista od %1 uzastopnih brojeva počevši od broja 0.".replace('%1',
-          Blockly.JavaScript.valueToCode(thisBlock, 'LIMIT', Blockly.JavaScript.ORDER_RELATIONAL) || '___');
-    });
-    this.setHelpUrl('');
-  }
-};
-
-Blockly.JavaScript['range_list1'] = function(block) {
-  var value = Blockly.JavaScript.valueToCode(block, 'LIMIT',
-      Blockly.JavaScript.ORDER_NONE) || '___';
-  var code = '[...Array('+ value + ').keys()]\n';
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
 
 
 Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
