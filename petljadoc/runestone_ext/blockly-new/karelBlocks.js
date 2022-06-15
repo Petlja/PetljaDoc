@@ -141,7 +141,7 @@ Blockly.Blocks['maze_moveForward'] = {
   
   Blockly.JavaScript['balls_present'] = function (block) {
     // Generate JavaScript for moving forward.
-    return ['ima_loptica()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    return ['balls_present()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
   
   
@@ -155,14 +155,14 @@ Blockly.Blocks['maze_moveForward'] = {
         "message0": 'ima_lopticu_kod_sebe',
         "output": "Boolean",
         "colour": 250,
-        "tooltip": 'ima_lopticu_kod_sebe'
+        "tooltip": 'Da li robot ima lopticu kod sebe'
       });
     }
   };
   
   Blockly.JavaScript['has_balls'] = function (block) {
     // Generate JavaScript for moving forward.
-    return ['ima_lopticu_kod_sebe()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    return ['has_ball()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
   
   Blockly.Blocks['count_balls'] = {
@@ -205,29 +205,52 @@ Blockly.Blocks['maze_moveForward'] = {
     return ['koliko_loptica_kod_sebe()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
   
-  
-  Blockly.Blocks['range_list1'] = {
-    init: function() {
-      this.appendValueInput('LIMIT')
-          .setCheck('Number')
-          .appendField("lista od ")
-      this.appendDummyInput()
-          .appendField(" brojeva");
-      this.setInputsInline(true);
-      this.setOutput(true, 'Array');
-      this.setColour(30);
-      var thisBlock = this;
-      this.setTooltip(function() {
-        return "lista od %1 uzastopnih brojeva počevši od broja 0.".replace('%1',
-            Blockly.JavaScript.valueToCode(thisBlock, 'LIMIT', Blockly.JavaScript.ORDER_RELATIONAL) || 0);
-      });
-      this.setHelpUrl('');
-    }
-  };
-  
-  Blockly.JavaScript['range_list1'] = function(block) {
-    var value = Blockly.JavaScript.valueToCode(block, 'LIMIT',
-        Blockly.JavaScript.ORDER_NONE) || 0;
-    var code = 'JSON.parse(range('+value+'))';
-    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-  };
+  Blockly.Blocks['controls_whileUntil_has_ball'] = {
+    init: function () {
+      this.jsonInit(   {
+        'type': 'controls_whileUntil',
+        'message0': '%1 %2',
+        'args0': [
+          {
+            'type': 'field_dropdown',
+            'name': 'MODE',
+            'options': [
+              ['%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_WHILE}', 'WHILE'],
+              ['%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_UNTIL}', 'UNTIL'],
+            ],
+          },
+          {
+            'type': 'field_dropdown',
+            'name': 'KAREL_BOOL',
+            'options': [
+              ['има лопту', 'has_ball()'],
+              ['постоји лопта на пољу', 'balls_present()'],
+              ['може напред', 'moze_napred()'],
+            ],
+          },
+        ],
+        'message1': '%{BKY_CONTROLS_REPEAT_INPUT_DO} %1',
+        'args1': [{
+          'type': 'input_statement',
+          'name': 'DO',
+        }],
+        'previousStatement': null,
+        'nextStatement': null,
+        'style': 'loop_blocks',
+        'helpUrl': '%{BKY_CONTROLS_WHILEUNTIL_HELPURL}',
+        'extensions': ['controls_whileUntil_tooltip'],
+      },)
+  }
+}
+
+Blockly.JavaScript['controls_whileUntil_has_ball'] = function (block) {
+  // Do while/until loop.
+  const until = block.getFieldValue('MODE') === 'UNTIL';
+  let argument0 = block.getFieldValue('KAREL_BOOL')
+  let branch = Blockly.JavaScript.statementToCode(block, 'DO');
+  branch = Blockly.JavaScript.addLoopTrap(branch, block);
+  if (until) {
+    argument0 = '!' + argument0;
+  }
+  return 'while (' + argument0 + ') {\n' + branch + '}\n';
+};

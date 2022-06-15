@@ -104,11 +104,11 @@ $(document).ready(function () {
       wrapper = function () {
         return robot.ballsPresent()
       };
-      interpreter.setProperty(globalObject, 'ima_loptica', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'balls_present', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         return robot.getBalls() != 0;
       };
-      interpreter.setProperty(globalObject, 'ima_lopticu_kod_sebe', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'has_ball', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         return robot.countBalls();
       };
@@ -143,7 +143,7 @@ $(document).ready(function () {
       function nextStep() {
         try {
           if (myInterpreter.step()) {
-            setTimeout(nextStep, 75);
+            setTimeout(nextStep, 65);
           }
           else {
             $('.run-button').removeAttr('disabled', 'disabled');
@@ -266,8 +266,8 @@ var toolbox = {
   "contents": [
     {
       "kind": "category",
-      "name": "Karel",
-      "colour": 275,
+      "name": "Karel movement",
+      "colour": 295,
       "contents": [
         {
           "kind": "block",
@@ -281,6 +281,13 @@ var toolbox = {
           "kind": "block",
           "type": "turn_right"
         },
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Karel action",
+      "colour": 275,
+      "contents": [
         {
           "kind": "block",
           "type": "pick_up"
@@ -289,13 +296,20 @@ var toolbox = {
           "kind": "block",
           "type": "drop_off"
         },
-        {
-          "kind": "block",
-          "type": "can_move"
-        },
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Karel brain",
+      "colour": 255,
+      "contents": [
         {
           "kind": "block",
           "type": "balls_present",
+        },
+        {
+          "kind": "block",
+          "type": "can_move",
         },
         {
           "kind": "block",
@@ -313,14 +327,23 @@ var toolbox = {
     },
     {
       "kind": "category",
-      "name": "Variables",
-      "colour": 240,
-      "custom": "VARIABLE"
+      "name": "Values",
+      "colour": 110,
+      "contents": [    
+        {
+          "kind": "block",
+          "type": "math_number",
+        },  
+        {
+          "kind": "block",
+          "type": "logic_boolean",
+        },  
+      ]
     },
     {
       "kind": "category",
       "name": "Logic",
-      "colour": 330,
+      "colour": 130,
       "contents": [
         {
           "kind": "block",
@@ -341,81 +364,34 @@ var toolbox = {
       ]
     },
     {
-      "kind": "category",
-      "name": "For each",
-      "colour": 300,
-      "contents": [
+      "kind" : "category",
+      "name" : "Loops",
+      "colour": 150,
+      "contents":[
         {
-          "kind": "block",
-          "type": "controls_forEach",
-        },      
+          "kind" : "block",
+          "type" : "controls_repeat"
+        },
+        {
+          "kind" : "block",
+          "type" : "controls_whileUntil"
+        }
       ]
     },
     {
-      "kind": "category",
-      "name": "Arithmetic",
-      "colour": 270,
-      "contents": [
+      "kind" : "category",
+      "name" : "Loops karel",
+      "colour": 190,
+      "contents":[
         {
-          "kind": "block",
-          "type": "math_arithmetic",
-        }, 
-        {
-          "kind": "block",
-          "type": "math_round",
-        },      
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Values",
-      "colour": 100,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "text",
-        },      
-        {
-          "kind": "block",
-          "type": "math_number",
-        },  
-        {
-          "kind": "block",
-          "type": "logic_boolean",
-        },  
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Conversion",
-      "colour": 275,
-      "contents": [
-        
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Conversion",
-      "colour": 30,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "lists_create_with",
-        },      
-        {
-          "kind": "block",
-          "type": "lists_create_empty",
-        },   
-        {
-          "kind": "block",
-          "type": "range_list1",
+          "kind" : "block",
+          "type" : "controls_whileUntil_has_ball"
         },
       ]
     },
+
   ]
-};
-
-
+}
 
 
 
