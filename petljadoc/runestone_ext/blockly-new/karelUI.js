@@ -76,31 +76,31 @@ $(document).ready(function () {
         robot.move();
         drawer.drawFrame(robot.clone());
       };
-      interpreter.setProperty(globalObject, 'napred', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'move_forward', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.turnLeft();
         drawer.drawFrame(robot.clone());
       };
-      interpreter.setProperty(globalObject, 'levo', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'turn_left', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.turnRight();
         drawer.drawFrame(robot.clone());
       };
-      interpreter.setProperty(globalObject, 'desno', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'turn_right', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.pickBall();
         drawer.drawFrame(robot.clone());
       };
-      interpreter.setProperty(globalObject, 'pokupi', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'pick_up', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.putBall();
         drawer.addFrame(robot.clone());
       };
-      interpreter.setProperty(globalObject, 'ostavi', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'drop_off', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         return robot.frontIsClear()
       };
-      interpreter.setProperty(globalObject, 'moze_napred', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'can_move', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         return robot.ballsPresent()
       };
@@ -112,11 +112,11 @@ $(document).ready(function () {
       wrapper = function () {
         return robot.countBalls();
       };
-      interpreter.setProperty(globalObject, 'koliko_loptica_na_polju', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'count_balls', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         return robot.getBalls();
       };
-      interpreter.setProperty(globalObject, 'koliko_loptica_kod_sebe', interpreter.createNativeFunction(wrapper));
+      interpreter.setProperty(globalObject, 'count_balls_on_hand', interpreter.createNativeFunction(wrapper));
       wrapper = function (id) {
         workspace.highlightBlock(id);
       };
@@ -266,12 +266,12 @@ var toolbox = {
   "contents": [
     {
       "kind": "category",
-      "name": "Karel movement",
+      "name": "Наредбе роботу",
       "colour": 295,
       "contents": [
         {
           "kind": "block",
-          "type": "maze_moveForward",
+          "type": "move",
         },
         {
           "kind": "block",
@@ -281,13 +281,6 @@ var toolbox = {
           "kind": "block",
           "type": "turn_right"
         },
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Karel action",
-      "colour": 275,
-      "contents": [
         {
           "kind": "block",
           "type": "pick_up"
@@ -300,8 +293,8 @@ var toolbox = {
     },
     {
       "kind": "category",
-      "name": "Karel brain",
-      "colour": 255,
+      "name": "Питај робота",
+      "colour": 275,
       "contents": [
         {
           "kind": "block",
@@ -327,7 +320,7 @@ var toolbox = {
     },
     {
       "kind": "category",
-      "name": "Values",
+      "name": "Вредности",
       "colour": 110,
       "contents": [    
         {
@@ -342,12 +335,43 @@ var toolbox = {
     },
     {
       "kind": "category",
-      "name": "Logic",
+      "name": "Логика",
       "colour": 130,
       "contents": [
         {
           "kind": "block",
           "type": "controls_if",
+        },
+        {
+          "kind": "block",
+          "type": "controls_ifelse",
+        },
+        {
+          "kind": "block",
+          "type": "logic_compare",
+        },
+        {
+          "kind": "block",
+          "type": "logic_operation",
+        },
+        {
+          "kind": "block",
+          "type": "logic_negate",
+        },
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Логика карел",
+      "colour": 150,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "controls_if_simple",
+        },
+        {
+          "kind": "block",
+          "type": "controls_ifelse_simple",
         },
         {
           "kind": "block",
@@ -365,7 +389,7 @@ var toolbox = {
     },
     {
       "kind" : "category",
-      "name" : "Loops",
+      "name" : "Петље",
       "colour": 150,
       "contents":[
         {
@@ -380,7 +404,7 @@ var toolbox = {
     },
     {
       "kind" : "category",
-      "name" : "Loops karel",
+      "name" : "Петље карел",
       "colour": 190,
       "contents":[
         {
