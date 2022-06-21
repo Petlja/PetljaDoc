@@ -15,12 +15,9 @@ def setup(app):
 
     app.add_javascript('acorn_interpreter.js')
     app.add_javascript('blockly_compressed.js')
-    app.add_javascript('blockly_compressed.js.map')
     app.add_javascript('msg/sr.js')
     app.add_javascript('blocks_compressed.js')
-    app.add_javascript('blocks_compressed.js.map')
     app.add_javascript('javascript_compressed.js.')
-    app.add_javascript('javascript_compressed.js.map')
     app.add_javascript('karelBlockly.js')
     app.add_javascript('karelBlocks.js')
 
@@ -42,6 +39,7 @@ TEMPLATE_END = """
     <div data-component="blocklyKarel" id="%(divid)s" class="karel_section">
         <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
         <button class="btn btn-default reset-button">Врати на почетак</button>
+        </div>
         <div style="overflow: hidden;" class="karel_actions col-md-12" >
             <section class="col-md-12">
                 <article>

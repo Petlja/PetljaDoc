@@ -1,14 +1,14 @@
 import os
 
-modules = ['karel', 'notes', 'pygamelib','blockly','audio', 'quizq', 'simanim', 'pycode', 'p5js','gallery', 'dbDirective', 'associations', 'regexcheck','nimgame']
+modules = ['karel', 'notes', 'pygamelib','audio', 'quizq', 'simanim', 'pycode', 'p5js','gallery', 'dbDirective', 'associations', 'regexcheck','nimgame']
 
-def extensions():
-    return ['petljadoc.runestone_ext.' + module for module in modules]
+def extensions(active_modules):
+    return ['petljadoc.runestone_ext.' + module for module in active_modules]
 
-def static_dirs():
+def static_dirs(active_modules):
     basedir = os.path.dirname(__file__)
     subdirs = ['js','css', 'images', 'bootstrap']
-    dirs0 = [basedir + '/' + m + '/' + s for m in modules for s in subdirs]
+    dirs0 = [basedir + '/' + m + '/' + s for m in active_modules for s in subdirs]
     dirs = [dir for dir in dirs0 if os.path.exists(dir)]
     return dirs
 
