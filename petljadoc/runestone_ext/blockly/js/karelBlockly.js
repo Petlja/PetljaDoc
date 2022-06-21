@@ -46,13 +46,13 @@ $(document).ready(function () {
 
 
 
-  $('[data-component=karel]').each(function (index) {
+  $('[data-component=blocklyKarel]').each(function (index) {
     var outerDiv = $(this)[0];
     var canvas = $(this).find(".world")[0];
     var problemId = this.id;
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
-    var div = document.getElementById("blocklyDiv")
+    var div = document.getElementById("blocklyKarelDiv")
     var workspace = Blockly.inject(div, { toolbox: toolbox });
 
     var setup = config.setup();

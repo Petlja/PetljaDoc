@@ -1,6 +1,6 @@
 import os
 
-modules = ['karel', 'notes', 'pygamelib','blockpylib','audio', 'quizq', 'simanim', 'pycode', 'p5js','gallery', 'dbDirective', 'associations', 'regexcheck','nimgame']
+modules = ['karel', 'notes', 'pygamelib','blockly','audio', 'quizq', 'simanim', 'pycode', 'p5js','gallery', 'dbDirective', 'associations', 'regexcheck','nimgame']
 
 def extensions():
     return ['petljadoc.runestone_ext.' + module for module in modules]
