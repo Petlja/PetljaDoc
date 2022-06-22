@@ -52,8 +52,11 @@ $(document).ready(function () {
     var problemId = this.id;
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
-    var div = document.getElementById("blocklyKarelDiv")
-    var workspace = Blockly.inject(div, { toolbox: toolbox });
+    var div = document.getElementById("blocklyKarelDiv");
+    var categoriesFilter = ['KarelCommands','KarelBrain','Values', 'Brenching', 'KarelBreacnhing', 'Loops', 'KarelLoops'];
+    for(var i= 0;i<categoriesFilter.length;i++)
+      toolbox.contents.push(categories[categoriesFilter[i]]);
+    var workspace = Blockly.inject(div, { toolbox:  toolbox});
 
     var setup = config.setup();
     var robot = setup.robot;
@@ -260,161 +263,133 @@ $(document).ready(function () {
   });
 });
 
+var categories = {
+  'KarelCommands' : {
+    "kind": "category",
+    "name": "Наредбе роботу",
+    "colour": 295,
+    "contents": [
+      {
+        "kind": "block",
+        "type": "move",
+      },
+      {
+        "kind": "block",
+        "type": "turn_left"
+      },
+      {
+        "kind": "block",
+        "type": "turn_right"
+      },
+      {
+        "kind": "block",
+        "type": "pick_up"
+      },
+      {
+        "kind": "block",
+        "type": "drop_off"
+      },
+    ]
+  },
+  'KarelBrain' :{
+    "kind": "category",
+    "name": "Питај робота",
+    "colour": 275,
+    "contents": [
+      {
+        "kind": "block",
+        "type": "balls_present",
+      },
+      {
+        "kind": "block",
+        "type": "can_move",
+      },
+      {
+        "kind": "block",
+        "type": "has_balls",
+      },
+      {
+        "kind": "block",
+        "type": "count_balls_on_hand",
+      },
+      {
+        "kind": "block",
+        "type": "count_balls",
+      },
+    ]
+  },
+  'Values':{
+    "kind": "category",
+    "name": "Вредности",
+    "colour": 110,
+    "contents": [    
+      {
+        "kind": "block",
+        "type": "math_number",
+      },   
+    ]
+  },
+  'Brenching':    {
+    "kind": "category",
+    "name": "Гранање",
+    "colour": 130,
+    "contents": [
+      {
+        "kind": "block",
+        "type": "controls_if",
+      },
+      {
+        "kind": "block",
+        "type": "controls_ifelse",
+      },
+    ]
+  },
+  'KarelBreacnhing':    {
+    "kind": "category",
+    "name": "Гранање карел",
+    "colour": 150,
+    "contents": [
+      {
+        "kind": "block",
+        "type": "controls_if_simple",
+      },
+      {
+        "kind": "block",
+        "type": "controls_ifelse_simple",
+      },
+    ]
+  },
+  'Loops': {
+    "kind" : "category",
+    "name" : "Петље",
+    "colour": 190,
+    "contents":[
+      {
+        "kind" : "block",
+        "type" : "controls_repeat"
+      },
+      {
+        "kind" : "block",
+        "type" : "controls_whileUntil"
+      }
+    ]
+  },
+  'KarelLoops':    {
+    "kind" : "category",
+    "name" : "Петље карел",
+    "colour": 210,
+    "contents":[
+      {
+        "kind" : "block",
+        "type" : "karel_controls_whileUntil"
+      },
+    ]
+  },
 
+}
 var toolbox = {
   "kind": "categoryToolbox",
-  "contents": [
-    {
-      "kind": "category",
-      "name": "Наредбе роботу",
-      "colour": 295,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "move",
-        },
-        {
-          "kind": "block",
-          "type": "turn_left"
-        },
-        {
-          "kind": "block",
-          "type": "turn_right"
-        },
-        {
-          "kind": "block",
-          "type": "pick_up"
-        },
-        {
-          "kind": "block",
-          "type": "drop_off"
-        },
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Питај робота",
-      "colour": 275,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "balls_present",
-        },
-        {
-          "kind": "block",
-          "type": "can_move",
-        },
-        {
-          "kind": "block",
-          "type": "has_balls",
-        },
-        {
-          "kind": "block",
-          "type": "count_balls_on_hand",
-        },
-        {
-          "kind": "block",
-          "type": "count_balls",
-        },
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Вредности",
-      "colour": 110,
-      "contents": [    
-        {
-          "kind": "block",
-          "type": "math_number",
-        },  
-        {
-          "kind": "block",
-          "type": "logic_boolean",
-        },  
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Логика",
-      "colour": 130,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "controls_if",
-        },
-        {
-          "kind": "block",
-          "type": "controls_ifelse",
-        },
-        {
-          "kind": "block",
-          "type": "logic_compare",
-        },
-        {
-          "kind": "block",
-          "type": "logic_operation",
-        },
-        {
-          "kind": "block",
-          "type": "logic_negate",
-        },
-      ]
-    },
-    {
-      "kind": "category",
-      "name": "Логика карел",
-      "colour": 150,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "controls_if_simple",
-        },
-        {
-          "kind": "block",
-          "type": "controls_ifelse_simple",
-        },
-        {
-          "kind": "block",
-          "type": "logic_compare",
-        },
-        {
-          "kind": "block",
-          "type": "logic_operation",
-        },
-        {
-          "kind": "block",
-          "type": "logic_negate",
-        },
-      ]
-    },
-    {
-      "kind" : "category",
-      "name" : "Петље",
-      "colour": 150,
-      "contents":[
-        {
-          "kind" : "block",
-          "type" : "controls_repeat"
-        },
-        {
-          "kind" : "block",
-          "type" : "controls_whileUntil"
-        }
-      ]
-    },
-    {
-      "kind" : "category",
-      "name" : "Петље карел",
-      "colour": 190,
-      "contents":[
-        {
-          "kind" : "block",
-          "type" : "controls_whileUntil_has_ball"
-        },
-      ]
-    },
-
-  ]
+  "contents": []
 }
 
 

@@ -93,8 +93,11 @@ class BlocklyKarelDirective(Directive):
     :blockly: -- use blocky
     """
     required_arguments = 1
-    optional_arguments = 0
+    optional_arguments = 1
     has_content = True
+    option_spec = {
+        'blockly': directives.flag
+    }
     def run(self):
         """
         generate html to include Karel box.

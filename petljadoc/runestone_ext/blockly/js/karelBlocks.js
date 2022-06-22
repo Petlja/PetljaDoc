@@ -205,7 +205,7 @@ Blockly.JavaScript['count_balls_on_hand'] = function (block) {
   return ['count_balls_on_hand()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
-Blockly.Blocks['controls_whileUntil_has_ball'] = {
+Blockly.Blocks['karel_controls_whileUntil'] = {
   init: function () {
     this.jsonInit({
       'type': 'controls_whileUntil',
@@ -235,7 +235,7 @@ Blockly.Blocks['controls_whileUntil_has_ball'] = {
   }
 }
 
-Blockly.JavaScript['controls_whileUntil_has_ball'] = function (block) {
+Blockly.JavaScript['karel_controls_whileUntil'] = function (block) {
   // Do while/until loop.
   let argument0 = block.getFieldValue('KAREL_BOOL')
   let branch = Blockly.JavaScript.statementToCode(block, 'DO');
