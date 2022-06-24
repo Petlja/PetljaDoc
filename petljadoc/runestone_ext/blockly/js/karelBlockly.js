@@ -53,7 +53,7 @@ $(document).ready(function () {
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
     var div = document.getElementById("blocklyKarelDiv");
-    var categoriesFilter = ['KarelCommands','KarelBrain','Values', 'Brenching', 'KarelBreacnhing', 'Loops', 'KarelLoops'];
+    var categoriesFilter = JSON.parse(div.getAttribute("data-categories"));
     for(var i= 0;i<categoriesFilter.length;i++)
       toolbox.contents.push(categories[categoriesFilter[i]]);
     var workspace = Blockly.inject(div, { toolbox:  toolbox});
@@ -385,7 +385,25 @@ var categories = {
       },
     ]
   },
-
+  'Logic': {
+    "kind": "category",
+    "name": "Логички оператори",
+    "colour": 240,
+    "contents": [
+      {
+        "kind": "block",
+        "type": "logic_compare",
+      },
+      {
+        "kind": "block",
+        "type": "logic_operation",
+      },
+      {
+        "kind": "block",
+        "type": "logic_negate",
+      },
+    ]
+  },
 }
 var toolbox = {
   "kind": "categoryToolbox",
