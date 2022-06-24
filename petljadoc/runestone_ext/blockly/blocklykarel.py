@@ -30,7 +30,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 20px;"></div>
+<div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 20px;" data-categories='%(data_categories)s' ></div>
 <div data-childcomponent="%(divid)s" class="karel_section course-box course-box-problem">
     <div class="course-content">
 """
@@ -93,10 +93,11 @@ class BlocklyKarelDirective(Directive):
     :blockly: -- use blocky
     """
     required_arguments = 1
-    optional_arguments = 1
+    optional_arguments = 0
     has_content = True
     option_spec = {
-        'blockly': directives.flag
+        'blockly': directives.flag,
+        'categories' : directives.unchanged,
     }
     def run(self):
         """
@@ -106,7 +107,7 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-
+        categories = ["KarelCommands","KarelBrain","Values", "Brenching", "KarelBreacnhing", "Loops", "KarelLoops", "Logic"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
@@ -123,6 +124,12 @@ class BlocklyKarelDirective(Directive):
             source = "\n".join(self.content)
         else:
             source = '\n'
+
+        if 'categories' in self.options:
+            author_categories = [categoty.strip() for categoty in self.options['categories'].split(',') if categoty.strip() in categories]
+            self.options['data_categories'] = json.dumps(author_categories)
+        else:
+            self.options['data_categories'] = json.dumps(categories)
 
         self.options['initialcode'] = source.replace("<", "&lt;")
         str = source.replace("\n", "*nline*")
