@@ -25,7 +25,7 @@ def setup(app):
     app.add_javascript('karelRobotDrawer.js')
     app.add_javascript('karelUI.js')
     app.add_javascript('karel.js')
-    add_i18n_js(app, {"en","sr-Cyrl"},"karel-i18n")
+    add_i18n_js(app, {"en","sr-Cyrl,sr"},"karel-i18n")
 
     app.add_node(KarelNode, html=(visit_karel_node, depart_karel_node))
 

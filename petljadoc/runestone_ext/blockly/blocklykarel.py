@@ -30,6 +30,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
+<div>
 <div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 20px;" data-categories='%(data_categories)s' ></div>
 <div data-childcomponent="%(divid)s" class="karel_section course-box course-box-problem">
     <div class="course-content">
@@ -56,6 +57,7 @@ TEMPLATE_END = """
         </div>
     </div>
 </div></div>
+</div>
 
 """
 

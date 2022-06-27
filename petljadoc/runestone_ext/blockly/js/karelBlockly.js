@@ -1,5 +1,5 @@
 "use strict";
-
+function WrappingBlicky(){
 $(document).ready(function () {
   var errorText = {};
 
@@ -43,20 +43,166 @@ $(document).ready(function () {
   errorText.NotImplementedError = $.i18n("msg_activecode_not_implemented_error");
   errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 
-
+  var categories = {
+    'KarelCommands' : {
+      "kind": "category",
+      "name": "Наредбе роботу",
+      "colour": 295,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "move",
+        },
+        {
+          "kind": "block",
+          "type": "turn_left"
+        },
+        {
+          "kind": "block",
+          "type": "turn_right"
+        },
+        {
+          "kind": "block",
+          "type": "pick_up"
+        },
+        {
+          "kind": "block",
+          "type": "drop_off"
+        },
+      ]
+    },
+    'KarelBrain' :{
+      "kind": "category",
+      "name": "Питај робота",
+      "colour": 275,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "balls_present",
+        },
+        {
+          "kind": "block",
+          "type": "can_move",
+        },
+        {
+          "kind": "block",
+          "type": "has_balls",
+        },
+        {
+          "kind": "block",
+          "type": "count_balls_on_hand",
+        },
+        {
+          "kind": "block",
+          "type": "count_balls",
+        },
+      ]
+    },
+    'Values':{
+      "kind": "category",
+      "name": "Вредности",
+      "colour": 110,
+      "contents": [    
+        {
+          "kind": "block",
+          "type": "math_number",
+        },   
+      ]
+    },
+    'Brenching':    {
+      "kind": "category",
+      "name": "Гранање",
+      "colour": 130,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "controls_if",
+        },
+        {
+          "kind": "block",
+          "type": "controls_ifelse",
+        },
+      ]
+    },
+    'KarelBreacnhing':    {
+      "kind": "category",
+      "name": "Гранање карел",
+      "colour": 150,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "controls_if_simple",
+        },
+        {
+          "kind": "block",
+          "type": "controls_ifelse_simple",
+        },
+      ]
+    },
+    'Loops': {
+      "kind" : "category",
+      "name" : "Петље",
+      "colour": 190,
+      "contents":[
+        {
+          "kind" : "block",
+          "type" : "controls_repeat"
+        },
+        {
+          "kind" : "block",
+          "type" : "controls_whileUntil"
+        }
+      ]
+    },
+    'KarelLoops':    {
+      "kind" : "category",
+      "name" : "Петље карел",
+      "colour": 210,
+      "contents":[
+        {
+          "kind" : "block",
+          "type" : "karel_controls_whileUntil"
+        },
+      ]
+    },
+    'Logic': {
+      "kind": "category",
+      "name": "Логички оператори",
+      "colour": 240,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "logic_compare",
+        },
+        {
+          "kind": "block",
+          "type": "logic_operation",
+        },
+        {
+          "kind": "block",
+          "type": "logic_negate",
+        },
+      ]
+    },
+  }
 
 
   $('[data-component=blocklyKarel]').each(function (index) {
+    var toolbox = {
+      "kind": "categoryToolbox",
+      "contents": []
+    }
+
     var outerDiv = $(this)[0];
     var canvas = $(this).find(".world")[0];
     var problemId = this.id;
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
-    var div = document.getElementById("blocklyKarelDiv");
-    var categoriesFilter = JSON.parse(div.getAttribute("data-categories"));
+    var karelConfigDiv = outerDiv.parentElement.parentElement.parentElement.children[0];
+    var categoriesFilter = JSON.parse(karelConfigDiv.getAttribute("data-categories"));
     for(var i= 0;i<categoriesFilter.length;i++)
       toolbox.contents.push(categories[categoriesFilter[i]]);
-    var workspace = Blockly.inject(div, { toolbox:  toolbox});
+    var workspace = Blockly.inject(karelConfigDiv, { toolbox:  toolbox});
 
     var setup = config.setup();
     var robot = setup.robot;
@@ -140,7 +286,6 @@ $(document).ready(function () {
       drawer = new RobotDrawer(canvas, 0);
       drawer.drawFrame(robot);
       var code = Blockly.JavaScript.workspaceToCode(workspace);
-      console.log(code)
       var myInterpreter = new Interpreter(code, initApi);
       drawer.start()
       function nextStep() {
@@ -261,157 +406,12 @@ $(document).ready(function () {
 
     reset();
   });
+
+  
+  Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
+  Blockly.JavaScript.addReservedWords('highlightBlock');
+  
+  
 });
-
-var categories = {
-  'KarelCommands' : {
-    "kind": "category",
-    "name": "Наредбе роботу",
-    "colour": 295,
-    "contents": [
-      {
-        "kind": "block",
-        "type": "move",
-      },
-      {
-        "kind": "block",
-        "type": "turn_left"
-      },
-      {
-        "kind": "block",
-        "type": "turn_right"
-      },
-      {
-        "kind": "block",
-        "type": "pick_up"
-      },
-      {
-        "kind": "block",
-        "type": "drop_off"
-      },
-    ]
-  },
-  'KarelBrain' :{
-    "kind": "category",
-    "name": "Питај робота",
-    "colour": 275,
-    "contents": [
-      {
-        "kind": "block",
-        "type": "balls_present",
-      },
-      {
-        "kind": "block",
-        "type": "can_move",
-      },
-      {
-        "kind": "block",
-        "type": "has_balls",
-      },
-      {
-        "kind": "block",
-        "type": "count_balls_on_hand",
-      },
-      {
-        "kind": "block",
-        "type": "count_balls",
-      },
-    ]
-  },
-  'Values':{
-    "kind": "category",
-    "name": "Вредности",
-    "colour": 110,
-    "contents": [    
-      {
-        "kind": "block",
-        "type": "math_number",
-      },   
-    ]
-  },
-  'Brenching':    {
-    "kind": "category",
-    "name": "Гранање",
-    "colour": 130,
-    "contents": [
-      {
-        "kind": "block",
-        "type": "controls_if",
-      },
-      {
-        "kind": "block",
-        "type": "controls_ifelse",
-      },
-    ]
-  },
-  'KarelBreacnhing':    {
-    "kind": "category",
-    "name": "Гранање карел",
-    "colour": 150,
-    "contents": [
-      {
-        "kind": "block",
-        "type": "controls_if_simple",
-      },
-      {
-        "kind": "block",
-        "type": "controls_ifelse_simple",
-      },
-    ]
-  },
-  'Loops': {
-    "kind" : "category",
-    "name" : "Петље",
-    "colour": 190,
-    "contents":[
-      {
-        "kind" : "block",
-        "type" : "controls_repeat"
-      },
-      {
-        "kind" : "block",
-        "type" : "controls_whileUntil"
-      }
-    ]
-  },
-  'KarelLoops':    {
-    "kind" : "category",
-    "name" : "Петље карел",
-    "colour": 210,
-    "contents":[
-      {
-        "kind" : "block",
-        "type" : "karel_controls_whileUntil"
-      },
-    ]
-  },
-  'Logic': {
-    "kind": "category",
-    "name": "Логички оператори",
-    "colour": 240,
-    "contents": [
-      {
-        "kind": "block",
-        "type": "logic_compare",
-      },
-      {
-        "kind": "block",
-        "type": "logic_operation",
-      },
-      {
-        "kind": "block",
-        "type": "logic_negate",
-      },
-    ]
-  },
-}
-var toolbox = {
-  "kind": "categoryToolbox",
-  "contents": []
-}
-
-
-
-Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
-Blockly.JavaScript.addReservedWords('highlightBlock');
-
+};
+WrappingBlicky();
