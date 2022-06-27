@@ -1,0 +1,77 @@
+__author__ = 'petlja'
+import json
+
+from docutils import nodes
+from docutils.parsers.rst import directives
+from docutils.parsers.rst import Directive
+from runestone.common.runestonedirective import add_i18n_js
+
+
+def setup(app):
+    app.connect('html-page-context', html_page_context_handler)
+    app.add_directive('petlja-editor', EditorDirective)
+
+    app.add_stylesheet('editor.css')
+
+    app.add_javascript('editor.js')
+    app.add_javascript('jszip.js')
+    #add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"editor")
+
+    app.add_node(EditorNode, html=(visit_nim_game_node, depart_nim_game_node))
+
+
+def html_page_context_handler(app, pagename, templatename, context, doctree):
+    app.builder.env.h_ctx = context
+
+TEMPLATE_START = """
+    <div id="%(divid)s" class="petlja-editor" data='%(data)s'>
+"""
+
+TEMPLATE_END = """
+    </div>
+"""
+
+
+class EditorNode(nodes.General, nodes.Element):
+    def __init__(self, content):
+        super(EditorNode, self).__init__()
+        self.components = content
+
+
+def visit_nim_game_node(self, node):
+    node.delimiter = "_start__{}_".format(node.components['divid'])
+    self.body.append(node.delimiter)
+    res = TEMPLATE_START % node.components
+    self.body.append(res)
+
+
+def depart_nim_game_node(self, node):
+    res = TEMPLATE_END
+    self.body.append(res)
+    self.body.remove(node.delimiter)
+
+
+class EditorDirective(Directive):
+    required_arguments = 1
+    optional_arguments = 0
+    has_content = False
+    option_spec = {}
+    def run(self):
+        env = self.state.document.settings.env 
+        self.options['divid'] = self.arguments[0]
+        data = {"js": { "name": "main.js", "source": "function myScript(){return 100;}"} ,"html": {"name": "index.html", "source": "blahtml"} ,"css": {"name": "main.css", "source": ".main { margin: 0 auto; } "}}
+        self.options['data'] = json.dumps(data)
+        editornode = EditorNode(self.options)
+        return [editornode]
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+    }
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c,c) for c in text)
