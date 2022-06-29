@@ -109,7 +109,7 @@ $(document).ready(function () {
         },   
       ]
     },
-    'Brenching':    {
+    'Branching':    {
       "kind": "category",
       "name": "Гранање",
       "colour": 130,
@@ -124,7 +124,7 @@ $(document).ready(function () {
         },
       ]
     },
-    'KarelBreacnhing':    {
+    'KarelBranching':    {
       "kind": "category",
       "name": "Гранање карел",
       "colour": 150,

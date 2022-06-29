@@ -109,12 +109,12 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-        categories = ["KarelCommands","KarelBrain","Values", "Brenching", "KarelBreacnhing", "Loops", "KarelLoops", "Logic"]
+        categories = ["KarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
         if not self.options['divid']:
-            raise Exception("No divid for ..karel karel.py")
+            raise Exception("No divid")
 
 
         explain_text = None
