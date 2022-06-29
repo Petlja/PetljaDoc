@@ -1,5 +1,6 @@
 __author__ = 'petlja'
 import json
+import os
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -54,12 +55,77 @@ def depart_nim_game_node(self, node):
 class EditorDirective(Directive):
     required_arguments = 1
     optional_arguments = 0
-    has_content = False
-    option_spec = {}
+    has_content = True
+    option_spec = {
+        'html': directives.unchanged,
+        'js': directives.unchanged,
+        'css': directives.unchanged,
+    }
     def run(self):
         env = self.state.document.settings.env 
         self.options['divid'] = self.arguments[0]
-        data = {"js": { "name": "main.js", "source": "function myScript(){return 100;}"} ,"html": {"name": "index.html", "source": "blahtml"} ,"css": {"name": "main.css", "source": ".main { margin: 0 auto; } "}}
+        contents = "\n".join(self.content).split("~~~")
+        data = {"html":{"name":"main.html", "source":""},"js":{"name":"main.js", "source":""},"css":{"name":"main.css", "source":""}}
+
+        if "html" in self.options:
+            fname = self.options['html'].replace('\\', '/')
+            source, _ = self.state_machine.get_source_and_line()
+            type = "html"
+            if not os.path.isabs(fname):
+                path = os.path.join(os.path.dirname(source),fname)
+            else:
+                path = fname
+            try:
+                with open(path, encoding='utf-8') as f:
+                    data[type] = {}
+                    data[type]["name"] =  fname.rsplit("/")[-1]
+                    data[type]["source"] =  f.read()
+            except:
+                self.error('Source file could not be opened')
+
+            if "css" in self.options:
+                fname = self.options['css'].replace('\\', '/')
+                source, _ = self.state_machine.get_source_and_line()
+                type = "css"
+                if not os.path.isabs(fname):
+                    path = os.path.join(os.path.dirname(source),fname)
+                else:
+                    path = fname
+                try:
+                    with open(path, encoding='utf-8') as f:
+                        data[type] = {}
+                        data[type]["name"] =  fname.rsplit("/")[-1]
+                        data[type]["source"] =  f.read()
+                except:
+                    self.error('Source file could not be opened')
+            if "js" in self.options:
+                fname = self.options['js'].replace('\\', '/')
+                source, _ = self.state_machine.get_source_and_line()
+                type = "js"
+                if not os.path.isabs(fname):
+                    path = os.path.join(os.path.dirname(source),fname)
+                else:
+                    path = fname
+                try:
+                    with open(path, encoding='utf-8') as f:
+                        data[type] = {}
+                        data[type]["name"] =  fname.rsplit("/")[-1]
+                        data[type]["source"] =  f.read()
+                except:
+                    self.error('Source file could not be opened')
+
+        else:
+            for file in contents:
+                file = file.strip('\n')
+                if len(file):
+                    try:
+                        name_type,type,source = parse(file)
+                    except:
+                        raise Exception("Couldn't parse editor directive. ID:{}".format(self.options['divid']))
+                    data[type] = {}
+                    data[type]["name"] = name_type
+                    data[type]["source"] =  source
+
         self.options['data'] = json.dumps(data)
         editornode = EditorNode(self.options)
         return [editornode]
@@ -75,3 +141,12 @@ html_escape_table = {
 def html_escape(text):
     """Produce entities within text."""
     return "".join(html_escape_table.get(c,c) for c in text)
+
+
+def parse(file_content):
+    name_type = file_content.split('\n')[0]
+    type = name_type.split('.')[1]
+    if type not in ["html","css","js"]:
+        raise Exception
+    source =  "\n".join(file_content.split('\n')[1:])
+    return name_type, type, source

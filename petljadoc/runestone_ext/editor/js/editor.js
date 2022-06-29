@@ -38,7 +38,6 @@ function WrappingAscorinaion(){
 
         editorArray.forEach(editor => {
             if (editor.data.hasOwnProperty('js')) {
-                console.log('create js editor..');
                 var jsDiv = document.createElement('div');
                 jsDiv.setAttribute('class', 'editor-container');
                 var editorTitle = '<label class="editor-title">' + editor.data['js'].name  + '</h3>'
@@ -47,18 +46,12 @@ function WrappingAscorinaion(){
                 var jsCodeMirror = CodeMirror(jsDiv, {
                     value: editor.data['js'].source,
                     mode:  "javascript",
-                    theme: "ambiance",
                     lineNumbers: true,
-                    hintOptions: {
-                        completeSingle: !1
-                    },
-
                   });
-
+                  jsCodeMirror.setSize(null,275);
                 editor.jsEditor  = jsCodeMirror;
             }
             if (editor.data.hasOwnProperty('css')) {
-                console.log('create css editor..');
                 var cssDiv = document.createElement('div');
                 cssDiv.setAttribute('class', 'editor-container');
                 var editorTitle = '<label class="editor-title">' + editor.data['css'].name  + '</h3>'
@@ -67,13 +60,12 @@ function WrappingAscorinaion(){
                 var cssCodeMirror = CodeMirror(cssDiv, {
                     value: editor.data['css'].source,
                     mode:  "css",
-                    theme: "ambiance",
                     lineNumbers: true
                   });
+                  cssCodeMirror.setSize(null,275);
                   editor.cssEditor  = cssCodeMirror;
             }
             if (editor.data.hasOwnProperty('html')) {
-                console.log('create html editor..');
                 var htmlDiv = document.createElement('div');
                 htmlDiv.setAttribute('class', 'editor-container');
                 var editorTitle = '<label class="editor-title">' + editor.data['html'].name  + '</h3>'
@@ -81,10 +73,10 @@ function WrappingAscorinaion(){
                 document.getElementById(editor.id).append(htmlDiv);
                 var htmlCodeMirror = CodeMirror(htmlDiv, {
                     value: editor.data['html'].source,
-                    mode:  "javascript",
-                    theme: "ambiance",
+                    mode:  "htmlmixed",
                     lineNumbers: true
                   });
+                  htmlCodeMirror.setSize(null,275);
                   editor.htmlEditor  = htmlCodeMirror;
             }
 
@@ -99,7 +91,6 @@ function WrappingAscorinaion(){
             playBtn.setAttribute('class', 'editor-play');
             playBtn.addEventListener('click', function(e) {
                 var editorsId = e.currentTarget.dataset.editorid;
-                console.log(editorsId);
                 var editor = editorArray.find(e => e.id == editorsId);
 
                 var htmlData = editor.htmlEditor.getValue();
@@ -126,7 +117,7 @@ function WrappingAscorinaion(){
                 htmliframe.setAttribute('id', editor.id + "-iframe");
                 document.getElementById(editor.id).append(htmliframe);
                 } else {
-                    document.getElementById(editor.id + "-iframe").style.visibility = 'visible';
+                    document.getElementById(editor.id + "-iframe").style.display = 'block';
                 }
                 
                 document.getElementById(editor.id + "-iframe").setAttribute('src', htmlURL);
@@ -134,7 +125,6 @@ function WrappingAscorinaion(){
                 
 
             });
-            document.getElementById(editor.id).append(playBtn);
 
 
             var downloadBtn = document.createElement('div');
@@ -143,16 +133,14 @@ function WrappingAscorinaion(){
             downloadBtn.setAttribute('class', 'editor-play');
             downloadBtn.addEventListener('click', function(e) {
                 var editorsId = e.currentTarget.dataset.editorid;
-                console.log(editorsId);
                 var editor = editorArray.find(e => e.id == editorsId);
 
                 var zip = new JSZip();
 
                 zip.file(editor.data["html"].name, editor.htmlEditor.getValue());
                 zip.file(editor.data["js"].name, editor.jsEditor.getValue());
-                zip.file(editor.data["css"].name, editor.cssEditor.getValue());
+                zip.file(editor.data["css"].name , editor.cssEditor.getValue());
 
-                console.log('zipping');
 
                 zip.generateAsync({type:"base64"}).then(function (content) {
                     var link = document.createElement('a');
@@ -166,7 +154,11 @@ function WrappingAscorinaion(){
                 
 
             });
-            document.getElementById(editor.id).append(downloadBtn);
+            var btnDiv = document.createElement('div');
+            btnDiv.append(playBtn);
+            btnDiv.append(downloadBtn)
+            btnDiv.setAttribute('class', 'editor-btn');
+            document.getElementById(editor.id).append(btnDiv);
         });
 
 
