@@ -98,7 +98,7 @@ RegexCheck.prototype.init =  function(opts){
          }.bind(this));
     }
 
-    this.regexArea.addEventListener('input', highlightText.bind(this));
+    this.regexArea.addEventListener('input', this.highlightText.bind(this));
 }
 RegexCheck.prototype.highlightText = function(){
         this.msg.innerText = ""
