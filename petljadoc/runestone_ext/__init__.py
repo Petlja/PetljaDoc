@@ -5,6 +5,9 @@ modules = ['karel', 'notes', 'pygamelib','audio', 'quizq','gallery', 'associatio
 def extensions():
     return ['petljadoc.runestone_ext.' + module for module in modules]
 
+def add_module(module):
+    modules.append(module)
+
 def static_dirs():
     basedir = os.path.dirname(__file__)
     subdirs = ['js','css', 'images', 'bootstrap']
