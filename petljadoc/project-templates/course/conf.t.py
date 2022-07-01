@@ -30,14 +30,16 @@ import petljadoc
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-petljadoc.runestone_ext.modules = petljadoc.runestone_ext.modules\
-#+ ['blockly']\
-#+ ['blockpylib']\
-#+ ['simanim', 'pycode']\
-#+ ['p5js']\
-#+ ['dbDirective']\
-#+ ['regexcheck']\
-#+ ['nimgame']                              
+
+#petljadoc.runestone_ext.add_module('blockly')
+#petljadoc.runestone_ext.add_module('blockpylib')
+#petljadoc.runestone_ext.add_module('simanim')
+#petljadoc.runestone_ext.add_module('pycode')
+#petljadoc.runestone_ext.add_module('p5js')
+#petljadoc.runestone_ext.add_module('dbDirective')
+#petljadoc.runestone_ext.add_module('regexcheck')
+#petljadoc.runestone_ext.add_module('nimgame')
+                          
 
 extensions = ['sphinx.ext.mathjax'] + runestone_extensions() + petljadoc.runestone_ext.extensions()
 
