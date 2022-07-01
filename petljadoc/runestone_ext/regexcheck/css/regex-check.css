@@ -14,6 +14,15 @@
     background-color: rgb(9, 161, 212);
 }
 
+.green:nth-child(2n+1){
+    background-color: #4AE8C8;
+}
+
+.green:nth-child(2n){
+    background-color: #18bc9c;
+}
+
+
 .regex-input{
     border: 1px solid black;
     border-radius: 3px;
@@ -36,7 +45,6 @@
     width: calc(100% - 4px);
     position:absolute;
     top:0%;
-    height: 500px;
     pointer-events: none;
     font-family: inherit;
     font-size: 20px !important;
@@ -63,8 +71,7 @@
     font-size: 20px;
     line-height: 20px;
     outline: 0;
-    width: 100%;
-    height: 500px;
+    width: 100%;  
     resize: none;
     caret-color: black;
 }

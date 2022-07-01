@@ -70,13 +70,14 @@ def depart_regex_check_note_node(self, node):
 
 class RegexCheckDirective(Directive):
     required_arguments = 1
-    optional_arguments = 3
+    optional_arguments = 0
     has_content = True
     option_spec = {}
     option_spec.update({
         'solution': directives.unchanged,
         'editable': directives.unchanged,
         'flags': directives.unchanged,
+        'initregex': directives.unchanged,
     })
     def run(self):
         env = self.state.document.settings.env 
@@ -88,14 +89,21 @@ class RegexCheckDirective(Directive):
         else:
             data['solution'] = self.options['solution']
             self.options['getsol'] = '<div class="test-button"></div><div class="sol-button"></div>'
+
         if 'editable' in self.options: 
             data['editable'] = True
         else:
             data['editable'] = False
+
         if 'flags' not in self.options: 
             data['flags']= ""
         else:
             data['flags'] = self.options['flags']
+            
+        if 'initregex' not in self.options: 
+            data['initregex']= ""
+        else:
+            data['initregex'] = self.options['initregex']
 
         data['text'] = '\n'.join(self.content)
 
