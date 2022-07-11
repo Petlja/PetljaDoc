@@ -10,12 +10,12 @@
 .editor-container {
     float: left;
     height: 318px;
-    padding-top: 10px;
+    padding-top: 0px;
     width: calc(50% - 3px);
     margin-right: 3px !important;
 }
 
-.editor-container label {
+.editor-container label, .title-tab label {
     background-color: #3d3d3d;
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
