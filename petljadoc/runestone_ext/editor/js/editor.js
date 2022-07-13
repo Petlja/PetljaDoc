@@ -47,8 +47,12 @@ function WrappingAscorinaion(){
             if (editor.data.hasOwnProperty('html')) {
                 var htmlDiv = document.createElement('div');
                 htmlDiv.setAttribute('class', 'editor-container');
-                var editorTabLabel = document.createElement('label');
-                editorTabLabel.setAttribute('class', 'editor-title');
+                htmlDiv.setAttribute('id', 'htmleditor-' + editor.id);
+                var editorTabLabel = document.createElement('div');
+                editorTabLabel.setAttribute('class', 'editor-title active');
+                editorTabLabel.setAttribute('data-editorid', editor.id);
+                editorTabLabel.setAttribute('data-tab', 'html');
+                editorTabLabel.setAttribute('id', 'htmltab-' + editor.id);
                 editorTabLabel.innerHTML =  editor.data['html'].name;
                 editorsContainerTabs.append(editorTabLabel);
                // htmlDiv.innerHTML = editorTitle;
@@ -56,7 +60,8 @@ function WrappingAscorinaion(){
                 var htmlCodeMirror = CodeMirror(htmlDiv, {
                     value: editor.data['html'].source,
                     mode:  "htmlmixed",
-                    lineNumbers: true
+                    lineNumbers: true,
+                    id: 'codeMirror-' + editor.id + '-html'
                   });
                   htmlCodeMirror.setSize(null,275);
                   editor.htmlEditor  = htmlCodeMirror;
@@ -64,42 +69,71 @@ function WrappingAscorinaion(){
 
             if (editor.data.hasOwnProperty('js')) {
                 var jsDiv = document.createElement('div');
-                jsDiv.setAttribute('class', 'editor-container');
-                var editorTabLabel = document.createElement('label');
+                jsDiv.setAttribute('class', 'editor-container d-none');
+                jsDiv.setAttribute('id', 'jseditor-' + editor.id);
+                var editorTabLabel = document.createElement('div');
                 editorTabLabel.setAttribute('class', 'editor-title');
+                editorTabLabel.setAttribute('data-editorid', editor.id);
+                editorTabLabel.setAttribute('data-tab', 'js');
+                editorTabLabel.setAttribute('id', 'jstab-' + editor.id);
                 editorTabLabel.innerHTML =  editor.data['js'].name;
                 editorsContainerTabs.append(editorTabLabel);
-                // document.getElementById(editor.id).append(jsDiv);
-                // var jsCodeMirror = CodeMirror(jsDiv, {
-                //     value: editor.data['js'].source,
-                //     mode:  "javascript",
-                //     lineNumbers: true,
-                //   });
-                //   jsCodeMirror.setSize(null,275);
-                // editor.jsEditor  = jsCodeMirror;
+                document.getElementById(editor.id).append(jsDiv);
+                var jsCodeMirror = CodeMirror(jsDiv, {
+                    value: editor.data['js'].source,
+                    mode:  "javascript",
+                    lineNumbers: true,
+                    id: 'codeMirror-' + editor.id + '-js'
+                  });
+                  jsCodeMirror.setSize(null,275);
+                editor.jsEditor  = jsCodeMirror;
             }
             if (editor.data.hasOwnProperty('css')) {
                 var cssDiv = document.createElement('div');
-                cssDiv.setAttribute('class', 'editor-container');
-                var editorTabLabel = document.createElement('label');
+                cssDiv.setAttribute('class', 'editor-container d-none');
+                cssDiv.setAttribute('id', 'csseditor-' + editor.id);
+                var editorTabLabel = document.createElement('div');
                 editorTabLabel.setAttribute('class', 'editor-title');
+                editorTabLabel.setAttribute('data-editorid', editor.id);
+                editorTabLabel.setAttribute('data-tab', 'css');
+                editorTabLabel.setAttribute('id', 'csstab-' + editor.id);
                 editorTabLabel.innerHTML =  editor.data['css'].name;
                 editorsContainerTabs.append(editorTabLabel);
-                // document.getElementById(editor.id).append(cssDiv);
-                // var cssCodeMirror = CodeMirror(cssDiv, {
-                //     value: editor.data['css'].source,
-                //     mode:  "css",
-                //     lineNumbers: true
-                //   });
-                //   cssCodeMirror.setSize(null,275);
-                //   editor.cssEditor  = cssCodeMirror;
+                document.getElementById(editor.id).append(cssDiv);
+                var cssCodeMirror = CodeMirror(cssDiv, {
+                    value: editor.data['css'].source,
+                    mode:  "css",
+                    lineNumbers: true,
+                    id: 'codeMirror-' + editor.id + '-css'
+                  });
+                  cssCodeMirror.setSize(null,275);
+                  editor.cssEditor  = cssCodeMirror;
             }
+
+
+            Array.prototype.forEach.call(document.getElementsByClassName('editor-title'), function(elem) {
+                elem.addEventListener("click", function(e) {
+                    var editorId = e.currentTarget.dataset.editorid;
+                    var tab = e.currentTarget.dataset.tab;
+                    var currentActiveTab = document.querySelector('#' + editorId).querySelector('.editor-title.active');
+                    if (currentActiveTab != null) {
+                        currentActiveTab.classList.remove('active');
+                        var currentActiveEditor = currentActiveTab.dataset.tab;
+                        document.getElementById(currentActiveEditor + 'editor-' + editorId).classList.add('d-none');
+                    }
+                    document.getElementById(tab + 'tab-' + editorId).classList.add('active');
+                    document.getElementById(tab + 'editor-' + editorId).classList.remove('d-none');
+                    document.getElementById(tab + 'editor-' + editorId).children[0].CodeMirror.refresh()
+                    document.getElementById(editorId + "-iframe").classList.add('d-none');
+                    
+                })
+            })
             
 
-                var htmliframe = document.createElement('iframe');
-                htmliframe.setAttribute('class', 'editor-iframe');
-                htmliframe.setAttribute('id', editor.id + "-iframe");
-                document.getElementById(editor.id).append(htmliframe);
+            var htmliframe = document.createElement('iframe');
+            htmliframe.setAttribute('class', 'editor-container d-none');
+            htmliframe.setAttribute('id', editor.id + "-iframe");
+            document.getElementById(editor.id).append(htmliframe);
                 
             var playBtn = document.createElement('div');
             playBtn.innerHTML = 'Prikazi stranicu';
@@ -133,7 +167,11 @@ function WrappingAscorinaion(){
                 htmliframe.setAttribute('id', editor.id + "-iframe");
                 document.getElementById(editor.id).append(htmliframe);
                 } else {
-                    document.getElementById(editor.id + "-iframe").style.display = 'block';
+                    document.getElementById(editor.id + "-iframe").classList.remove('d-none');
+                    var currentActiveTab = document.querySelector('#' + editor.id).querySelector('.editor-title.active');
+                    currentActiveTab.classList.remove('active');
+                    var currentActiveEditor = currentActiveTab.dataset.tab;
+                    document.getElementById(currentActiveEditor + 'editor-' + editor.id).classList.add('d-none');
                 }
                 
                 document.getElementById(editor.id + "-iframe").setAttribute('src', htmlURL);
@@ -144,9 +182,9 @@ function WrappingAscorinaion(){
 
 
             var downloadBtn = document.createElement('div');
-            downloadBtn.innerHTML = 'Preuzmi fileove';
+            downloadBtn.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
             downloadBtn.setAttribute('data-editorId', editor.id);
-            downloadBtn.setAttribute('class', 'editor-play');
+            downloadBtn.setAttribute('class', 'editor-play ml-3');
             downloadBtn.addEventListener('click', function(e) {
                 var editorsId = e.currentTarget.dataset.editorid;
                 var editor = editorArray.find(e => e.id == editorsId);
@@ -171,8 +209,8 @@ function WrappingAscorinaion(){
 
             });
             var btnDiv = document.createElement('div');
-            btnDiv.append(playBtn);
-            btnDiv.append(downloadBtn)
+            editorsContainerTabs.append(downloadBtn)
+            editorsContainerTabs.append(playBtn);
             btnDiv.setAttribute('class', 'editor-btn');
             document.getElementById(editor.id).append(btnDiv);
         });
