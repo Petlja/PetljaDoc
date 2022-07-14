@@ -115,7 +115,7 @@ function WrappingAscorinaion(){
                 elem.addEventListener("click", function(e) {
                     var editorId = e.currentTarget.dataset.editorid;
                     var tab = e.currentTarget.dataset.tab;
-                    var currentActiveTab = document.querySelector('#' + editorId).querySelector('.editor-title.active');
+                    var currentActiveTab = document.querySelector('[id="'+editorId+'"]').querySelector('.editor-title.active');
                     if (currentActiveTab != null) {
                         currentActiveTab.classList.remove('active');
                         var currentActiveEditor = currentActiveTab.dataset.tab;
@@ -136,7 +136,7 @@ function WrappingAscorinaion(){
             document.getElementById(editor.id).append(htmliframe);
                 
             var playBtn = document.createElement('div');
-            playBtn.innerHTML = 'Prikazi stranicu';
+            playBtn.innerHTML = $.i18n("show_page");;
             playBtn.setAttribute('data-editorId', editor.id);
             playBtn.setAttribute('class', 'editor-play');
             playBtn.addEventListener('click', function(e) {
@@ -168,7 +168,7 @@ function WrappingAscorinaion(){
                 document.getElementById(editor.id).append(htmliframe);
                 } else {
                     document.getElementById(editor.id + "-iframe").classList.remove('d-none');
-                    var currentActiveTab = document.querySelector('#' + editor.id).querySelector('.editor-title.active');
+                    var currentActiveTab = document.querySelector('[id="'+editor.id+'"]').querySelector('.editor-title.active');
                     currentActiveTab.classList.remove('active');
                     var currentActiveEditor = currentActiveTab.dataset.tab;
                     document.getElementById(currentActiveEditor + 'editor-' + editor.id).classList.add('d-none');

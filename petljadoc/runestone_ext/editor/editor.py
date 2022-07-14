@@ -16,7 +16,7 @@ def setup(app):
 
     app.add_javascript('editor.js')
     app.add_javascript('jszip.js')
-    #add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"editor")
+    add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"editor-i18n")
 
     app.add_node(EditorNode, html=(visit_nim_game_node, depart_nim_game_node))
 
