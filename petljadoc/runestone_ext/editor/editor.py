@@ -65,8 +65,8 @@ class EditorDirective(Directive):
         env = self.state.document.settings.env 
         self.options['divid'] = self.arguments[0]
         contents = "\n".join(self.content).split("~~~")
-        data = {"html":{"name":"main.html", "source":""},"js":{"name":"main.js", "source":""},"css":{"name":"main.css", "source":""}}
-
+        #data = {"html":{"name":"main.html", "source":""},"js":{"name":"main.js", "source":""},"css":{"name":"main.css", "source":""}}
+        data = {}
         if "html" in self.options:
             fname = self.options['html'].replace('\\', '/')
             source, _ = self.state_machine.get_source_and_line()
