@@ -79,7 +79,7 @@ class EditorDirective(Directive):
                 with open(path, encoding='utf-8') as f:
                     data[type] = {}
                     data[type]["name"] =  fname.rsplit("/")[-1]
-                    data[type]["source"] =  f.read()
+                    data[type]["source"] =  html_escape(f.read())
             except:
                 self.error('Source file could not be opened')
 
@@ -95,7 +95,7 @@ class EditorDirective(Directive):
                     with open(path, encoding='utf-8') as f:
                         data[type] = {}
                         data[type]["name"] =  fname.rsplit("/")[-1]
-                        data[type]["source"] =  f.read()
+                        data[type]["source"] =  html_escape(f.read())
                 except:
                     self.error('Source file could not be opened')
             if "js" in self.options:
@@ -110,7 +110,7 @@ class EditorDirective(Directive):
                     with open(path, encoding='utf-8') as f:
                         data[type] = {}
                         data[type]["name"] =  fname.rsplit("/")[-1]
-                        data[type]["source"] =  f.read()
+                        data[type]["source"] =  html_escape(f.read())
                 except:
                     self.error('Source file could not be opened')
 
@@ -124,7 +124,7 @@ class EditorDirective(Directive):
                         raise Exception("Couldn't parse editor directive. ID:{}".format(self.options['divid']))
                     data[type] = {}
                     data[type]["name"] = name_type
-                    data[type]["source"] =  source
+                    data[type]["source"] =  html_escape(source)
 
         self.options['data'] = json.dumps(data)
         editornode = EditorNode(self.options)
@@ -132,7 +132,7 @@ class EditorDirective(Directive):
 
 html_escape_table = {
     "&": "&amp;",
-    '"': "&quot;",
+    '"': "\"",
     "'": "&apos;",
     ">": "&gt;",
     "<": "&lt;",
