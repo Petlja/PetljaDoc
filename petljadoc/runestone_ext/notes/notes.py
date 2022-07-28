@@ -10,11 +10,19 @@ def setup(app):
     app.add_stylesheet('notes.css')
     app.add_javascript('notes.js')
 
-    app.add_directive('infonote', InfoNoteDirective)
+    app.add_directive('infonote', NoteDirective)
+    app.add_directive('suggestionnote', NoteDirective)
+
+    app.add_directive('learnmorenote', NoteDirective)
+
+    app.add_directive('technicalnote', NoteDirective)
+    
+    
     app.add_directive('questionnote', QuestionNoteDirective)
     app.add_directive('level', LevelDirective)
 
-    app.add_node(InfoNoteNode, html=(visit_info_note_node, depart_info_note_node))
+
+    app.add_node(NoteNode, html=(visit_note_node, depart_note_node))
     app.add_node(QuestionNoteNode, html=(visit_question_note_node, depart_question_note_node))
     app.add_node(LevelNode, html=(visit_level_node, depart_level_node))
 
@@ -22,7 +30,9 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div class="course-box course-box-info">
+    <div class="note-wrapper %(notetype)s-type">
+        <div class="note-icon-holder"> </div>
+        <img src="../_static/img/%(notetype)s-img.svg" class="note-image %(notetype)s-image" /> 
         <div class="course-content">
             <p>
 """
@@ -32,29 +42,28 @@ TEMPLATE_END = """
 """
 
 
-class InfoNoteNode(nodes.General, nodes.Element):
+class NoteNode(nodes.General, nodes.Element):
     def __init__(self, content):
-        super(InfoNoteNode, self).__init__()
+        super(NoteNode, self).__init__()
         self.note = content
 
 
-def visit_info_note_node(self, node):
+def visit_note_node(self, node):
+    
     node.delimiter = "_start__{}_".format("info")
     self.body.append(node.delimiter)
-    res = TEMPLATE_START
+    res = TEMPLATE_START % node.note
     self.body.append(res)
 
 
-def depart_info_note_node(self, node):
+def depart_note_node(self, node):
     res = TEMPLATE_END
     self.body.append(res)
     self.body.remove(node.delimiter)
 
 
-class InfoNoteDirective(Directive):
-    """
-.. infonote::
-    """
+class NoteDirective(Directive):
+    
     required_arguments = 0
     optional_arguments = 0
     has_content = True
@@ -65,11 +74,11 @@ class InfoNoteDirective(Directive):
         :param self:
         :return:
         """
-
+        
         env = self.state.document.settings.env
         self.options['source'] = "\n".join(self.content)
-
-        innode = InfoNoteNode(self.options)
+        self.options['notetype'] = self.name
+        innode = NoteNode(self.options)
 
         self.state.nested_parse(self.content, self.content_offset, innode)
 
