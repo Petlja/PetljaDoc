@@ -1,5 +1,7 @@
 "use strict";
 function WrappingBlicky(){
+var ScrollDebounce = {};
+var ScrollDebounceLog = {};
 $(document).ready(function () {
   var errorText = {};
 
@@ -126,7 +128,7 @@ $(document).ready(function () {
     },
     'KarelBranching':    {
       "kind": "category",
-      "name": "Гранање карел",
+      "name": "Гранање робот",
       "colour": 150,
       "contents": [
         {
@@ -156,7 +158,7 @@ $(document).ready(function () {
     },
     'KarelLoops':    {
       "kind" : "category",
-      "name" : "Петље карел",
+      "name" : "Петље робот",
       "colour": 210,
       "contents":[
         {
@@ -184,6 +186,32 @@ $(document).ready(function () {
         },
       ]
     },
+    'Arithmetic': {
+      "kind": "category",
+      "name": "Аритметикa",
+      "colour": 270,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "math_number",
+        },
+        {
+          "kind": "block",
+          "type": "math_arithmetic",
+        },
+      ]
+    },
+    'KarelSays': {
+      "kind": "category",
+      "name": "Поруке роботу",
+      "colour": 290,
+      "contents": [
+        {
+        "kind": "block",
+        "type": "text_print",
+        },
+      ]
+    },
   }
 
 
@@ -205,6 +233,11 @@ $(document).ready(function () {
     var workspace = Blockly.inject(karelConfigDiv, { toolbox:  toolbox});
 
     var setup = config.setup();
+    if(setup.hasOwnProperty('domXml')){
+      var domXml = setup.domXml;
+      Blockly.Xml.domToWorkspace(workspace,Blockly.Xml.textToDom(domXml))
+    }
+    ScrollDebounce[workspace.id] = true
     var robot = setup.robot;
     var world = setup.world;
     robot.setWorld(world)
@@ -214,6 +247,7 @@ $(document).ready(function () {
 
     function initApi(interpreter, globalObject) {
       var wrapper = function (text) {
+        robot.show(text);
         return alert(arguments.length ? text : '');
       };
       interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(wrapper));
@@ -326,6 +360,27 @@ $(document).ready(function () {
     $(this).find(".reset-button").click(function () {
       clearError();
       reset();
+    });
+    document.getElementsByClassName("lectureContentMaterial")[0].addEventListener('scroll',function () {
+    if (ScrollDebounce[workspace.id]) {
+      ScrollDebounce[workspace.id] = false;
+      workspace.updateScreenCalculations_();
+      setTimeout(function () { 
+        ScrollDebounce[workspace.id] = true; 
+        if(ScrollDebounceLog[workspace.id]){
+          ScrollDebounceLog[workspace.id] = false; 
+          workspace.updateScreenCalculations_();
+        }
+        }, 1000);
+    }
+    else{
+      ScrollDebounceLog[workspace.id] = true;
+    }
+    });
+
+
+    $(this).find(".export-button").click(function () {
+      navigator.clipboard.writeText("'" + Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace)).replaceAll('\n','\\n') + "';" )
     });
 
     $(this).find(".blockly-button").click(function () {

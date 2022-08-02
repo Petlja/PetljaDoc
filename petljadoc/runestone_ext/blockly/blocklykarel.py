@@ -40,6 +40,7 @@ TEMPLATE_END = """
     <div data-component="blocklyKarel" id="%(divid)s" class="karel_section">
         <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
         <button class="btn btn-default reset-button">Врати на почетак</button>
+        %(export_button)s
         </div>
         <div style="overflow: hidden;" class="karel_actions col-md-12" >
             <section class="col-md-12">
@@ -100,6 +101,7 @@ class BlocklyKarelDirective(Directive):
     option_spec = {
         'blockly': directives.flag,
         'categories' : directives.unchanged,
+        'exportmode' : directives.flag,
     }
     def run(self):
         """
@@ -109,7 +111,7 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-        categories = ["KarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic"]
+        categories = ["KarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic", "KarelSays", "Arithmetic"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
@@ -132,6 +134,10 @@ class BlocklyKarelDirective(Directive):
             self.options['data_categories'] = json.dumps(author_categories)
         else:
             self.options['data_categories'] = json.dumps(categories)
+        if 'exportmode' in self.options:
+            self.options['export_button'] = '<button class="btn btn-default export-button">Сачувај стање</button>'
+        else:
+            self.options['export_button'] = ''
 
         self.options['initialcode'] = source.replace("<", "&lt;")
         str = source.replace("\n", "*nline*")
