@@ -128,7 +128,7 @@ $(document).ready(function () {
     },
     'KarelBranching':    {
       "kind": "category",
-      "name": "Гранање Карел",
+      "name": "Гранање робот",
       "colour": 150,
       "contents": [
         {
@@ -158,7 +158,7 @@ $(document).ready(function () {
     },
     'KarelLoops':    {
       "kind" : "category",
-      "name" : "Петље Карел",
+      "name" : "Петље робот",
       "colour": 210,
       "contents":[
         {
