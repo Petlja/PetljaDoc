@@ -16,7 +16,7 @@ def static_dirs():
     return dirs
 
 def create_style(divclass):
-    return 'course-box {} course-content'.format(divclass)
+    return 'course-box {} course-content petlja-problem-box'.format(divclass)
 
 def config_values_for_components(glob):
     box_problem = 'course-box-problem'
