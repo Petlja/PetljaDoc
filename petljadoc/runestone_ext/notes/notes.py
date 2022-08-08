@@ -34,11 +34,11 @@ TEMPLATE_START = """
         <div class="note-icon-holder"> </div>
         <img src="../_static/img/%(notetype)s-img.svg" class="note-image %(notetype)s-image" /> 
         <div class="course-content">
-            <p>
+            
 """
 
 TEMPLATE_END = """
-    </p></div></div>
+    </div></div>
 """
 
 
@@ -77,6 +77,9 @@ class NoteDirective(Directive):
         
         env = self.state.document.settings.env
         self.options['source'] = "\n".join(self.content)
+        print('........')
+        print(self.content)
+        print('........')
         self.options['notetype'] = self.name
         innode = NoteNode(self.options)
 
