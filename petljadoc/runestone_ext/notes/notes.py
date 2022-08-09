@@ -77,9 +77,6 @@ class NoteDirective(Directive):
         
         env = self.state.document.settings.env
         self.options['source'] = "\n".join(self.content)
-        print('........')
-        print(self.content)
-        print('........')
         self.options['notetype'] = self.name
         innode = NoteNode(self.options)
 
