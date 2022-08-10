@@ -18,12 +18,16 @@ def static_dirs():
 def create_style(divclass):
     return 'course-box {} course-content petlja-problem-box'.format(divclass)
 
+def create_ActiveCode_style(divclass):
+    return 'course-box {} course-content'.format(divclass)
+
 def config_values_for_components(glob):
     box_problem = 'course-box-problem'
     box_question = 'course-box-question'
     problem_style =  create_style(box_problem)
     question_style = create_style(box_question)
-    glob['activecode_div_class'] = problem_style
+    active_code_problem_style = create_ActiveCode_style(box_problem)
+    glob['activecode_div_class'] = active_code_problem_style
     glob['activecode_hide_load_history'] = True
     glob['mchoice_div_class'] = question_style
     glob['fitb_div_class'] = question_style
