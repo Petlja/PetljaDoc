@@ -4,82 +4,94 @@ Test your students
 
 Multiple Answer
 ===============
+
 Old style
 ---------
-.. mchoice:: question1
-    :multiple_answers:
-    :correct: a, c
-    :answer_a: red
-    :answer_b: brown
-    :answer_c: blue
-    :answer_d: gray
-    :feedback_a: Red it is.
-    :feedback_b: Not brown.
-    :feedback_c: Blue it is.
-    :feedback_d: Not gray.
+.. quizq:: 
 
-    Which colors might be found in a rainbow (check all)?
+    .. mchoice:: question1
+        :multiple_answers:
+        :correct: a, c
+        :answer_a: red
+        :answer_b: brown
+        :answer_c: blue
+        :answer_d: gray
+        :feedback_a: Red it is.
+        :feedback_b: Not brown.
+        :feedback_c: Blue it is.
+        :feedback_d: Not gray.
 
+        Which colors might be found in a rainbow (check all)?
+
+    
 New style
 ---------
-.. mchoice:: question1_new
+.. quizq:: 
+ 
+    .. mchoice:: question1_new
 
-    Which colors might be found in a rainbow (check all)?
+        Which colors might be found in a rainbow (check all)?
 
-    -   red
+        -   red
 
-        +   Red it is.
+            +   Red it is.
 
-    -   brown
+        -   brown
 
-        -   Not brown.
+            -   Not brown.
 
-    -   blue
+        -   blue
 
-        +   Blue it is.
+            +   Blue it is.
 
-    -   gray
+        -   gray
 
-        -   Not gray.
+            -   Not gray.
 
 
 
 Multiple Choice
 ===============
+
 Old style
 ---------
-.. mchoice:: question2
-    :correct: a
-    :answer_a: red
-    :answer_b: brown
-    :answer_c: black
-    :answer_d: gray
-    :feedback_a: Red it is.
-    :feedback_b: Not brown.
-    :feedback_c: Not black.
-    :feedback_d: Not gray.
+.. quizq:: 
 
-    What color is a stop sign?
+    .. mchoice:: question2
+        :correct: a
+        :answer_a: red
+        :answer_b: brown
+        :answer_c: black
+        :answer_d: gray
+        :feedback_a: Red it is.
+        :feedback_b: Not brown.
+        :feedback_c: Not black.
+        :feedback_d: Not gray.
+
+        What color is a stop sign?
+
 
 New style
 ---------
-.. mchoice:: question2_new
+.. quizq:: 
 
-    What color is a stop sign?
+    .. mchoice:: question2_new
 
-    -   red
+        What color is a stop sign?
 
-        +   Red it is.
+        -   red
 
-    -   brown
+            +   Red it is.
 
-        -   Not brown.
+        -   brown
 
-    -   blue
+            -   Not brown.
 
-        -   Not blue.
+        -   blue
 
-    -   gray
+            -   Not blue.
 
-        -   Not gray.
+        -   gray
+
+            -   Not gray.
 

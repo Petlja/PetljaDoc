@@ -34,11 +34,11 @@ TEMPLATE_START = """
         <div class="note-icon-holder"> </div>
         <img src="../_static/img/%(notetype)s-img.svg" class="note-image %(notetype)s-image" /> 
         <div class="course-content">
-            <p>
+            
 """
 
 TEMPLATE_END = """
-    </p></div></div>
+    </div></div>
 """
 
 
