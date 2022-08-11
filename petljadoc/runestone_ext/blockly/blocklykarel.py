@@ -36,7 +36,9 @@ TEMPLATE_START = """
     <div class="course-content">
 """
 
+
 TEMPLATE_END = """
+
     <div data-component="blocklyKarel" id="%(divid)s" class="karel_section">
         <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
         <button class="btn btn-default reset-button">Врати на почетак</button>
@@ -55,8 +57,18 @@ TEMPLATE_END = """
                     </canvas>
                 </article>
             </section>
+            <section class="col-md-12">
+                <div class = "chat-window" id="chatWindow" style="display: none"> 
+                    <div data-type="template-left" class="chat-message" style="display: none">
+                        <img src = "..\_static\img\karel-head.png">
+                        <div class = "chat-bubble">  </div>
+                    </div>
+                </div> 
+            </section>
         </div>
+        
     </div>
+    
 </div></div>
 </div>
 

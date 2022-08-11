@@ -186,11 +186,35 @@ var Robot = (function () {
 
     Robot.prototype.turnMessagesOff = function() {
 	this.messagesOn = false;
-    }
+    };
     
     Robot.prototype.getLastMessage = function () {
         return this.lastMessage;
     };
+
+
+    Robot.prototype.clearMessages = function () {
+        var node = document.querySelector('#chatWindow');
+        while (node.childNodes.length > 2) {
+            node.removeChild(node.lastChild);
+        }
+
+    }
+    Robot.prototype.showMessage = function (message) {
+        if(message === true){
+            message = $.i18n("msg_karel_true");
+        }
+        else if (message === false){
+            message = $.i18n("msg_karel_false");
+        }
+        var tempNode = document.querySelector('[data-type="template-left"]').cloneNode(true);
+        tempNode.querySelector("div.chat-bubble").textContent = message;
+        tempNode.style.display = "flex";
+        document.getElementById("chatWindow").style.display = "block";
+        document.getElementById("chatWindow").appendChild(tempNode);
+        this.lastMessage = message;
+    }
+
 
     return Robot;
 })();

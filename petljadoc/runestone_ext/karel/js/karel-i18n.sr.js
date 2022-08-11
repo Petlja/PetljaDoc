@@ -6,5 +6,7 @@ $.i18n().load({
         "msg_karel_no_balls_with_robot": "Робот нема лоптица код себе!",
         "msg_karel_incorrect": "Нетачно!",
         "msg_karel_correct": "Тачно!"
+	"msg_karel_true": "Тачно",
+	"msg_karel_false": "Нетачно"
     }
 })
