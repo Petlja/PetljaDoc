@@ -238,17 +238,20 @@ $(document).ready(function () {
       Blockly.Xml.domToWorkspace(workspace,Blockly.Xml.textToDom(domXml))
     }
     ScrollDebounce[workspace.id] = true
+   
     var robot = setup.robot;
     var world = setup.world;
-    robot.setWorld(world)
+    var node = this.querySelector(".chat-window");
+    var chat = new Chat(node);
+    robot.setChat(chat);
+    robot.setWorld(world);
     var drawer = new RobotDrawer(canvas, 0);
     drawer.drawFrame(robot);
 
 
     function initApi(interpreter, globalObject) {
       var wrapper = function (text) {
-        robot.show(text);
-        return alert(arguments.length ? text : '');
+        robot.showMessage(text);
       };
       interpreter.setProperty(globalObject, 'alert', interpreter.createNativeFunction(wrapper));
       wrapper = function(text) {
@@ -316,7 +319,9 @@ $(document).ready(function () {
       setup = config.setup();
       robot = setup.robot;
       world = setup.world;
-      robot.setWorld(world)
+      robot.chat = chat;
+      robot.setWorld(world);
+      robot.clearMessages();
       drawer = new RobotDrawer(canvas, 0);
       drawer.drawFrame(robot);
       var code = Blockly.JavaScript.workspaceToCode(workspace);
@@ -399,8 +404,10 @@ $(document).ready(function () {
     function reset() {
       var setup = config.setup();
       var robot = setup.robot;
-      var world = setup.world;
-      robot.setWorld(world)
+      var world = setup.world; 
+      robot.chat = chat;
+      robot.setWorld(world);
+      robot.clearMessages();
       var drawer = new RobotDrawer(canvas, 0);
       drawer.drawFrame(robot);
     }
