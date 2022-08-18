@@ -61,6 +61,9 @@
     border-radius: 5px;
     display: block;
 }
-
+.karel_action_wrapper{
+    height: auto;
+    overflow: hidden;
+}
 
 

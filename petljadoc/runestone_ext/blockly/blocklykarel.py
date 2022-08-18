@@ -31,6 +31,12 @@ def setup(app):
 
 TEMPLATE_START = """
 <div>
+<div class="karel_action_wrapper">
+        <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
+        <button class="btn btn-default reset-button">Врати на почетак</button>
+        %(export_button)s
+        </div>
+</div>
 <div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 20px;" data-categories='%(data_categories)s' ></div>
 <div data-childcomponent="%(divid)s" class="karel_section course-box course-box-problem">
     <div class="course-content">
@@ -39,11 +45,7 @@ TEMPLATE_START = """
 
 TEMPLATE_END = """
 
-    <div data-component="blocklyKarel" id="%(divid)s" class="karel_section">
-        <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
-        <button class="btn btn-default reset-button">Врати на почетак</button>
-        %(export_button)s
-        </div>
+    <div data-component="blocklyKarel" id="%(divid)s" class="karel_section" %(flyoutToolbox)s>
         <div style="overflow: hidden;" class="karel_actions col-md-12" >
             <section class="col-md-12">
                 <article>
@@ -110,6 +112,7 @@ class BlocklyKarelDirective(Directive):
         'blockly': directives.flag,
         'categories' : directives.unchanged,
         'exportmode' : directives.flag,
+        'flyouttoolbox' : directives.flag
     }
     def run(self):
         """
@@ -146,6 +149,11 @@ class BlocklyKarelDirective(Directive):
             self.options['export_button'] = '<button class="btn btn-default export-button">Сачувај стање</button>'
         else:
             self.options['export_button'] = ''
+
+        if 'flyouttoolbox' in self.options:
+            self.options['flyoutToolbox'] = 'data-flyoutToolbox'
+        else:
+            self.options['flyoutToolbox'] = ''
 
         self.options['initialcode'] = source.replace("<", "&lt;")
         str = source.replace("\n", "*nline*")
