@@ -216,8 +216,13 @@ $(document).ready(function () {
 
 
   $('[data-component=blocklyKarel]').each(function (index) {
+    var toolboxType = "";
+    if (this.hasAttribute("data-flyoutToolbox"))
+      toolboxType = "flyoutToolbox"
+    else
+      toolboxType = "categoryToolbox"
     var toolbox = {
-      "kind": "categoryToolbox",
+      "kind": toolboxType,
       "contents": []
     }
 
@@ -226,10 +231,23 @@ $(document).ready(function () {
     var problemId = this.id;
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
-    var karelConfigDiv = outerDiv.parentElement.parentElement.parentElement.children[0];
+    var karelCongrolosDiv = outerDiv.parentElement.parentElement.parentElement.children[0];
+    var karelConfigDiv = outerDiv.parentElement.parentElement.parentElement.children[1];
     var categoriesFilter = JSON.parse(karelConfigDiv.getAttribute("data-categories"));
-    for(var i= 0;i<categoriesFilter.length;i++)
+    if(toolboxType === "flyoutToolbox")
+      for(var i= 0;i<categoriesFilter.length;i++){
+        toolbox.contents.push({
+          "kind": "label",
+          "text": categories[categoriesFilter[i]].name,
+          "web-class": "petlja-blockly.label"
+        },);
+        for(var j= 0;j<categories[categoriesFilter[i]].contents.length;j++)
+          toolbox.contents.push(categories[categoriesFilter[i]].contents[j]);
+      }
+    else{
+      for(var i= 0;i<categoriesFilter.length;i++)
       toolbox.contents.push(categories[categoriesFilter[i]]);
+    }
     var workspace = Blockly.inject(karelConfigDiv, { toolbox:  toolbox});
 
     var setup = config.setup();
@@ -313,7 +331,7 @@ $(document).ready(function () {
       interpreter.setProperty(globalObject, 'range', interpreter.createNativeFunction(wrapper));
     }
 
-    $(this).find(".run-button").click(function () {
+    karelCongrolosDiv.querySelector(".run-button").addEventListener("click",function () {
       $('.run-button').attr('disabled', 'disabled');
       clearError();
       setup = config.setup();
@@ -362,7 +380,7 @@ $(document).ready(function () {
       nextStep();
     });
 
-    $(this).find(".reset-button").click(function () {
+    karelCongrolosDiv.querySelector(".reset-button").addEventListener("click",function () {
       clearError();
       reset();
     });
@@ -383,22 +401,10 @@ $(document).ready(function () {
     }
     });
 
-
-    $(this).find(".export-button").click(function () {
-      navigator.clipboard.writeText("'" + Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace)).replaceAll('\n','\\n') + "';" )
-    });
-
-    $(this).find(".blockly-button").click(function () {
-      var code = editor.getValue().replace(/\?\?\?\s+/g, "___ ")
-        .replace(/\?\?\?/g, "___");
-      var bpm = new BlocklPyModal();
-      bpm.open(Blockly.Msg.Title[$.i18n().locale], 700, 500, code, eBookConfig.staticDir + 'blockly/',
-        function (src) {
-          if (src) {
-            editor.setValue("from karel import * \n" + src.replace(/\_\_\_/g, "???"));
-          }
-        });
-    });
+    if(karelCongrolosDiv.querySelector(".export-button"))
+      karelCongrolosDiv.querySelector(".export-button").addEventListener("click",function () {
+        navigator.clipboard.writeText("'" + Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace)).replaceAll('\n','\\n') + "';" )
+      });
 
 
     function reset() {
