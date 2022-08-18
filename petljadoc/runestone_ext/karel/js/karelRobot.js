@@ -4,7 +4,7 @@ var Robot = (function () {
         this.direction = "N";
         this.numBalls = 0;
         this.infiniteBalls = false;
-	this.messagesOn = false;
+	    this.messagesOn = false;
         this.lastMessage = "";
     }
 
@@ -16,9 +16,14 @@ var Robot = (function () {
         r.numBalls = this.numBalls;
         r.infiniteBalls = this.infiniteBalls;
         r.lastMessage = this.lastMessage;
-	r.messagesOn = this.messagesOn;
+	    r.messagesOn = this.messagesOn;
         r.world = this.world.clone();
+        r.chat = this.chat.clone();
         return r;
+    }
+
+    Robot.prototype.setChat = function(c) {
+        this.chat = c;
     }
 
     Robot.prototype.setWorld = function (w) {
@@ -194,24 +199,10 @@ var Robot = (function () {
 
 
     Robot.prototype.clearMessages = function () {
-        var node = document.querySelector('#chatWindow');
-        while (node.childNodes.length > 2) {
-            node.removeChild(node.lastChild);
-        }
-
+        this.chat.clearMessages();
     }
     Robot.prototype.showMessage = function (message) {
-        if(message === true){
-            message = $.i18n("msg_karel_true");
-        }
-        else if (message === false){
-            message = $.i18n("msg_karel_false");
-        }
-        var tempNode = document.querySelector('[data-type="template-left"]').cloneNode(true);
-        tempNode.querySelector("div.chat-bubble").textContent = message;
-        tempNode.style.display = "flex";
-        document.getElementById("chatWindow").style.display = "block";
-        document.getElementById("chatWindow").appendChild(tempNode);
+        this.chat.showMessage(message);
         this.lastMessage = message;
     }
 

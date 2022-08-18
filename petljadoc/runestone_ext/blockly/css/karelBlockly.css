@@ -7,7 +7,6 @@
     min-height: 100px;
     border: 1px solid gray;
     padding: 10px;
-    margin: 30px !important;
     text-align: left !important;
 }
 .chat-message {
@@ -17,6 +16,7 @@
     width: fit-content;
     max-width: 95%;
     text-align: left !important;
+    margin-left:unset !important;
 }
 .chat-message img {
     width: 30px;

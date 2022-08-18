@@ -22,6 +22,7 @@ def setup(app):
     app.add_javascript('karelCorner.js')
     app.add_javascript('karelRobot.js')
     app.add_javascript('karelWorld.js')
+    app.add_javascript('karelChat.js')
     app.add_javascript('karelRobotDrawer.js')
     app.add_javascript('karelUI.js')
     app.add_javascript('karel.js')

@@ -58,11 +58,7 @@ TEMPLATE_END = """
                 </article>
             </section>
             <section class="col-md-12">
-                <div class = "chat-window" id="chatWindow" style="display: none"> 
-                    <div data-type="template-left" class="chat-message" style="display: none">
-                        <img src = "..\_static\img\karel-head.png">
-                        <div class = "chat-bubble">  </div>
-                    </div>
+                <div class = "chat-window" style="display: none"> 
                 </div> 
             </section>
         </div>
