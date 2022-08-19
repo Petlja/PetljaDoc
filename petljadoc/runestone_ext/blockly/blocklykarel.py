@@ -30,7 +30,7 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div>
+<div class="course-box course-box-problem" style="padding-top: 15px;">
 <div class="karel_action_wrapper" style="margin-top: 30px;">
         <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
         <button class="btn btn-default reset-button">Врати на почетак</button>
@@ -38,7 +38,7 @@ TEMPLATE_START = """
         </div>
 </div>
 <div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 10px;" data-categories='%(data_categories)s' ></div>
-<div data-childcomponent="%(divid)s" class="karel_section course-box course-box-problem">
+<div data-childcomponent="%(divid)s" class="karel_section">
     <div class="course-content">
 """
 
@@ -122,7 +122,7 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-        categories = ["KarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic", "KarelSays", "Arithmetic"]
+        categories = ["KarelCommands", "BeginnerKarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic", "KarelSays", "Arithmetic"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
@@ -144,6 +144,7 @@ class BlocklyKarelDirective(Directive):
             author_categories = [categoty.strip() for categoty in self.options['categories'].split(',') if categoty.strip() in categories]
             self.options['data_categories'] = json.dumps(author_categories)
         else:
+            categories.remove('BeginnerKarelCommands')
             self.options['data_categories'] = json.dumps(categories)
         if 'exportmode' in self.options:
             self.options['export_button'] = '<button class="btn btn-default export-button">Сачувај стање</button>'

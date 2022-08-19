@@ -60,6 +60,28 @@ Blockly.JavaScript['turn_right'] = function (block) {
   return 'turn_right()\n';
 };
 
+Blockly.Blocks['turn_around'] = {
+  /**
+   * Block for moving forward.
+   * @this {Blockly.Block}
+   */
+  init: function () {
+    this.jsonInit({
+      "message0": 'окрени полукружно',
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 255,
+      "tooltip": 'Робот се окреће на десно.'
+    });
+  }
+};
+
+Blockly.JavaScript['turn_around'] = function (block) {
+  // Generate JavaScript for moving forward.
+  return 'turn_around()\n';
+};
+
+
 Blockly.Blocks['pick_up'] = {
   /**
    * Block for moving forward.

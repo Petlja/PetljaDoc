@@ -65,11 +65,38 @@ $(document).ready(function () {
         },
         {
           "kind": "block",
+          "type": "turn_around"
+        },
+        {
+          "kind": "block",
           "type": "pick_up"
         },
         {
           "kind": "block",
           "type": "drop_off"
+        },
+      ]
+    },
+    'BeginnerKarelCommands' : {
+      "kind": "category",
+      "name": "Наредбе роботу",
+      "colour": 295,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "move",
+        },
+        {
+          "kind": "block",
+          "type": "turn_left"
+        },
+        {
+          "kind": "block",
+          "type": "turn_right"
+        },
+        {
+          "kind": "block",
+          "type": "pick_up"
         },
       ]
     },
@@ -292,6 +319,12 @@ $(document).ready(function () {
       };
       interpreter.setProperty(globalObject, 'turn_right', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
+        robot.turnRight();
+        robot.turnRight();
+        drawer.drawFrame(robot.clone());
+      };
+      interpreter.setProperty(globalObject, 'turn_around', interpreter.createNativeFunction(wrapper));
+      wrapper = function () {
         robot.pickBall();
         drawer.drawFrame(robot.clone());
       };
@@ -381,6 +414,7 @@ $(document).ready(function () {
     });
 
     karelCongrolosDiv.querySelector(".reset-button").addEventListener("click",function () {
+      workspace.getAllBlocks().forEach( a => a.setHighlighted(!1));
       clearError();
       reset();
     });
