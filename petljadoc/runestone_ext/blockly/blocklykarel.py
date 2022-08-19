@@ -31,13 +31,13 @@ def setup(app):
 
 TEMPLATE_START = """
 <div>
-<div class="karel_action_wrapper">
+<div class="karel_action_wrapper" style="margin-top: 30px;">
         <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
         <button class="btn btn-default reset-button">Врати на почетак</button>
         %(export_button)s
         </div>
 </div>
-<div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 20px;" data-categories='%(data_categories)s' ></div>
+<div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 10px;" data-categories='%(data_categories)s' ></div>
 <div data-childcomponent="%(divid)s" class="karel_section course-box course-box-problem">
     <div class="course-content">
 """
