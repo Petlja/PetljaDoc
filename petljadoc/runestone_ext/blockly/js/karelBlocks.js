@@ -26,7 +26,7 @@ Blockly.Blocks['turn_left'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'окрени се лево',
+      "message0": 'скрени лево',
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
@@ -46,7 +46,7 @@ Blockly.Blocks['turn_right'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'окрени се десно',
+      "message0": 'скрени десно',
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
