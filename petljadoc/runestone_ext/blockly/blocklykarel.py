@@ -17,7 +17,7 @@ def setup(app):
     app.add_javascript('blockly_compressed.js')
     app.add_javascript('msg/sr.js')
     app.add_javascript('blocks_compressed.js')
-    app.add_javascript('javascript_compressed.js.')
+    app.add_javascript('javascript_compressed.js')
     app.add_javascript('karelBlockly.js')
     app.add_javascript('karelBlocks.js')
 
