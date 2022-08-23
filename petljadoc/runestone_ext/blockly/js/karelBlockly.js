@@ -258,8 +258,9 @@ $(document).ready(function () {
     var problemId = this.id;
     var configarea = $(this).find(".configArea")[0];
     var config = (new Function('return ' + configarea.value.replace('<!--x', '').replace('x-->', '')))();
+    var elementDiv = outerDiv.parentElement.parentElement.parentElement.parentElement
     var karelCongrolosDiv = outerDiv.parentElement.parentElement.parentElement.children[0];
-    var karelConfigDiv = outerDiv.parentElement.parentElement.parentElement.children[1];
+    var karelConfigDiv = elementDiv.querySelector("#blocklyKarelDiv");
     var categoriesFilter = JSON.parse(karelConfigDiv.getAttribute("data-categories"));
     if(toolboxType === "flyoutToolbox")
       for(var i= 0;i<categoriesFilter.length;i++){

@@ -30,45 +30,57 @@ def setup(app):
 
 
 TEMPLATE_START = """
-<div class="course-box course-box-problem" style="padding-top: 15px;">
-<div class="karel_action_wrapper" style="margin-top: 30px;">
-        <div class="karel_actions col-md-12 mb-2"><button class="btn btn-success run-button">Покрени програм</button>
-        <button class="btn btn-default reset-button">Врати на почетак</button>
-        %(export_button)s
+<div  style="height: auto;display: flex;justify-content: center;">
+    <div class="course-box course-box-problem karel-blockly-wrapper">
+        <div class="col-md-5">
+            <div data-childcomponent="%(divid)s" class="karel_section">
+                <div class="course-content">
+                    <div data-component="blocklyKarel" id="%(divid)s" class="karel_section" %(flyoutToolbox)s>
+                        <div style="overflow: hidden;" class="karel_actions col-md-12">
+                            <section class="col-md-12">
+                                <article>
+                                    <textarea class="configArea" style="display:none"><!--x %(initialcode)s x--></textarea>
+                                </article>
+                            </section>
+                            <section class="col-md-12">
+                                <article>
+                                    <canvas class="world"
+                                        style="border-style: solid; border-width: 2px; border-color: inherit; background: white;"
+                                        width="300" height="300">
+                                        <p>Please try loading this page in HTML5 enabled web browsers. All the latest
+                                            versions
+                                            of famous browsers such as Internet explorer, Chrome, Firefox, Opera support
+                                            HTML5.
+                                        </p>
+                                    </canvas>
+                                </article>
+                            </section>
+                        </div>
+                        <div>
+                            <div class="karel_actions col-md-12 mb-2">
+                                <button class="btn btn-success run-button run-karel">Покрени програм</button>
+                                <button class="btn btn-default reset-button reset-karel">Врати на почетак</button>
+                                %(export_button)s
+                            </div>
+                        </div>
+                        <section class="col-md-12">
+                            <div class="chat-window" style="display: none">
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
         </div>
+        <div class="col-md-7">
+            <div id="blocklyKarelDiv" style="height: 500px;width: 580px;margin-top: 10px;"
+                data-categories='%(data_categories)s'></div>
+        </div>
+    </div>
 </div>
-<div id="blocklyKarelDiv" style="height: 500px;width: 780px;margin-top: 10px;" data-categories='%(data_categories)s' ></div>
-<div data-childcomponent="%(divid)s" class="karel_section">
-    <div class="course-content">
 """
 
 
 TEMPLATE_END = """
-
-    <div data-component="blocklyKarel" id="%(divid)s" class="karel_section" %(flyoutToolbox)s>
-        <div style="overflow: hidden;" class="karel_actions col-md-12" >
-            <section class="col-md-12">
-                <article>
-                    <textarea class="configArea" style="display:none"><!--x %(initialcode)s x--></textarea>
-                </article>
-            </section>
-            <section class="col-md-12">
-                <article>
-                    <canvas class="world" style="border-style: solid; border-width: 2px; border-color: inherit; background: white;" width="300" height="300">
-                        <p>Please try loading this page in HTML5 enabled web browsers. All the latest versions of famous browsers such as Internet explorer, Chrome, Firefox, Opera support HTML5.</p>
-                    </canvas>
-                </article>
-            </section>
-            <section class="col-md-12">
-                <div class = "chat-window" style="display: none"> 
-                </div> 
-            </section>
-        </div>
-        
-    </div>
-    
-</div></div>
-</div>
 
 """
 
