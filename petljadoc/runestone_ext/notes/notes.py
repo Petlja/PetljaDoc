@@ -85,16 +85,14 @@ class NoteDirective(Directive):
         return [innode]
 
 TEMPLATE_START_Q = """
-    <div class="course-box course-box-special">
+    <div class="note-wrapper questionnote-type">
+        <div class="note-icon-holder"> </div>
+        <img src="../_static/img/question-mark.png" class="note-image questionnote-image" /> 
         <div class="course-content">
-            <h4 class="carbox-title">
-                <img class="corner-image float-right" src="%s" />
-            </h4>
-            <p>
 """
 
 TEMPLATE_END_Q = """
-    </p></div></div>
+    </div></div>
 """
 
 
@@ -108,7 +106,7 @@ def visit_question_note_node(self, node):
     node.delimiter = "_start__{}_".format("info")
     self.body.append(node.delimiter)
     prefix = '../' * self.builder.current_docname.count('/')
-    res = TEMPLATE_START_Q % (prefix + "_static/img/question-mark.png")
+    res = TEMPLATE_START_Q
     self.body.append(res)
 
 
