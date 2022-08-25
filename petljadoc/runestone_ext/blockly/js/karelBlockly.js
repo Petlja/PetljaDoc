@@ -276,7 +276,7 @@ $(document).ready(function () {
       for(var i= 0;i<categoriesFilter.length;i++)
       toolbox.contents.push(categories[categoriesFilter[i]]);
     }
-    var workspace = Blockly.inject(karelConfigDiv, { toolbox:  toolbox});
+    var workspace = Blockly.inject(karelConfigDiv, { toolbox:  toolbox, trashcan: true});
 
     var setup = config.setup();
     if(setup.hasOwnProperty('domXml')){
