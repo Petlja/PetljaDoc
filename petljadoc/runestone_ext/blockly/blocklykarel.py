@@ -32,7 +32,7 @@ def setup(app):
 TEMPLATE_START = """
 <div  style="height: auto;display: flex;justify-content: center;">
     <div class="course-box course-box-problem karel-blockly-wrapper">
-        <div class="col-md-5">
+        <div class="karel-ui">
             <div data-childcomponent="%(divid)s" class="karel_section">
                 <div class="course-content">
                     <div data-component="blocklyKarel" id="%(divid)s" class="karel_section" %(flyoutToolbox)s>
@@ -71,8 +71,8 @@ TEMPLATE_START = """
                 </div>
             </div>
         </div>
-        <div class="col-md-7">
-            <div id="blocklyKarelDiv" style="height: 500px;width: 580px;margin-top: 10px;"
+        <div class="blockly-ui">
+            <div id="blocklyKarelDiv" style="height: 550px;width: 640px;margin-top: 10px;"
                 data-categories='%(data_categories)s'></div>
         </div>
     </div>

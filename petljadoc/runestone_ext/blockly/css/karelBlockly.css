@@ -73,11 +73,6 @@
     min-height: 580px;
     max-width:none !important;
 } 
-@media only screen and (max-width: 1000px) {
-    .karel-blockly-wrapper{
-        width: 100%;
-    }
-  }
 
 .run-karel{
     width: auto !important;
@@ -86,3 +81,29 @@
 .reset-karel{
     margin-bottom: 4px;
 }
+
+.karel-ui{
+    width: 35%;
+    float: left;
+    top: -6px;
+    position: relative;
+}
+.blockly-ui{
+    width: 65%;
+    float: left;
+}
+
+@media only screen and (max-width: 1325px) {
+    .karel-blockly-wrapper{
+        width: 100%;
+    }
+    .karel-ui{
+        width: 100%;
+        float: left;
+    }
+    .blockly-ui{
+        width: 100%;
+        float: left;
+    }
+    
+  }
