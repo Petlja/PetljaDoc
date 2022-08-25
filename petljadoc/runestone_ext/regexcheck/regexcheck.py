@@ -28,7 +28,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
 TEMPLATE_START = """
     <div id="%(divid)s" class="regex-check" data-regex='%(data)s''>
         <div>
-            <p class="title"></p>
+            <p class="title"> </p>
             <textarea type="text" spellcheck="false"  class="regex-input"></textarea>
         </div>
         <div>
