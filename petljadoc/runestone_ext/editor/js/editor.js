@@ -61,7 +61,8 @@ function WrappingAscorinaion(){
                     value: editor.data['html'].source,
                     mode:  "htmlmixed",
                     lineNumbers: true,
-                    id: 'codeMirror-' + editor.id + '-html'
+                    id: 'codeMirror-' + editor.id + '-html',
+                    lineWrapping: true,
                   });
                   htmlCodeMirror.setSize(null,275);
                   editor.htmlEditor  = htmlCodeMirror;
