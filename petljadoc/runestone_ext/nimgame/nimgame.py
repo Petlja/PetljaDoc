@@ -26,40 +26,49 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
+<div class="course-box course-box-problem">
     <div id="%(divid)s" class="nim-game" data-nimgame='%(data)s'>
-        <div class="switch-wrapp">
-        <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider round"></span>
-        </label>
-        <p data-game-mode></p>
-        </div>
+        <p class="nim-game-game-msg"> На табли je %(count)s жетона - побеђује ко узме последњи </p>
         <div class="canvas-wrapper">
-        <canvas>
+            <canvas>
 
-        </canvas>
+            </canvas>
         </div>
         <div class="canvas-control">          
             <div class="game-input">
-                <div class="player-one row">
-                <input data-input-id="player-1">
-                <button class="btn btn-success" data-id="player-1">
-                </button>
+                <div class="nim-controls" data-player="controls-1">
+                    <div class="row player-labels">
+                        <p class="p1-label"> Ти </p>
+                        <p class="turn"> На потезу </p>
+                    </div>
+                    <div class="player-one row">
+                        <button class="btn btn-success nim-take" data-take=1 data-id="player-1">Узми 1</button>
+                        <button class="btn btn-success nim-take" data-take=2 data-id="player-1">Узми 2</button> 
+                        <button class="btn btn-success nim-take" data-take=3 data-id="player-1">Узми 3</button> 
+                    </div>
                 </div>
-                <div class="player-two row">
-                    <input data-input-id="player-2">
-                    <button class="btn btn-success" data-id="player-2">
-                    </button>
+                <div class="nim-controls" data-player="controls-2">
+                    <div class="row player-labels">
+                        <p class="p2-label"> Рачунар </p>
+                        <p class="turn d-none"> На потезу </p>
+                    </div>
+                    <div class="player-two row">
+                        <button class="btn btn-success nim-take"  data-take=1 data-id="player-2">Узми 1</button>
+                        <button class="btn btn-success nim-take"  data-take=2 data-id="player-2">Узми 2</button> 
+                        <button class="btn btn-success nim-take"  data-take=3 data-id="player-2">Узми 3</button> 
+                    </div>
                 </div>
             </div>
-            <button class="btn btn-danger res-btn" data-restart></button>
-            <div class="msg-banner">        
+            <div class="reset-controls"> 
+                <button class="btn btn-danger" data-restart="sp">Нова игра против рачунара</button>
+                <button class="btn btn-danger" data-restart="mp">Нова игра у двоје</button>
             </div>
 """
 
 TEMPLATE_END = """
         </div>
     </div>
+</div>
 """
 
 
