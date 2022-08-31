@@ -96,9 +96,11 @@ function WrappingNimGame(){
                 this.clearCanvas();
                 this.drawAllElements();
                 //end game
-                if(this.removedCircleIndex + 1 > this.circles.length){
-                    this.controlsDivPlayerOne.classList.toggle("d-none")
-                    this.controlsDivPlayerTwo.classList.toggle("d-none")
+                if (this.removedCircleIndex + 1 > this.circles.length) {
+                    if (!this.controlsDivPlayerOne.classList.contains("d-none"))
+                        this.controlsDivPlayerOne.classList.add("d-none")
+                    if (!this.controlsDivPlayerTwo.classList.contains("d-none"))
+                        this.controlsDivPlayerTwo.classList.add("d-none")
                     this.displayMsg($.i18n("nimgame_winner", this.playersTurn[this.playersTurn.length-1]));
                     this.gameOver = true;
                     return
@@ -140,13 +142,19 @@ function WrappingNimGame(){
                     }
                     if(this.removedCircleIndex + 1 > this.circles.length){
                         this.displayMsg($.i18n("nimgame_alg_won"));
+                        if (!this.controlsDivPlayerOne.classList.contains("d-none"))
+                            this.controlsDivPlayerOne.classList.add("d-none")
+                        if (!this.controlsDivPlayerTwo.classList.contains("d-none"))
+                            this.controlsDivPlayerTwo.classList.add("d-none")
                         this.gameOver = true;
                     }
                     this.clearCanvas();
                     this.drawAllElements();
                     this.thinking = false;
-                    this.controlsDivPlayerOne.classList.toggle("d-none")
-                    this.controlsDivPlayerTwo.classList.toggle("d-none")
+                    if (!this.gameOver) {
+                        this.controlsDivPlayerOne.classList.toggle("d-none")
+                        this.controlsDivPlayerTwo.classList.toggle("d-none")
+                    }
                 },1000);
                 }
 
