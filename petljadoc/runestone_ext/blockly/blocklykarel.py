@@ -45,7 +45,7 @@ TEMPLATE_START = """
                             <section class="col-md-12">
                                 <article>
                                     <canvas class="world"
-                                        style="border-style: solid; border-width: 2px; border-color: inherit; background: white;"
+                                        style="border-style: solid; border-width: 2px; border-color: inherit; "
                                         width="300" height="300">
                                         <p>Please try loading this page in HTML5 enabled web browsers. All the latest
                                             versions
