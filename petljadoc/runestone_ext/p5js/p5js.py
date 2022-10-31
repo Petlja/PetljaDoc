@@ -12,10 +12,10 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('p5js', P5jsDirective)
 
-    app.add_stylesheet('p5js.css')
+    app.add_css_file('p5js.css')
 
-    app.add_javascript('//toolness.github.io/p5.js-widget/p5-widget.js')
-    app.add_javascript('p5js.js')
+    app.add_js_file('//toolness.github.io/p5.js-widget/p5-widget.js')
+    app.add_js_file('p5js.js')
  
 
     app.add_node(P5jsNode, html=(visit_info_note_node, depart_info_note_node))

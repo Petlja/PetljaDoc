@@ -14,9 +14,9 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('regex-check', RegexCheckDirective)
 
-    app.add_stylesheet('regex-check.css')
+    app.add_css_file('regex-check.css')
 
-    app.add_javascript('regex-check.js')
+    app.add_js_file('regex-check.js')
     add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"regex-check-i18n")
 
     app.add_node(RegexCheckQNode, html=(visit_regex_check_note_node, depart_regex_check_note_node))

@@ -15,9 +15,9 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('associations', AssociationsDirective)
 
-    app.add_stylesheet('associations.css')
+    app.add_css_file('associations.css')
 
-    app.add_javascript('associations.js')
+    app.add_js_file('associations.js')
     add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"associations-i18n")
 
     app.add_node(AssociationsQNode, html=(visit_associations_note_node, depart_associations_note_node))

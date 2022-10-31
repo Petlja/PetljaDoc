@@ -7,8 +7,8 @@ from docutils.parsers.rst import Directive
 
 def setup(app):
     app.connect('html-page-context', html_page_context_handler)
-    app.add_stylesheet('notes.css')
-    app.add_javascript('notes.js')
+    app.add_css_file('notes.css')
+    app.add_js_file('notes.js')
 
     app.add_directive('infonote', NoteDirective)
     app.add_directive('suggestionnote', NoteDirective)

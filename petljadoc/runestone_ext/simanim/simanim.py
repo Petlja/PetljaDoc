@@ -12,10 +12,10 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('simanim', SinAnimDirective)
 
-    app.add_stylesheet('simanim.css')
+    app.add_css_file('simanim.css')
 
-    app.add_javascript('simanim.js')
-    app.add_javascript('https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js')
+    app.add_js_file('simanim.js')
+    app.add_js_file('https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js')
 
     app.add_node(SinAnimQNode, html=(visit_info_note_node, depart_info_note_node))
 
