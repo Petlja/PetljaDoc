@@ -1229,6 +1229,23 @@ ul:first-child {
     margin: 5px;
 }
 
+#finish-activity{
+    margin-left: calc(50% - 50px);
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 25px;
+    border: 1px solid #18bc9c;
+    color: #18bc9c;
+    background-color: white;
+}
+
+#finish-activity:focus{
+	color: white;
+    background-color: #18bc9c;
+}
+
 .dec-letter-icon {
     font-size: 12px !important;
     cursor: pointer;

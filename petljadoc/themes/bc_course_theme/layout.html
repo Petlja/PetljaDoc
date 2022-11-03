@@ -20,9 +20,9 @@
                         '_static'+'/processing-1.4.1.min.js',
                         '_static'+'/jquery.hotkey.js',
                         '_static'+'/jquery-migrate-1.2.1.min.js',
-                        '_static'+'/course-errors.js',
+                        'platform'+ '/petljaRTBundle.js',
                         '_static'+'/petlja.js',
-                        '_static'+ '/require.js'
+                        '_static'+ '/require.js',
                       ]
 %}
 
@@ -35,7 +35,7 @@
     '_static'+'/bootstrap-4.0.0-dist/css/bootstrap.min.css',
     '_static'+'/flatly.min.css',
     '_static'+'/petlja-course.css',
-    '_static'+'/nbstyle.css'
+    '_static'+'/nbstyle.css',
   ]
 %}
 {%- if page_settings is not defined -%}
@@ -123,9 +123,6 @@
 {% block sidebarsourcelink %}{% endblock %}
 
 {%- block content %}
-{% if page_settings.header_nav %}
-{{ navBar() }}
-{% endif %}
 {% if pagename == 'index' %}
 {% block homepage %}
 {% include "course_homepage.html" %}
@@ -133,56 +130,20 @@
 {% else %}
 
 <div class="petljaCourseContainer">
-{% if page_settings.navigation %}
-<div class="petljaCourseContent">
-  {{ sidebar()}}
-</div>
-{% else %}
-<div class="petljaCourseContent d-none">
-  {{ sidebar()}}
-</div>
-{% endif %}
 
-{% if page_settings.navigation%}
-<div class="lectureContent">
-{% else %}
+
+
 <div class="container" style="padding-left: 20px; height: calc(100vh - 115px);">
-{% endif %}
   <div id="errors">
   </div>
-  {% if page_settings.navigation%}
-  <div class="lectureContentMaterial">
-  {% else %}
   <div class="lectureContentMaterial" style="overflow-x: visible;">
-  {% endif %}
     <div id="main-content">
     {% block body %}
     {% endblock %}
+    <button id="finish-activity"> <i class="fa fa-check" aria-hidden="true"></i> </button>
     </div>
-    {% block nextprevious %}
-    {% include "subchapter.html" %}
-    {% endblock %}
   </div>
 </div>
-{% if page_settings.copy_right %}
-<div class="petljadoc-resources">
-  <span class="pull-left">(Created using  <a href="https://pypi.org/project/Sphinx/">Swinx</a>, <a href="http://runestoneinteractive.org/">RunestoneComponents</a> and <a href="https://github.com/Petlja/PetljaDoc">PetljaDoc</a>) <br> © 2022 Petlja</span>
-</div>
-{% endif %}
-{% if page_settings.navigation%}
-<div class="lectureToolbox">
-
-  <label class="font-size-toggle" id="fontSizeToggle">
-
-      <i class="fas fa-font"></i><label>{{ _('Letters') }}</label>
-  </label>
-  <div class="font-change d-none" id="fontChangeModal">
-      <span class="dec-letter-icon" id="decLetterIcon">A-</span>
-      <label id="currentFontSize">16</label>
-      <span class="inc-letter-icon" id="incLetterIcon">A+</span>
-  </div>
-</div>
-{% endif %}
 </div>
 {% endif %}
 {%- endblock %}
