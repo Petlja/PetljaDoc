@@ -14,9 +14,9 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('nimgame', NimGameDirective)
 
-    app.add_stylesheet('nimgame.css')
+    app.add_css_file('nimgame.css')
 
-    app.add_javascript('nimgame.js')
+    app.add_js_file('nimgame.js')
     add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"nimgame-i18n")
 
     app.add_node(NimGamesNode, html=(visit_nim_game_node, depart_nim_game_node))

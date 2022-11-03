@@ -12,9 +12,9 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('gallery', GalleryDirective)
 
-    app.add_stylesheet('gallery.css')
+    app.add_css_file('gallery.css')
 
-    app.add_javascript('gallery.js')
+    app.add_js_file('gallery.js')
  
 
     app.add_node(GalleryNode, html=(visit_info_note_node, depart_info_note_node))

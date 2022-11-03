@@ -12,10 +12,10 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('dbpetlja', dbDirective)
 
-    app.add_stylesheet('dbDirective.css')
+    app.add_css_file('dbDirective.css')
 
-    app.add_javascript('dbDirective.js')
-    app.add_javascript('sql.js')
+    app.add_js_file('dbDirective.js')
+    app.add_js_file('sql.js')
 
     app.add_node(dbNode, html=(visit_info_note_node, depart_info_note_node))
 

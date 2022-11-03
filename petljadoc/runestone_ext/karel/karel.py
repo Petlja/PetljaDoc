@@ -17,15 +17,15 @@ def setup(app):
     add_codemirror_css_and_js(app,'python')
     add_skulpt_js(app)
 
-    app.add_stylesheet('karel.css')
+    app.add_css_file('karel.css')
 
-    app.add_javascript('karelCorner.js')
-    app.add_javascript('karelRobot.js')
-    app.add_javascript('karelWorld.js')
-    app.add_javascript('karelChat.js')
-    app.add_javascript('karelRobotDrawer.js')
-    app.add_javascript('karelUI.js')
-    app.add_javascript('karel.js')
+    app.add_js_file('karelCorner.js')
+    app.add_js_file('karelRobot.js')
+    app.add_js_file('karelWorld.js')
+    app.add_js_file('karelChat.js')
+    app.add_js_file('karelRobotDrawer.js')
+    app.add_js_file('karelUI.js')
+    app.add_js_file('karel.js')
     add_i18n_js(app, {"en","sr-Cyrl,sr"},"karel-i18n")
 
     app.add_node(KarelNode, html=(visit_karel_node, depart_karel_node))

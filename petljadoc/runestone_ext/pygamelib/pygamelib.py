@@ -1,2 +1,2 @@
 def setup(app):
-    app.add_javascript('pygamelib-init.js')
+    app.add_js_file('pygamelib-init.js')

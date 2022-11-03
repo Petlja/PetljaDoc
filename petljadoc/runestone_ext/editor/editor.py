@@ -12,10 +12,10 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('petlja-editor', EditorDirective)
 
-    app.add_stylesheet('editor.css')
+    app.add_css_file('editor.css')
 
-    app.add_javascript('editor.js')
-    app.add_javascript('jszip.js')
+    app.add_js_file('editor.js')
+    app.add_js_file('jszip.js')
     add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn"},"editor-i18n")
 
     app.add_node(EditorNode, html=(visit_nim_game_node, depart_nim_game_node))

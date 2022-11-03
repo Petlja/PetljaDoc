@@ -12,9 +12,9 @@ def setup(app):
     app.connect('html-page-context', html_page_context_handler)
     app.add_directive('pycode', PyCodeDirective)
 
-    app.add_stylesheet('pycode.css')
+    app.add_css_file('pycode.css')
 
-    app.add_javascript('pycode.js')
+    app.add_js_file('pycode.js')
  
 
     app.add_node(PyCodeNode, html=(visit_info_note_node, depart_info_note_node))
