@@ -3,7 +3,9 @@ import os
 modules = ['karel', 'notes', 'pygamelib','audio', 'quizq','gallery', 'associations','editor']
 
 def extensions():
-    return ['petljadoc.runestone_ext.' + module for module in modules]
+    extensions = ['petljadoc.petlja_builder']
+    extensions += ['petljadoc.runestone_ext.' + module for module in modules]
+    return extensions
 
 def add_module(module):
     modules.append(module)

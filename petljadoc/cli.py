@@ -248,7 +248,7 @@ def init_runestone(yes, defaults):
     init_template_arguments(template_dir, defaults, 'runestone')
 
 
-def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone'):
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone', sphinx_builder = None):
     path = project_path()
     if not path:
         raise click.ClickException(
@@ -260,23 +260,26 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     if not buildPath.exists:
         os.makedirs(buildPath)
     args = []
-
+    srcdir = os.path.realpath(paver_options.build.sourcedir)
+    outdir = os.path.realpath(paver_options.build.builddir)
     if sphinx_autobuild:
-        srcdir = os.path.realpath(paver_options.build.sourcedir)
-        outdir = os.path.realpath(paver_options.build.builddir)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         server = Server()
         builder = get_builder(
-            server.watcher, ['-b', 'html', '-d', './_build/doctrees', '-c', '.', srcdir, outdir], pre_build_commands=[]
+            server.watcher, ['-b', sphinx_builder , '-d', outdir + '/doctrees', '-c', '.', srcdir, outdir], pre_build_commands=[]
         )
+        if sphinx_builder == 'petlja_builder':
+            rootdir = outdir + '/bc_html'
+        else:
+            rootdir = outdir
 
         server.watch(srcdir, builder, ignore=[])
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
 
         server.serve(port=port, host="127.0.0.1",
-                     root=outdir, open_url_delay=5)
+                     root=rootdir, open_url_delay=5)
 
     if sphinx_build:
         if not os.path.exists(os.path.join(path, '_build')) and project_type == 'course':
@@ -284,20 +287,21 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         build_module = "sphinx.cmd.build"
         args.append('-a')
         args.append('-E')
-        args.append('-b html')
+        args.append(f'-b "{sphinx_builder}"')
         args.append(f'-c "{paver_options.build.confdir}"')
-        args.append(f'-d "{paver_options.build.builddir}/doctrees"')
+        args.append(f'-d "{outdir}/doctrees"')
         for k, v in paver_options.build.template_args.items():
             args.append(f'-A "{k}={v}"')
         args.append(f'"{paver_options.build.sourcedir}"')
-        args.append(f'"{paver_options.build.builddir}"')
+        args.append(f'"{outdir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
 
 
 @main.command()
 @click.option("--port", "-p", default=8000, type=int, help="HTTP port numpber (default 8000)")
-def preview(port):
+@click.option("--builder", "-b", default="html", type=str, help="Shpinx builder that should be used")
+def preview(port, builder):
     """
     Build and preview the Runestone project in browser
     """
@@ -310,9 +314,9 @@ def preview(port):
                 watch_server([os.path.realpath('_sources'),
                               os.path.realpath('_images')])
                 build_or_autobuild(
-                    "preview", port=port, sphinx_build=True, project_type=data["project_type"])
+                    "preview", port=port, sphinx_build=True, project_type=data["project_type"], sphinx_builder =builder)
                 build_or_autobuild(
-                    "preview", port=port, sphinx_autobuild=True, project_type=data["project_type"])
+                    "preview", port=port, sphinx_autobuild=True, project_type=data["project_type"], sphinx_builder = builder)
             else:
                 build_or_autobuild("preview", port=port, sphinx_build=True)
                 build_or_autobuild("preview", port=port, sphinx_autobuild=True)
