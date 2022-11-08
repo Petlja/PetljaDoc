@@ -3,7 +3,7 @@
         <div class="course-logo">
             <img class="course-logo-img" src="{{pathto('_static/images/logo.svg', 1)}}">
         </div>
-                    <a class="course-start " id="startCourseAnonymously" href="./{{course.active_lessons[0].folder_url}}/{{course.active_lessons[0].active_activies[0].toc_url}}.html">
+                    <a class="course-start " id="startCourseAnonymously" href="./{{course.active_lessons[0].folder_url}}/{{course.active_lessons[0].active_activities[0].toc_url}}.html">
                         {{ _('Go to course') }}
                     </a>
     </div>
@@ -41,7 +41,7 @@
     <label>{{lesson.title}}</label>
     <span>
     </span>     
-    <span><i class="fas fa-file-alt"></i> {{course.active_lessons[loop.index0].active_activies | length}} {{ _('Lecture') }}</span> 
+    <span><i class="fas fa-file-alt"></i> {{course.active_lessons[loop.index0].active_activities | length}} {{ _('Lecture') }}</span> 
     </div>
     {% endfor -%}
 </div>

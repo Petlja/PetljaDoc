@@ -268,6 +268,11 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     else:
         rootdir = outdir
         doctreesdir = outdir+ '/doctrees'
+
+    if not os.path.exists(rootdir + '/course'):
+        os.makedirs(rootdir + '/course')
+    shutil.copyfile('course.json', rootdir + '/course/course.json')
+
     if sphinx_autobuild:
         if not os.path.exists(outdir):
             os.makedirs(outdir)
@@ -298,8 +303,6 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
     
-    os.mkdir(rootdir + '/course')
-    shutil.copyfile('course.json', rootdir + '/course/course.json')
 
 
 @main.command()
@@ -496,7 +499,7 @@ def create_course():
                         archived_lessons.append(archived_lesson_guid)
 
                 for i, lesson in enumerate(data['lessons'], start=1):
-                    active_activies = []
+                    active_activities = []
                     archived_activities = []
                     order_prefix_lesson = str(i)+'_'
                     lesson_line = lesson['__line__']
@@ -555,11 +558,11 @@ def create_course():
                                 continue
 
                             else:
-                                active_activies.append(Activity(
+                                active_activities.append(Activity(
                                     activity_type, activity_title, activity_src, activity_guid, activity_description, lesson_nbsrc))
 
                     active_lessons.append(
-                        Lesson(title, folder, guid, description, archived_activities, active_activies))
+                        Lesson(title, folder, guid, description, archived_activities, active_activities))
 
             course = Course(courseId, lang, title_course, longDesc, shortDesc, willLearn,
                             requirements, toc, external_links, archived_lessons, active_lessons)
@@ -658,7 +661,7 @@ def create_activity_RST(course, index, path, intermediatPath):
                              encoding='utf-8')
         section_index.write(rst_title(lesson.title))
         section_index.write(_INDEX_TEMPLATE.format(1))
-        for activity in lesson.active_activies:
+        for activity in lesson.active_activities:
             if activity.type in ['reading', 'quiz']:
                 if activity.get_src_type() == 'rst':
                     section_index.write(' '*4+activity.src+'\n')
