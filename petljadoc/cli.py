@@ -262,18 +262,19 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     args = []
     srcdir = os.path.realpath(paver_options.build.sourcedir)
     outdir = os.path.realpath(paver_options.build.builddir)
+    if sphinx_builder == 'petlja_builder':
+            rootdir = outdir + '/bc_html'
+            doctreesdir = outdir + './doctrees'
+    else:
+        rootdir = outdir
+        doctreesdir = outdir+ '/doctrees'
     if sphinx_autobuild:
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         server = Server()
         builder = get_builder(
-            server.watcher, ['-b', sphinx_builder , '-d', outdir + '/doctrees', '-c', '.', srcdir, outdir], pre_build_commands=[]
+            server.watcher, ['-b', sphinx_builder , '-d', doctreesdir, '-c', '.', srcdir, outdir], pre_build_commands=[]
         )
-        if sphinx_builder == 'petlja_builder':
-            rootdir = outdir + '/bc_html'
-        else:
-            rootdir = outdir
-
         server.watch(srcdir, builder, ignore=[])
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
@@ -289,13 +290,16 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append('-E')
         args.append(f'-b "{sphinx_builder}"')
         args.append(f'-c "{paver_options.build.confdir}"')
-        args.append(f'-d "{outdir}/doctrees"')
+        args.append(f'-d "{doctreesdir}"')
         for k, v in paver_options.build.template_args.items():
             args.append(f'-A "{k}={v}"')
         args.append(f'"{paver_options.build.sourcedir}"')
         args.append(f'"{outdir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+    
+    os.mkdir(rootdir + '/course')
+    shutil.copyfile('course.json', rootdir + '/course/course.json')
 
 
 @main.command()

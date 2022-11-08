@@ -1,4 +1,4 @@
-{% extends "basic_layout.html" %}
+{% extends "basic/layout.html" %}
 
 {% set script_files = ['_static/runestonebase.js',
                        '_static'+'/skulpt.min.js', 
@@ -38,55 +38,12 @@
     '_static'+'/nbstyle.css',
   ]
 %}
-{%- if page_settings is not defined -%}
-{% set page_settings = none %}
-{%- endif -%}
-{%- if page_settings is none -%}
-{% set page_settings = namespace(copy_right=true,navigation=true,header_nav=true,petlja_links=true) %}
-{%- endif -%}
 
-{%block lang %}
-<html xmlns="http://www.w3.org/1999/xhtml" lang="{{course.lang}}">
-{%- endblock %}
+{% if pagename == "index" %}
+{% set css_files = ['platform/style.css'] %}
+{% set script_files = ['platform/bundle.js'] %}
+{%- endif %}
 
-{% macro navBar() %}
-<div id="navbar" class="content-header">
-  <div class="right-side-nav">
-    {% if course.externalLinkLinks|length > 0 %}
-    <div id="usefulLinksToggle" class="useful-links-toggle">
-        <a class="dropdown-toggle dropdown-toggle-burger" role="button" href="#" id="usefulLinksDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-bars fa-2x"></i>
-        </a>
-        <div class="dropdown-menu dropdown-nav-links shadow-lg" aria-labelledby="usefulLinksDropdown" x-placement="bottom-start" style="position: absolute; transform: translate3d(-55px, 32px, 0px); top: 0px; left: 0px; will-change: transform;">
-          <div class="links-title"> {{ _('Useful links' )}}</div>
-          {% for n in range(course.externalLinkTexts| length) -%}
-          <div class="useful-link">
-            <a href="{{course.externalLinkLinks[n]}}" target="_blank">{{course.externalLinkTexts[n]}}</a></div>
-          {% endfor %}
-        </div>
-    </div>
-
-    {% endif %}
-</div>
-{%if page_settings.petlja_links %}
-<div class="left-side-nav">
-  <div class="course-logo-nav">
-      <a target="_blank" href="https://petlja.org">
-          <img src="{{pathto('_static/img/petlja-logo-wt.svg', 1)}}" alt="petlja.org" id="lightPetljaLogo">
-      </a>
-  </div>
-  <div class="course-logo-nav-kabinet">
-      <a target="_blank" href="https://petlja.org/net.kabinet">
-          <img src="{{pathto('_static/img/netkabinet-logo-strelica-wt.svg', 1)}}" alt="petlja.org" id="lightNetKabinetLogo">
-      </a>
-  </div>
-</div>
-{% endif %}
-{% if pagename != 'index' %}
-<div class="content-header-label" id = "content-header-label" href="{{pathto('', 1)}}">{{ course.shortDesc }}</div>
-{% endif %}
-</div>
-{% endmacro %}
 
 {%- block extrahead %}
     <meta charset='utf-8'>
@@ -114,6 +71,8 @@
     </script>
 {% endblock %}
 
+
+
 {# Silence the sidebar's, relbar's #}
 {% block header %}{% endblock %}
 {% block sidebar1 %}{% endblock %}
@@ -121,29 +80,25 @@
 {% block relbar1 %}{% endblock %}
 {% block relbar2 %}{% endblock %}
 {% block sidebarsourcelink %}{% endblock %}
+{% block footer %}{% endblock %}
 
 {%- block content %}
 {% if pagename == 'index' %}
-{% block homepage %}
-{% include "course_homepage.html" %}
-{% endblock %}
+{% include "index.html" %}
 {% else %}
-
 <div class="petljaCourseContainer">
-
-
-
-<div class="container" style="padding-left: 20px; height: calc(100vh - 115px);">
-  <div id="errors">
-  </div>
-  <div class="lectureContentMaterial" style="overflow-x: visible;">
-    <div id="main-content">
-    {% block body %}
-    {% endblock %}
-    <button id="finish-activity"> <i class="fa fa-check" aria-hidden="true"></i> </button>
+  <div class="container" style="padding-left: 20px; height: calc(100vh - 115px);">
+    <div id="errors">
+    </div>
+    <div class="lectureContentMaterial" style="overflow-x: visible;">
+      <div id="main-content">
+      {% block body %}
+      {{ super() }}
+      {% endblock %}
+      <button id="finish-activity"> <i class="fa fa-check" aria-hidden="true"></i> </button>
+      </div>
     </div>
   </div>
-</div>
-</div>
+  </div>
 {% endif %}
 {%- endblock %}

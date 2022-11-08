@@ -1,7 +1,10 @@
 from os import path
+from pkg_resources import resource_filename
 
 from sphinx.application import Sphinx
 from sphinx.builders.html import StandaloneHTMLBuilder
+from sphinx.util.fileutil import copy_asset
+from sphinx.util.matching import DOTFILES
 
 class PetljaBuilder(StandaloneHTMLBuilder):
     name = 'petlja_builder'
@@ -10,12 +13,20 @@ class PetljaBuilder(StandaloneHTMLBuilder):
     def __init__(self, app):
         super().__init__(app)
         self.outdir = path.join(self.outdir, self.bc_outdir)
+        self.search = False
+        self.copysource = False
+        petlja_player_driver = resource_filename('petljadoc', 'themes/bc_theme/platform')
+        copy_asset(petlja_player_driver, path.join(self.outdir, 'platform'), excluded=DOTFILES)
+
 
     def get_theme_config(self):
         return 'petljadoc_bc_theme', self.config.html_theme_options
 
-    def dump_search_index(self):
+    def gen_indices(self):
         pass
+
+    #def dump_search_index(self):
+    #    pass
 
     def write_buildinfo(self):
         pass
