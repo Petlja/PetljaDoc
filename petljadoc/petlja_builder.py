@@ -13,6 +13,7 @@ class PetljaBuilder(StandaloneHTMLBuilder):
     def __init__(self, app):
         super().__init__(app)
         self.outdir = path.join(self.outdir, self.bc_outdir)
+        self.app.outdir = self.outdir
         self.search = False
         self.copysource = False
         petlja_player_driver = resource_filename('petljadoc', 'themes/bc_theme/platform')
