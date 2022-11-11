@@ -1,5 +1,19 @@
 {% extends "basic/layout.html" %}
 
+{# Silence the sidebar's, relbar's #}
+{% block header %}{% endblock %}
+{% block sidebar1 %}{% endblock %}
+{% block sidebar2 %}{% endblock %}
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+{% block sidebarsourcelink %}{% endblock %}
+{% block footer %}{% endblock %}
+{%- block linktags %}{% endblock %}
+
+{% if pagename == 'index' %}
+{% set css_files = ['platform/style.css'] %}
+{% set script_files = ['platform/bundle.js'] %}
+{% else %}
 {% set script_files = ['_static/runestonebase.js',
                        '_static'+'/skulpt.min.js', 
                        '_static'+'/skulpt-stdlib.js'
@@ -35,21 +49,17 @@
     '_static'+'/bootstrap-4.0.0-dist/css/bootstrap.min.css',
     '_static'+'/flatly.min.css',
     '_static'+'/petlja-course.css',
-    '_static'+'/nbstyle.css',
   ]
 %}
-
-{% if pagename == "index" %}
-{% set css_files = ['platform/style.css'] %}
-{% set script_files = ['platform/bundle.js'] %}
-{%- endif %}
+{% endif %}
 
 
 {%- block extrahead %}
+    <link rel="shortcut icon" href="{{pathto('_static/favicon.ico', 1)}}" type="image/ico" />
+  {% if pagename != 'index' %}
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-    <link rel="shortcut icon" href="{{pathto('_static/favicon.ico', 1)}}" type="image/ico" />
     <script type="text/javascript">
       eBookConfig = {};
       eBookConfig.host = '{{course_url}}' ? '{{course_url}}' : 'http://127.0.0.1:8000';
@@ -69,22 +79,46 @@
       if (typeof (Sk) != "undefined")
         Sk.imgPath = eBookConfig.imagesDir;
     </script>
+    {% endif %}
 {% endblock %}
-
-
-
-{# Silence the sidebar's, relbar's #}
-{% block header %}{% endblock %}
-{% block sidebar1 %}{% endblock %}
-{% block sidebar2 %}{% endblock %}
-{% block relbar1 %}{% endblock %}
-{% block relbar2 %}{% endblock %}
-{% block sidebarsourcelink %}{% endblock %}
-{% block footer %}{% endblock %}
 
 {%- block content %}
 {% if pagename == 'index' %}
-{% include "index.html" %}
+
+<div id="main" class="main-content">
+  <div id="player-header" class="player-header">
+    <div id="toc-toggle" class="content-toggle">
+      <i class="bi bi-list-task"></i>
+      <p id="content-text"> {{ _('Table of content') }} </p>
+    </div>
+    <div class="content-title">
+      <div id="course-title" class="course-title"></div>
+      <div id="lecture-title-header" class="lecture-title-header"></div>
+    </div>
+    <div>
+      <div id="font-size" class="content-options">
+        <i class="bi bi-fonts"></i>
+        <span id="font-text" class="noselect"> Фонт </span>
+      </div>
+      <div id="font-size-modal" class="font-picker hide-element">
+        <button class="noselect" id="smaller-text">-</button>
+        <button class="noselect" id="larger-text">+</button>
+      </div>
+    </div>
+  </div>
+  <div id="content-nav"  class="content-nav"> 
+    <div id="toc" class="table-of-content">
+    </div>
+    <div class="nav-buttons">
+      <button id="previus-activity"><i class="bi bi-chevron-left"></i> </button>
+      <button id="next-activity"> <i class="bi bi-chevron-right"></i> </button>
+    </div>
+  </div>
+  <div id="course-content" class="course-content">
+    <iframe id="main-iframe" class="content-iframe"></iframe>
+  </div>
+</div>
+
 {% else %}
 <div class="petljaCourseContainer">
   <div class="container" style="padding-left: 20px; height: calc(100vh - 115px);">
@@ -92,6 +126,7 @@
     </div>
     <div class="lectureContentMaterial" style="overflow-x: visible;">
       <div id="main-content">
+      {{ meta.type }}
       {% block body %}
       {{ super() }}
       {% endblock %}
@@ -99,6 +134,6 @@
       </div>
     </div>
   </div>
-  </div>
+</div>
 {% endif %}
 {%- endblock %}
