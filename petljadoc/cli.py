@@ -248,7 +248,7 @@ def init_runestone(yes, defaults):
     init_template_arguments(template_dir, defaults, 'runestone')
 
 
-def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone', sphinx_builder = None):
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone', sphinx_builder = 'html'):
     path = project_path()
     if not path:
         raise click.ClickException(
@@ -271,7 +271,8 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
 
     if not os.path.exists(rootdir + '/course'):
         os.makedirs(rootdir + '/course')
-    shutil.copyfile('course.json', rootdir + '/course/course.json')
+    if project_type != 'runestone':
+        shutil.copyfile('course.json', rootdir + '/course/course.json')
 
     if sphinx_autobuild:
         if not os.path.exists(outdir):
@@ -641,6 +642,8 @@ def print_error(error, first_build):
 def template_toc(course):
     with open('course.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.to_dict()))
+    with open('overide.json', mode='w', encoding='utf8') as file:
+        file.write(json.dumps(course.metadata_to_dict()))
 
 
 def create_intermediate_folder(course, path, intermediatPath):

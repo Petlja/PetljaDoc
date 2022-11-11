@@ -139,6 +139,12 @@ class Course:
                 lesson_dict['active_activities'].append(activity_dict)
             course_dict['active_lessons'].append(lesson_dict)
         return course_dict
+    def metadata_to_dict(self):
+        course_dict = dict()
+        for lesson in self.active_lessons:
+            for activity in lesson.active_activities:      
+                course_dict[lesson.folder_url+'/'+activity.toc_url] = {'type' : activity.type}
+        return course_dict
 
 
 class Lesson:
