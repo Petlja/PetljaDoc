@@ -14,7 +14,8 @@
 {% set css_files = ['platform/style.css'] %}
 {% set script_files = ['platform/bundle.js'] %}
 {% else %}
-{% set script_files = ['_static/runestonebase.js',
+{% set script_files = ['_static'+'/petlja.js',
+                       '_static/runestonebase.js',
                        '_static'+'/skulpt.min.js', 
                        '_static'+'/skulpt-stdlib.js'
                       ] + 
@@ -35,7 +36,6 @@
                         '_static'+'/jquery.hotkey.js',
                         '_static'+'/jquery-migrate-1.2.1.min.js',
                         'platform'+ '/petljaRTBundle.js',
-                        '_static'+'/petlja.js',
                         '_static'+ '/require.js',
                       ]
 %}
@@ -79,6 +79,12 @@
       if (typeof (Sk) != "undefined")
         Sk.imgPath = eBookConfig.imagesDir;
     </script>
+    {% if meta is defined and meta is not none and meta|length and meta.type is defined and meta.type == 'quiz' %}
+    <script> var lectureType = 'quiz'; </script>
+    {% endif %}
+    {% if meta is defined and meta is not none and meta|length and meta.type is defined and meta.type == 'reading' %}
+    <script> var lectureType = 'reading'; </script>
+    {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -98,11 +104,11 @@
     <div>
       <div id="font-size" class="content-options">
         <i class="bi bi-fonts"></i>
-        <span id="font-text" class="noselect"> Фонт </span>
+        <span id="font-text" class="no-select"> Фонт </span>
       </div>
       <div id="font-size-modal" class="font-picker hide-element">
-        <button class="noselect" id="smaller-text">-</button>
-        <button class="noselect" id="larger-text">+</button>
+        <button class="no-select" id="smaller-text">-</button>
+        <button class="no-select" id="larger-text">+</button>
       </div>
     </div>
   </div>
@@ -110,7 +116,7 @@
     <div id="toc" class="table-of-content">
     </div>
     <div class="nav-buttons">
-      <button id="previus-activity"><i class="bi bi-chevron-left"></i> </button>
+      <button id="previous-activity"><i class="bi bi-chevron-left"></i> </button>
       <button id="next-activity"> <i class="bi bi-chevron-right"></i> </button>
     </div>
   </div>
@@ -126,11 +132,10 @@
     </div>
     <div class="lectureContentMaterial" style="overflow-x: visible;">
       <div id="main-content">
-      {{ meta.type }}
       {% block body %}
       {{ super() }}
       {% endblock %}
-      <button id="finish-activity"> <i class="fa fa-check" aria-hidden="true"></i> </button>
+      <button id="finish-activity" class="unfinished-activity"> <i class="fa fa-check" aria-hidden="true"></i> </button>
       </div>
     </div>
   </div>
