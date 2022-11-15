@@ -43,35 +43,10 @@ release = '0.0'
 # for a list of supported languages.
 language = '{{language}}'
 locale_dirs = ['{{locale_dirs}}']
-# There are two options for replacing |today|: either, you set today to some
-# non-false value, then it is used:
-#today = ''
-# Else, today_fmt is used as the format for a strftime call.
-#today_fmt = '%%B %%d, %%Y'
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-exclude_patterns = []
-
-# The reST default role (used for this markup: `text`) to use for all documents.
-#default_role = None
-
-# If true, '()' will be appended to :func: etc. cross-reference text.
-#add_function_parentheses = True
-
-# If true, the current module name will be prepended to all description
-# unit titles (such as .. function::).
-#add_module_names = True
-
-# If true, sectionauthor and moduleauthor directives will be shown in the
-# output. They are ignored by default.
-#show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-# A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
 
 # `keep_warnings <http://www.sphinx-doc.org/en/stable/config.html#confval-keep_warnings>`_:
 # If true, keep warnings as “system message” paragraphs in the built documents.
@@ -119,18 +94,15 @@ html_theme = '{{html_theme}}'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {'nosidebar': 'true'}
+
 html_theme_options = {
     # Navigation bar title. (Default: ``project`` value)
     'navbar_title': "{{project_title}}",
-
     # Tab name for entire site. (Default: "Site")
     'navbar_site_name': "Chapters",
-
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
     'globaltoc_depth': 1,
-
     # Include hidden TOCs in Site navbar?
     #
     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
@@ -139,19 +111,15 @@ html_theme_options = {
     #
     # Values: "true" (default) or "false"
     'globaltoc_includehidden': "false",
-
     # HTML navbar class (Default: "navbar") to attach to <div> element.
     # For black navbar, do "navbar navbar-inverse"
     'navbar_class': "navbar",
-
     # Fix navigation bar to top of page?
     # Values: "true" (default) or "false"
     'navbar_fixed_top': "false",
-
     # Location of link to source.
     # Options are "nav" (default), "footer" or anything else to exclude.
     'source_link_position': "nav",
-
     # Bootswatch (http://bootswatch.com/) theme.
     #
     # Options are nothing with "" (default) or the name of a valid theme
@@ -160,8 +128,6 @@ html_theme_options = {
     # Note that this is served off CDN, so won't be available offline.
     #'bootswatch_theme': "slate",
 }
-
-#html_style = "style.css"
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ["{{html_theme_path}}"]
@@ -173,17 +139,6 @@ html_title = '{{project_title}}'
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title ='{{project_title}}'
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-
-# logo is included in layout file
-#html_logo = "../source/_static/logo_small.png"
-
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-#html_favicon = None
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -191,7 +146,9 @@ html_short_title ='{{project_title}}'
 html_static_path = ['_static']  + runestone_static_dirs() + petljadoc.runestone_ext.static_dirs()
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {}
+html_sidebars = {
+    '**' : ['globaltoc.html']
+}
 
 # If true, links to the reST sources are added to the pages.
 html_show_sourcelink = False
@@ -202,5 +159,7 @@ html_show_sphinx = False
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = False
 
+# If false, no index is generated.
+html_use_index = False
 
 petljadoc.runestone_ext.config_values_for_components(globals())

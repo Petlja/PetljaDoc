@@ -26,9 +26,6 @@ class PetljaBuilder(StandaloneHTMLBuilder):
     def get_theme_config(self):
         return 'petljadoc_bc_theme', self.config.html_theme_options
 
-    def gen_indices(self):
-        pass
-
     def write_buildinfo(self):
         pass
 
