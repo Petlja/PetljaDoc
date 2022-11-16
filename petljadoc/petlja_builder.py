@@ -24,7 +24,7 @@ class PetljaBuilder(StandaloneHTMLBuilder):
         copy_asset(petlja_player_driver, path.join(self.outdir, 'platform'), excluded=DOTFILES)
         
     def get_theme_config(self):
-        return 'petljadoc_bc_theme', self.config.html_theme_options
+        return self.config.html_bc_theme , self.config.html_theme_options
 
     def write_buildinfo(self):
         pass
@@ -53,6 +53,7 @@ def dict_of_dicts_merge(x, y):
         return y
 
 def setup(app: Sphinx):
+    app.add_config_value('html_bc_theme', 'petljadoc_bc_theme', 'html')
     app.connect('env-updated',override_env_dict)
     app.add_builder(PetljaBuilder)
 
