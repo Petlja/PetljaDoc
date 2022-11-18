@@ -26,7 +26,7 @@ class Course:
         for lesson in self.active_lessons:
             guid_list = guid_list + lesson.archived_activities
             guid_list.append(lesson.guid)
-            for activity in lesson.active_activies:
+            for activity in lesson.active_activities:
                 guid_list.append(activity.guid)
         guid_list = duplicates(guid_list)
         return {'status': len(guid_list) == 0, 'guid_duplicate_list': guid_list}
@@ -36,7 +36,7 @@ class Course:
         missing_activities = []
         missing_status = True
         for lesson in self.active_lessons:
-            for activity in lesson.active_activies:
+            for activity in lesson.active_activities:
                 if activity.type in ['reading', 'quiz']:
                     if activity.get_src_type() == 'rst':
                         if not Path('_sources/'+lesson.folder+'/'+activity.src).is_file():
@@ -83,7 +83,7 @@ class Course:
         self.dict['lessons'] = []
         for lesson in self.active_lessons:
             tmp_activities = []
-            for activity in lesson.active_activies:
+            for activity in lesson.active_activities:
                 tmp_activities.append({'type': activity.type,
                                        'title': activity.title,
                                        'src': activity.src,
@@ -130,14 +130,20 @@ class Course:
             lesson_dict = dict()
             lesson_dict['title'] = lesson.title
             lesson_dict['folder_url'] = lesson.folder_url
-            lesson_dict['active_activies'] = []
-            for activity in lesson.active_activies:
+            lesson_dict['active_activities'] = []
+            for activity in lesson.active_activities:
                 activity_dict = dict()
                 activity_dict['toc_url'] = activity.toc_url
                 activity_dict['type'] = activity.type
                 activity_dict['title'] = activity.title
-                lesson_dict['active_activies'].append(activity_dict)
+                lesson_dict['active_activities'].append(activity_dict)
             course_dict['active_lessons'].append(lesson_dict)
+        return course_dict
+    def metadata_to_dict(self):
+        course_dict = dict()
+        for lesson in self.active_lessons:
+            for activity in lesson.active_activities:      
+                course_dict[lesson.folder_url+'/'+activity.toc_url] = {'type' : activity.type}
         return course_dict
 
 
@@ -148,7 +154,7 @@ class Lesson:
         self.guid = guid
         self.description = description if description else ''
         self.archived_activities = archived_activities
-        self.active_activies = active_activities
+        self.active_activities = active_activities
         self.folder = folder if folder else '_missing_folder_name'
         self.folder_url = self.folder.replace(" ", "%20")
 

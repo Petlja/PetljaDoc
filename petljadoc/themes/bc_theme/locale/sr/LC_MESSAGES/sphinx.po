@@ -1,0 +1,81 @@
+# Translations template for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-03-06 14:03+0100\n"
+"PO-Revision-Date: 2022-03-30 10:04+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Generated-By: Babel 2.9.1\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: basic_layout.html:21
+msgid "Navigation"
+msgstr "Навигација"
+
+#: basic_layout.html:129
+#, python-format
+msgid "Search within %(docstitle)s"
+msgstr ""
+
+#: course_homepage.html:7
+msgid "Go to course"
+msgstr "Погледај курс одмах"
+
+#: course_homepage.html:21
+msgid "What you will learn"
+msgstr "Шта ћеш научити"
+
+#: course_homepage.html:27
+msgid "More"
+msgstr "прикажи више"
+
+#: course_homepage.html:27
+msgid "Less"
+msgstr "мање"
+
+#: course_homepage.html:29
+msgid "Course requires"
+msgstr "Потребне ствари за курс"
+
+#: course_homepage.html:38 globaltoc.html:3 localtoc.html:3
+msgid "Table of content"
+msgstr "Садржај"
+
+#: course_homepage.html:44
+msgid "Lecture"
+msgstr "лекција"
+
+#: layout.html:58
+msgid "Useful links"
+msgstr "Корисни линкови"
+
+#: layout.html:172
+msgid "Letters"
+msgstr "Слова"
+
+#: localtoc.html:2
+msgid "Page"
+msgstr "Страна"
+
+#: relations.html:4 subchapter.html:4 subchapter.html:6
+msgid "Previous chapter"
+msgstr "Претходна лекција"
+
+#: relations.html:7 subchapter.html:9
+msgid "Next chapter"
+msgstr "Следећа лекција"
+
+#: sourcelink.html:3
+msgid "Source"
+msgstr "Извор"
