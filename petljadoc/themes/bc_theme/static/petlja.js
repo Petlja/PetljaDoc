@@ -70,16 +70,21 @@ ContentPage.prototype.getProgress = function(){
         return {
             'progressStatus' : this.correctAnswersCount == pageQuestionStatuses.length,
             'score' : this.correctAnswersCount,
-            'maxScore' :  pageQuestionStatuses.length}
+            'maxScore' :  pageQuestionStatuses.length,
+            'lectureType' : lectureType
+        }
     if (lectureType == LECTURE_TYPE_QUIZ)
         return {
-            'progressStatus' : this.correctAnswers > (pageQuestionStatuses.length * QUIZ_MARGIN),
+            'progressStatus' : this.correctAnswersCount > (pageQuestionStatuses.length * QUIZ_MARGIN),
             'score' : this.correctAnswersCount,
-            'maxScore' : pageQuestionStatuses.length}
+            'maxScore' : pageQuestionStatuses.length,
+            'lectureType' : lectureType
+        }
     return {
         'progressStatus' :true,
         'score' : 1,
-        'maxScore' : 1
+        'maxScore' : 1,
+        'lectureType' : 'other'
     }
 }
 

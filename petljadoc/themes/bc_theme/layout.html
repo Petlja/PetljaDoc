@@ -81,11 +81,12 @@
     </script>
     {% if meta is defined and meta is not none and meta|length and meta.type is defined and meta.type == 'quiz' %}
     <script> var lectureType = 'quiz'; </script>
-    {% endif %}
-    {% if meta is defined and meta is not none and meta|length and meta.type is defined and meta.type == 'reading' %}
+    {% elif meta is defined and meta is not none and meta|length and meta.type is defined and meta.type == 'reading' %}
     <script> var lectureType = 'reading'; </script>
+    {% else %}
+    <script> var lectureType = ''; </script>
     {% endif %}
-    {% endif %}
+  {% endif %}
 {% endblock %}
 
 {%- block content %}
