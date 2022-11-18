@@ -22,7 +22,7 @@ from nbconvert import HTMLExporter
 from traitlets.config import Config
 from .util import *
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
-from .package import ScormPackager
+from .package import ScormPackager, ScormProxyPackager
 
 
 _INDEX_TEMPLATE_HIDDEN = '''
@@ -190,7 +190,7 @@ def clean():
     delete_file('course.json')
 
 
-#@main.command("export")
+@main.command("export")
 def export():
     """
     Export course as a SCORM package
@@ -198,20 +198,31 @@ def export():
     path = project_path()
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
-            _course_export_type = _prompt("Do you wish to export as single or multy sco",
-                                          default="single")
+            _course_export_type = _prompt("Do you wish to export as single or multi or proxy sco",
+                                          default="proxy")
             data = json.load(f)
-            build_or_autobuild("export", sphinx_build=True,
-                               project_type=data["project_type"])
-            scrom_template = resource_filename('petljadoc', 'scorm-templates')
-            copy_dir(scrom_template, '_build')
-            scorm_package = ScormPackager()
-            if _course_export_type == "single":
-                scorm_package.create_package_for_single_sco_course()
-                scorm_package.create_single_sco_packages_for_lectures()
-            else:
+            if(_course_export_type == "proxy"):
+                build_or_autobuild("export", sphinx_build=True,
+                                project_type=data["project_type"], sphinx_builder="petlja_builder")   
+            else: 
+                build_or_autobuild("export", sphinx_build=True,
+                                project_type=data["project_type"])
+            if _course_export_type == "proxy":
+                scorm_package = ScormProxyPackager()
                 scorm_package.create_package_for_course()
-                scorm_package.create_packages_for_lectures()
+                scorm_package.create_packages_for_activities()
+            else:
+                scrom_template = resource_filename('petljadoc', 'scorm-templates')
+                copy_dir(scrom_template, '_build')
+                if  _course_export_type == "single":
+                    scorm_package = ScormPackager()
+                    scorm_package.create_package_for_single_sco_course()
+                    scorm_package.create_single_sco_packages_for_lectures()
+                if _course_export_type == "multi":
+                    scorm_package = ScormPackager()
+                    scorm_package.create_package_for_course()
+                    scorm_package.create_packages_for_lectures()
+
             print('The packages are in export directory')
 
 
