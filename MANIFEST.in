@@ -6,6 +6,7 @@ recursive-include petljadoc/runestone_ext *.js *.css *.txt
 graft petljadoc/themes/course_theme/static
 graft petljadoc/themes/runestone_theme/static
 graft petljadoc/themes/bc_theme/static
+graft petljadoc/themes/bc_theme/platform
 graft petljadoc/project-templates
 graft petljadoc/scorm-templates
 graft petljadoc/scorm-proxy-templates
