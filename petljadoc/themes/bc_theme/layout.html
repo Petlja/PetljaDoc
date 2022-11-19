@@ -11,8 +11,12 @@
 {%- block linktags %}{% endblock %}
 
 {% if pagename == 'index' %}
-{% set css_files = ['platform/style.css'] %}
-{% set script_files = ['platform/bundle.js'] %}
+{% set css_files = ['_static/style-player.css',
+                    '_static/fonts/bootstrap-icons.woff',
+                    '_static/fonts/bootstrap-icons.woff2'
+                    ]
+%}
+{% set script_files = ['_static/bundle.js'] %}
 {% else %}
 {% set script_files = ['_static'+'/petlja.js',
                        '_static/runestonebase.js',
@@ -122,7 +126,7 @@
     </div>
   </div>
   <div id="course-content" class="course-content">
-    <iframe id="main-iframe" class="content-iframe"></iframe>
+    <iframe id="main-iframe" class="content-iframe" data-content-url="."></iframe>
   </div>
 </div>
 

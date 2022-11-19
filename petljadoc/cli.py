@@ -22,7 +22,7 @@ from nbconvert import HTMLExporter
 from traitlets.config import Config
 from .util import *
 from .course import Activity, Lesson, Course, YamlLoger, ExternalLink, ActivityTypeValueError
-from .package import ScormPackager
+from .package import ScormPackager, ScormProxyPackager
 
 
 _INDEX_TEMPLATE_HIDDEN = '''
@@ -188,9 +188,10 @@ def clean():
     delete_dir('_intermediate')
     delete_dir('__pycache__')
     delete_file('course.json')
+    delete_file('override.json')
 
 
-#@main.command("export")
+@main.command("export")
 def export():
     """
     Export course as a SCORM package
@@ -198,20 +199,31 @@ def export():
     path = project_path()
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
-            _course_export_type = _prompt("Do you wish to export as single or multy sco",
-                                          default="single")
+            _course_export_type = _prompt("Do you wish to export as single or multi or proxy sco",
+                                          default="proxy")
             data = json.load(f)
-            build_or_autobuild("export", sphinx_build=True,
-                               project_type=data["project_type"])
-            scrom_template = resource_filename('petljadoc', 'scorm-templates')
-            copy_dir(scrom_template, '_build')
-            scorm_package = ScormPackager()
-            if _course_export_type == "single":
-                scorm_package.create_package_for_single_sco_course()
-                scorm_package.create_single_sco_packages_for_lectures()
-            else:
+            if(_course_export_type == "proxy"):
+                build_or_autobuild("export", sphinx_build=True,
+                                project_type=data["project_type"], sphinx_builder="petlja_builder")   
+            else: 
+                build_or_autobuild("export", sphinx_build=True,
+                                project_type=data["project_type"])
+            if _course_export_type == "proxy":
+                scorm_package = ScormProxyPackager()
                 scorm_package.create_package_for_course()
-                scorm_package.create_packages_for_lectures()
+                scorm_package.create_packages_for_activities()
+            else:
+                scrom_template = resource_filename('petljadoc', 'scorm-templates')
+                copy_dir(scrom_template, '_build')
+                if  _course_export_type == "single":
+                    scorm_package = ScormPackager()
+                    scorm_package.create_package_for_single_sco_course()
+                    scorm_package.create_single_sco_packages_for_lectures()
+                if _course_export_type == "multi":
+                    scorm_package = ScormPackager()
+                    scorm_package.create_package_for_course()
+                    scorm_package.create_packages_for_lectures()
+
             print('The packages are in export directory')
 
 
@@ -268,10 +280,6 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     else:
         rootdir = outdir
 
-    if not os.path.exists(rootdir + '/course'):
-        os.makedirs(rootdir + '/course')
-    if project_type != 'runestone':
-        shutil.copyfile('course.json', rootdir + '/course/course.json')
 
     if sphinx_autobuild:
         if not os.path.exists(outdir):
@@ -284,11 +292,13 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
 
+        shutil.copy('course.json', rootdir)
+
         server.serve(port=port, host="127.0.0.1",
                      root=rootdir, open_url_delay=5)
 
     if sphinx_build:
-        if not os.path.exists(os.path.join(path, '_build')) and project_type == 'course':
+        if project_type == 'course':
             build_intermediate(path)
         build_module = "sphinx.cmd.build"
         args.append('-a')
@@ -302,7 +312,11 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append(f'"{outdir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+        shutil.copy('course.json', rootdir)
+
     
+
+
 
 
 @main.command()
@@ -641,7 +655,7 @@ def print_error(error, first_build):
 def template_toc(course):
     with open('course.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.to_dict()))
-    with open('overide.json', mode='w', encoding='utf8') as file:
+    with open('override.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.metadata_to_dict()))
 
 
