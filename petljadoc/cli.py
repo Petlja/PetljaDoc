@@ -291,8 +291,8 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         server.watch(srcdir, builder, ignore=[])
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
-
-        shutil.copy('course.json', rootdir)
+        if(project_type!= 'runestone'):
+            shutil.copy('course.json', rootdir)
 
         server.serve(port=port, host="127.0.0.1",
                      root=rootdir, open_url_delay=5)
@@ -312,7 +312,8 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append(f'"{outdir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
-        shutil.copy('course.json', rootdir)
+        if(project_type!= 'runestone'):
+            shutil.copy('course.json', rootdir)
 
     
 
