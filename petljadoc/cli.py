@@ -188,6 +188,7 @@ def clean():
     delete_dir('_intermediate')
     delete_dir('__pycache__')
     delete_file('course.json')
+    delete_file('override.json')
 
 
 @main.command("export")
@@ -279,10 +280,6 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     else:
         rootdir = outdir
 
-    if not os.path.exists(rootdir + '/course'):
-        os.makedirs(rootdir + '/course')
-    if project_type != 'runestone':
-        shutil.copyfile('course.json', rootdir + '/course/course.json')
 
     if sphinx_autobuild:
         if not os.path.exists(outdir):
@@ -295,11 +292,13 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         server.setHeader('Access-Control-Allow-Origin', '*')
         server.setHeader('Access-Control-Allow-Methods', '*')
 
+        shutil.copy('course.json', rootdir)
+
         server.serve(port=port, host="127.0.0.1",
                      root=rootdir, open_url_delay=5)
 
     if sphinx_build:
-        if not os.path.exists(os.path.join(path, '_build')) and project_type == 'course':
+        if project_type == 'course':
             build_intermediate(path)
         build_module = "sphinx.cmd.build"
         args.append('-a')
@@ -313,7 +312,11 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append(f'"{outdir}"')
 
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+        shutil.copy('course.json', rootdir)
+
     
+
+
 
 
 @main.command()
@@ -652,7 +655,7 @@ def print_error(error, first_build):
 def template_toc(course):
     with open('course.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.to_dict()))
-    with open('overide.json', mode='w', encoding='utf8') as file:
+    with open('override.json', mode='w', encoding='utf8') as file:
         file.write(json.dumps(course.metadata_to_dict()))
 
 
