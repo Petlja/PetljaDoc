@@ -114,6 +114,7 @@ class Course:
 
     def to_dict(self):
         course_dict = dict()
+        course_dict['courseId'] = self.courseId
         course_dict['active_lessons'] = []
         course_dict['longDesc'] = self.longDesc
         course_dict['shortDesc'] = self.shortDesc
@@ -129,6 +130,7 @@ class Course:
         for lesson in self.active_lessons:
             lesson_dict = dict()
             lesson_dict['title'] = lesson.title
+            lesson_dict['normalized_title'] = lesson.normalized_title
             lesson_dict['folder_url'] = lesson.folder_url
             lesson_dict['active_activities'] = []
             for activity in lesson.active_activities:
@@ -143,7 +145,7 @@ class Course:
         course_dict = dict()
         for lesson in self.active_lessons:
             for activity in lesson.active_activities:      
-                course_dict[lesson.folder_url+'/'+activity.toc_url] = {'type' : activity.type}
+                course_dict[(lesson.folder_url+'/'+activity.toc_url).replace("%20", " ")] = {'type' : activity.type}
         return course_dict
 
 

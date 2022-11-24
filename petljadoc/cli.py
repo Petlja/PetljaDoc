@@ -192,39 +192,42 @@ def clean():
 
 
 @main.command("export")
-def export():
+@click.option("--skip_build", "-sb", is_flag=True, help="Skip build phase")
+@click.option("--skip_packing", "-sp", is_flag=True, help="Skip build phase")
+def export(skip_build, skip_packing):
     """
     Export course as a SCORM package
     """
     path = project_path()
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
-            _course_export_type = _prompt("Do you wish to export as single or multi or proxy sco",
-                                          default="proxy")
+            _course_export_type = "proxy"
             data = json.load(f)
-            if(_course_export_type == "proxy"):
-                build_or_autobuild("export", sphinx_build=True,
-                                project_type=data["project_type"], sphinx_builder="petlja_builder")   
-            else: 
-                build_or_autobuild("export", sphinx_build=True,
-                                project_type=data["project_type"])
-            if _course_export_type == "proxy":
-                scorm_package = ScormProxyPackager()
-                scorm_package.create_package_for_course()
-                scorm_package.create_packages_for_activities()
-            else:
-                scrom_template = resource_filename('petljadoc', 'scorm-templates')
-                copy_dir(scrom_template, '_build')
-                if  _course_export_type == "single":
-                    scorm_package = ScormPackager()
-                    scorm_package.create_package_for_single_sco_course()
-                    scorm_package.create_single_sco_packages_for_lectures()
-                if _course_export_type == "multi":
-                    scorm_package = ScormPackager()
+            if not skip_build:
+                if(_course_export_type == "proxy"):
+                    build_or_autobuild("export", sphinx_build=True,
+                                    project_type=data["project_type"], sphinx_builder="petlja_builder")   
+                else: 
+                    build_or_autobuild("export", sphinx_build=True,
+                                    project_type=data["project_type"])
+            if not skip_packing:
+                if _course_export_type == "proxy":
+                    scorm_package = ScormProxyPackager()
                     scorm_package.create_package_for_course()
-                    scorm_package.create_packages_for_lectures()
+                    scorm_package.create_packages_for_activities()
+                else:
+                    scrom_template = resource_filename('petljadoc', 'scorm-templates')
+                    copy_dir(scrom_template, '_build')
+                    if  _course_export_type == "single":
+                        scorm_package = ScormPackager()
+                        scorm_package.create_package_for_single_sco_course()
+                        scorm_package.create_single_sco_packages_for_lectures()
+                    if _course_export_type == "multi":
+                        scorm_package = ScormPackager()
+                        scorm_package.create_package_for_course()
+                        scorm_package.create_packages_for_lectures()
 
-            print('The packages are in export directory')
+                print('The packages are in export directory')
 
 
 @main.command('init-course')

@@ -7,5 +7,5 @@ _build
 course
 course.json
 _tmp
-overide.json
+override.json
 package-conf.json

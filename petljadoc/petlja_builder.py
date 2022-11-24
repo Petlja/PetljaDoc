@@ -32,9 +32,12 @@ class PetljaBuilder(StandaloneHTMLBuilder):
     def dump_inventory(self):
         pass
 
+    def write_genindex(self):
+        pass
+
 def override_env_dict(app, env):
-    if(os.path.isfile('overide.json')):
-        with open('overide.json') as file:
+    if(os.path.isfile('override.json')):
+        with open('override.json') as file:
             data = json.load(file)
         app.env.metadata = defaultdict(dict, dict_of_dicts_merge(dict(env.metadata), data))
 
