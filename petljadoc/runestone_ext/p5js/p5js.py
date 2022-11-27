@@ -114,8 +114,8 @@ class P5jsDirective(Directive):
                         os.makedirs(build_file_path)
                     shutil.copyfile(src_file_path, build_file_path_img)
                     #coping img to _build/_images dir
-                    build_file_path = os.path.join(cwd,os.path.dirname(os.path.join('_build/_images/',image)))
-                    build_file_path_img = os.path.join(cwd, os.path.join(os.path.dirname(os.path.join('_build/_images/',image)),img))
+                    build_file_path = os.path.join(cwd,os.path.dirname(os.path.join(env.app.outdir,'_images/',image)))
+                    build_file_path_img = os.path.join(cwd, os.path.join(os.path.dirname(os.path.join(env.app.outdir,'_images/',image)),img))
                     if not os.path.exists(build_file_path):
                         os.makedirs(build_file_path)
                     shutil.copyfile(src_file_path, build_file_path_img)

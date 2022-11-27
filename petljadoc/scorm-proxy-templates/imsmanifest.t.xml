@@ -5,11 +5,11 @@
   </metadata>
   <organizations default="petlja_org">
     <organization identifier="petlja_org">
-      <title>Petljadoc Course</title>
+      <title>{{title}}</title>
       <item identifier="home_page">
-        <title>Petljadoc Course</title>
-        <item identifier="indexid" identifierref="index">
-          <title>Petljadoc Course</title>
+        <title>{{title}}</title>
+        <item identifier="index_id" identifierref="index">
+          <title>Petlja Player</title>
         </item>
       </item>
     </organization>
@@ -17,6 +17,11 @@
   <resources>
     <resource identifier="index" type="webcontent" href="index.html" adlcp:scormtype="sco">
       <file href="index.html"/>
+      <file href="bundle.js"/>
+      <file href="style-player.css"/>
+      <file href="favicon.ico"/>
+      <file href="fonts/bootstrap-icons.woff"/>
+      <file href="fonts/bootstrap-icons.woff2"/>
     </resource>
   </resources>
 </manifest>

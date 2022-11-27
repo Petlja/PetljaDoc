@@ -36,6 +36,17 @@ function ContentPage(PetljaRT){
         this.PetljaRT.registerActivityProgress(progress);
         
     });
+    window.addEventListener("load", () =>{
+        this.contentHeight = Math.round(this.mainDiv.scrollHeight + 100);
+        this.PetljaRT.registerContentHeight(this.contentHeight);
+    });
+    window.addEventListener("resize", () =>{
+        var currentHeight = Math.round(this.mainDiv.scrollHeight + 100);
+        if (currentHeight != this.contentHeight){
+            this.contentHeight = currentHeight;
+            this.PetljaRT.registerContentHeight(this.contentHeight);
+        }
+    });
 }
 
 

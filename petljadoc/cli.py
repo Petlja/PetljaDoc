@@ -317,6 +317,10 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
         if(project_type!= 'runestone'):
             shutil.copy('course.json', rootdir)
+        #FIX ME
+        if sphinx_builder == 'petlja_builder' and os.path.exists('_build/_images') and os.path.exists('_build/bc_html/'):
+            copy_dir('_build/_images',rootdir+'/_images')
+            shutil.rmtree('_build/_images')
 
     
 
