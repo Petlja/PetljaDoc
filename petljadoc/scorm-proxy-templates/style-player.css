@@ -1941,6 +1941,7 @@ html::-webkit-scrollbar-thumb {
   top: 51px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid lightgray;
 }
 
 .content-nav-on {
@@ -1958,7 +1959,6 @@ html::-webkit-scrollbar-thumb {
 }
 
 .course-content {
-  border-left: 0.5px solid lightgray;
   height: calc(100% - 53px);
   position: relative;
   float: right;
