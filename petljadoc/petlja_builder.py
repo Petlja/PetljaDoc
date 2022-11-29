@@ -10,6 +10,8 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util.fileutil import copy_asset
 from sphinx.util.matching import DOTFILES
 
+SHPINX_TO_ISO_LANGUAGE_CODES = {'sr_RS' : 'sr-Cyrl', 'sr' : 'sr-Cyrl', 'sr@latn' : 'sr-Latn'}
+
 class PetljaBuilder(StandaloneHTMLBuilder):
     name = 'petlja_builder'
     bc_outdir = 'bc_html'
@@ -20,6 +22,7 @@ class PetljaBuilder(StandaloneHTMLBuilder):
         self.app.outdir = self.outdir
         self.search = False
         self.copysource = False
+        self.config.language = SHPINX_TO_ISO_LANGUAGE_CODES.get(self.config.language, self.config.language)
         petlja_player_driver = resource_filename('petljadoc', 'themes/bc_theme/platform')
         copy_asset(petlja_player_driver, path.join(self.outdir, 'platform'), excluded=DOTFILES)
         

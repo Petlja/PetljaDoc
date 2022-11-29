@@ -23,6 +23,9 @@ function ContentPage(PetljaRT){
     this.PetljaRT.addFontSizeHandler((zoomFactor) => {this.changeFontSizeWrapper(zoomFactor)});
     this.PetljaRT.addActivityStatusHandler(() => {this.setProgressStatus()});
 
+    this.ro = new ResizeObserver(() => {this.onResize();});
+    this.ro.observe(this.mainDiv);
+    
     this.finishButton.addEventListener("click", () => {
         if(this.isActivityDone)
             return
@@ -40,15 +43,16 @@ function ContentPage(PetljaRT){
         this.contentHeight = Math.round(this.mainDiv.scrollHeight + 100);
         this.PetljaRT.registerContentHeight(this.contentHeight);
     });
-    window.addEventListener("resize", () =>{
-        var currentHeight = Math.round(this.mainDiv.scrollHeight + 100);
-        if (currentHeight != this.contentHeight){
-            this.contentHeight = currentHeight;
-            this.PetljaRT.registerContentHeight(this.contentHeight);
-        }
-    });
+    window.addEventListener("resize", () =>{this.onResize();});
 }
 
+ContentPage.prototype.onResize = function(){
+    var currentHeight = Math.round(this.mainDiv.scrollHeight + 100);
+    if (currentHeight != this.contentHeight){
+        this.contentHeight = currentHeight;
+        this.PetljaRT.registerContentHeight(this.contentHeight);
+    }
+}
 
 ContentPage.prototype.changeFontSizeWrapper = function(zoomFactor){
     changeFontSize(this.mainDiv, zoomFactor);

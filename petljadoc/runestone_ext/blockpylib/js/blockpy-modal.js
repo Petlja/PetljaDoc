@@ -89,7 +89,13 @@ BlocklPyModal.prototype.open = function(title, width, height, pythonSrc, blockly
     divHeader.appendChild(header);
     divHeader.appendChild(btnClose);
     divFooter.appendChild(btnSave);
-
+    if( window.parent !== window.self){
+      var currentScroll = window.parent.document.documentElement.scrollTop;
+      window.parent.document.documentElement.scrollTop = 0;
+      $(divModal).on('hidden.bs.modal', ()=>{
+          window.parent.document.documentElement.scrollTop = currentScroll;
+        })
+  }
     $(divModal).modal({
         backdrop: 'static',
         keyboard: false
