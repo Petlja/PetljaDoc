@@ -5,11 +5,11 @@
   </metadata>
   <organizations default="petlja_org">
     <organization identifier="petlja_org">
-      <title>{{title}}</title>
+      <title>Petlja kurs</title>
       <item identifier="home_page">
         <title>{{title}}</title>
         <item identifier="index_id" identifierref="index">
-          <title>Petlja Player</title>
+          <title>Sadržaj</title>
         </item>
       </item>
     </organization>
