@@ -324,7 +324,7 @@ class ScormProxyPackager:
         self.package_conf['title'] = cyrtranslit.to_latin(normalize(self.course_data['title']))
 
     def create_package_for_course(self):
-        zip_path = os.path.join(_EXPORT_PATH,  self.courseId + '_proxy')
+        zip_path = os.path.join(_EXPORT_PATH,  self.courseId + '_scorm')
         apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
         with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
             f.write(json.dumps(self.course_data))
@@ -342,14 +342,14 @@ class ScormProxyPackager:
                 single_activity_dict["active_lessons"][0]["active_activities"] = []
                 single_activity_dict["active_lessons"][0]["active_activities"].append(activity)
                 dict_image["active_lessons"] = single_activity_dict["active_lessons"]
-                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_proxy_activities' ,cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
+                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' ,cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
                 apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
                 with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
                     f.write(json.dumps(dict_image))
                 index += 1
                 shutil.make_archive(zip_path, "zip", zip_path)
                 shutil.rmtree(zip_path)
-        zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_proxy_activities')
+        zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti')
         shutil.make_archive(zip_path, "zip", zip_path)
         shutil.rmtree(zip_path)
             
