@@ -333,6 +333,7 @@ class ScormProxyPackager:
 
     def create_packages_for_activities(self):
         single_activity_dict = {}
+        index_lesson = 1
         for lesson in self.course_data["active_lessons"]:
             index = 1
             dict_image = copy.deepcopy(self.course_data)
@@ -342,13 +343,14 @@ class ScormProxyPackager:
                 single_activity_dict["active_lessons"][0]["active_activities"] = []
                 single_activity_dict["active_lessons"][0]["active_activities"].append(activity)
                 dict_image["active_lessons"] = single_activity_dict["active_lessons"]
-                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' ,cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
+                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' ,str(index_lesson)+'. '+ cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
                 apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
                 with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
                     f.write(json.dumps(dict_image))
                 index += 1
                 shutil.make_archive(zip_path, "zip", zip_path)
                 shutil.rmtree(zip_path)
+            index_lesson += 1
         zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti')
         shutil.make_archive(zip_path, "zip", zip_path)
         shutil.rmtree(zip_path)
