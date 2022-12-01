@@ -313,11 +313,8 @@ class ScormProxyPackager:
             with open('package-conf.json') as json_file:
                 self.package_conf = json.load(json_file)
         except FileNotFoundError:
-            # print("Missing package-conf.json.")
-            # exit()
-            with open('package-conf.json', mode="x") as conf_file:
-                self.package_conf = { "data_content_url" : "https://petljastorage.blob.core.windows.net/kursevi/2022/" +  self.courseId}
-                conf_file.write(json.dumps(self.package_conf))
+            print("Missing package-conf.json.")
+            exit()
         
         with open('course.json') as json_file:
             self.course_data = json.load(json_file)
@@ -343,7 +340,6 @@ class ScormProxyPackager:
                 single_activity_dict["active_lessons"][0]["active_activities"] = []
                 single_activity_dict["active_lessons"][0]["active_activities"].append(activity)
                 dict_image["active_lessons"] = single_activity_dict["active_lessons"]
-                #str(index_lesson)+'. '+ 
                 zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' , cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
                 apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
                 with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
