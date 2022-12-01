@@ -103,6 +103,14 @@ ContentPage.prototype.getProgress = function(){
     }
 }
 
+ContentPage.prototype.showContentModal = function(){
+    this.PetljaRT.showContentModal();
+}
+
+ContentPage.prototype.hideContentModal = function(){
+    this.PetljaRT.hideContentModal();
+}
+
 function changeFontSize(node, zoomFactor) {
     node.childNodes.forEach(child => {
         if(child.nodeType != Node.TEXT_NODE){
