@@ -89,7 +89,12 @@ BlocklPyModal.prototype.open = function(title, width, height, pythonSrc, blockly
     divHeader.appendChild(header);
     divHeader.appendChild(btnClose);
     divFooter.appendChild(btnSave);
-
+    if( window.parent !== window.self && typeof c_API !== 'undefined'){
+      c_API.showContentModal();
+      $(divModal).on('hidden.bs.modal', ()=>{
+          c_API.hideContentModal();
+        })
+  }
     $(divModal).modal({
         backdrop: 'static',
         keyboard: false

@@ -23,6 +23,9 @@ function ContentPage(PetljaRT){
     this.PetljaRT.addFontSizeHandler((zoomFactor) => {this.changeFontSizeWrapper(zoomFactor)});
     this.PetljaRT.addActivityStatusHandler(() => {this.setProgressStatus()});
 
+    this.ro = new ResizeObserver(() => {this.onResize();});
+    this.ro.observe(this.mainDiv);
+    
     this.finishButton.addEventListener("click", () => {
         if(this.isActivityDone)
             return
@@ -36,8 +39,20 @@ function ContentPage(PetljaRT){
         this.PetljaRT.registerActivityProgress(progress);
         
     });
+    window.addEventListener("load", () =>{
+        this.contentHeight = Math.round(this.mainDiv.scrollHeight + 100);
+        this.PetljaRT.registerContentHeight(this.contentHeight);
+    });
+    window.addEventListener("resize", () =>{this.onResize();});
 }
 
+ContentPage.prototype.onResize = function(){
+    var currentHeight = Math.round(this.mainDiv.scrollHeight + 100);
+    if (currentHeight != this.contentHeight){
+        this.contentHeight = currentHeight;
+        this.PetljaRT.registerContentHeight(this.contentHeight);
+    }
+}
 
 ContentPage.prototype.changeFontSizeWrapper = function(zoomFactor){
     changeFontSize(this.mainDiv, zoomFactor);
@@ -86,6 +101,14 @@ ContentPage.prototype.getProgress = function(){
         'maxScore' : 1,
         'lectureType' : 'other'
     }
+}
+
+ContentPage.prototype.showContentModal = function(){
+    this.PetljaRT.showContentModal();
+}
+
+ContentPage.prototype.hideContentModal = function(){
+    this.PetljaRT.hideContentModal();
 }
 
 function changeFontSize(node, zoomFactor) {

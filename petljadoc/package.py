@@ -306,13 +306,22 @@ class ScormPackager:
 
 class ScormProxyPackager:
     def __init__(self) -> None:
-        with open('package-conf.json') as json_file:
-            self.package_conf = json.load(json_file)
-
-    def create_package_for_course(self):
+        with open(_BUILD_YAML_PATH, encoding="utf8") as f:
+            self.course_data = yaml.load(f, Loader=yaml.FullLoader)
+        self.courseId = os.path.basename(os.getcwd())  
+        try:
+            with open('package-conf.json') as json_file:
+                self.package_conf = json.load(json_file)
+        except FileNotFoundError:
+            print("Missing package-conf.json.")
+            exit()
+        
         with open('course.json') as json_file:
             self.course_data = json.load(json_file)
-        zip_path = os.path.join(_EXPORT_PATH, self.course_data['title'])
+        self.package_conf['title'] = cyrtranslit.to_latin(normalize(self.course_data['title']))
+
+    def create_package_for_course(self):
+        zip_path = os.path.join(_EXPORT_PATH,  self.courseId + '_scorm')
         apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
         with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
             f.write(json.dumps(self.course_data))
@@ -320,11 +329,10 @@ class ScormProxyPackager:
         shutil.rmtree(zip_path)
 
     def create_packages_for_activities(self):
-        with open('course.json') as json_file:
-            self.course_data = json.load(json_file)
         single_activity_dict = {}
-        index = 1
+        index_lesson = 1
         for lesson in self.course_data["active_lessons"]:
+            index = 1
             dict_image = copy.deepcopy(self.course_data)
             for activity in lesson["active_activities"]:
                 single_activity_dict["active_lessons"] = []
@@ -332,15 +340,19 @@ class ScormProxyPackager:
                 single_activity_dict["active_lessons"][0]["active_activities"] = []
                 single_activity_dict["active_lessons"][0]["active_activities"].append(activity)
                 dict_image["active_lessons"] = single_activity_dict["active_lessons"]
-                zip_path = os.path.join(_EXPORT_PATH, 'activities', str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title'])))
+                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' , cyrtranslit.to_latin(lesson["normalized_title"]) ,str(index)+'. ' + cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
                 apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
                 with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
                     f.write(json.dumps(dict_image))
                 index += 1
                 shutil.make_archive(zip_path, "zip", zip_path)
                 shutil.rmtree(zip_path)
-
+            index_lesson += 1
+        zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti')
+        shutil.make_archive(zip_path, "zip", zip_path)
+        shutil.rmtree(zip_path)
+            
 
 def normalize(string: str):
-    reserved_chars = ['?', '>', ':', '"', '/', '\\', '|', '*', '.']
-    return ''.join(char for char in string if char not in reserved_chars)
+    reserved_chars = ['?', '>', ':', '"', '/', '\\', '|', '*']
+    return ''.join(char for char in string if char not in reserved_chars).removesuffix('.')

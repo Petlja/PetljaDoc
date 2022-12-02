@@ -10,6 +10,8 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util.fileutil import copy_asset
 from sphinx.util.matching import DOTFILES
 
+SHPINX_TO_ISO_LANGUAGE_CODES = {'sr_RS' : 'sr-Cyrl', 'sr' : 'sr-Cyrl', 'sr@latn' : 'sr-Latn'}
+
 class PetljaBuilder(StandaloneHTMLBuilder):
     name = 'petlja_builder'
     bc_outdir = 'bc_html'
@@ -20,6 +22,7 @@ class PetljaBuilder(StandaloneHTMLBuilder):
         self.app.outdir = self.outdir
         self.search = False
         self.copysource = False
+        self.config.language = SHPINX_TO_ISO_LANGUAGE_CODES.get(self.config.language, self.config.language)
         petlja_player_driver = resource_filename('petljadoc', 'themes/bc_theme/platform')
         copy_asset(petlja_player_driver, path.join(self.outdir, 'platform'), excluded=DOTFILES)
         
@@ -32,9 +35,12 @@ class PetljaBuilder(StandaloneHTMLBuilder):
     def dump_inventory(self):
         pass
 
+    def write_genindex(self):
+        pass
+
 def override_env_dict(app, env):
-    if(os.path.isfile('overide.json')):
-        with open('overide.json') as file:
+    if(os.path.isfile('override.json')):
+        with open('override.json') as file:
             data = json.load(file)
         app.env.metadata = defaultdict(dict, dict_of_dicts_merge(dict(env.metadata), data))
 
