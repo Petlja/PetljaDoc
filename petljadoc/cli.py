@@ -215,6 +215,7 @@ def export(skip_build, skip_packing):
                     scorm_package = ScormProxyPackager()
                     scorm_package.create_package_for_course()
                     scorm_package.create_packages_for_activities()
+                    scorm_package.create_moodle_backup()
                 else:
                     scrom_template = resource_filename('petljadoc', 'scorm-templates')
                     copy_dir(scrom_template, '_build')

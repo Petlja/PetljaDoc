@@ -86,6 +86,7 @@ class Course:
             for activity in lesson.active_activities:
                 tmp_activities.append({'type': activity.type,
                                        'title': activity.title,
+                                       'normalized_title': activity.normalized_title,
                                        'src': activity.src,
                                        'file': activity.html_file_src,
                                        'description': activity.description,
@@ -165,6 +166,7 @@ class Activity:
     def __init__(self, type, title, src, guid, description, nbsrc):
         self.type = type
         self.title = title
+        self.normalized_title = normalize(title)
         self.guid = guid
         self.description = description if description else ''
         self.nbsrc = nbsrc
@@ -332,4 +334,4 @@ class ActivityTypeValueError(Exception):
 
 def normalize(string: str):
     reserved_chars = ['?', '>', ':', '"', '/', '\\', '|', '*']
-    return ''.join(char for char in string if char not in reserved_chars)
+    return (''.join(char for char in string if char not in reserved_chars)).rstrip('.')
