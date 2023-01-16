@@ -358,6 +358,8 @@ class ScormProxyPackager:
 
 
     def create_moodle_backup(self):
+        archive_index_lines = []
+
         course_id = os.path.basename(os.getcwd())
         course_scorm_zip_path = course_id + '_scorm_aktivnosti.zip'
         course_scorm_zip_path = os.path.join(_EXPORT_PATH, course_scorm_zip_path)
@@ -375,6 +377,7 @@ class ScormProxyPackager:
             zip_ref.extractall(temp_dir.name)
             moodle_course = MoodleCourse(self.course_yaml_data)
             moodle_backup_file.write(temp_dir.name, 'course')
+            copied_files = []
             for lesson in self.course_yaml_data["lessons"]:
                 section_sort_order += 1
                 moodle_section = MoodleSection(lesson, section_sort_order)
@@ -389,21 +392,27 @@ class ScormProxyPackager:
                     file_path = os.path.join(temp_dir.name, scorm_activity_zip_path + '.zip')
                     moodle_activity.sah1 = Sha1Hasher(file_path)
                     moodle_activity.file_size = str(os.path.getsize(file_path))
-                    with zipfile.ZipFile(file_path, 'r') as zip_scrom_file_ref:
+                    with zipfile.ZipFile(file_path, 'r') as zip_scorm_file_ref:
                         temp_dir_scorm = tempfile.TemporaryDirectory()
-                        zip_scrom_file_ref.extractall(temp_dir_scorm.name)
+                        zip_scorm_file_ref.extractall(temp_dir_scorm.name)
+                        moodle_activity.add_file(MoodleFile('.', 'da39a3ee5e6b4b0d3255bfef95601890afd80709', '$@NULL@$', '', '0','content'))
+                        moodle_activity.add_file(MoodleFile('.', 'da39a3ee5e6b4b0d3255bfef95601890afd80709', '$@NULL@$', '', '0', 'package'))
                         for file in os.listdir(temp_dir_scorm.name):
                             path = os.path.join(temp_dir_scorm.name, file)
                             hash_file_name = Sha1Hasher(path)
                             mime_type, _ = mimetypes.guess_type(path)
                             rel_path = os.path.relpath(path, temp_dir_scorm.name)
                             file_size = os.path.getsize(path)     
-                            moodle_file = MoodleFile(file, hash_file_name, mime_type, rel_path, file_size)
+                            moodle_file = MoodleFile(file, hash_file_name, mime_type, rel_path, file_size, 'content')
                             moodle_activity.add_file(moodle_file)
-
+                            if hash_file_name not in copied_files:
+                                copied_files.append(hash_file_name)
+                                moodle_backup_file.write(path, 'files/' +hash_file_name[0:2] +'/' + hash_file_name)               
+                    moodle_activity.add_file(MoodleFile(file_path,moodle_activity.sah1,'$@NULL@$', '', '0','content'))
+                    moodle_backup_file.write(file_path, 'files/' +moodle_activity.sah1[0:2] +'/' + moodle_activity.sah1)
                     moodle_activity.extract_activity_data()
                     apply_moodle_template_dir(resource_filename('petljadoc', 'moodle-templates/activities'),moodle_backup_file, root_copy_path = moodle_activity.activity_dir_path, xml_data = moodle_activity.xml_data)
-                    moodle_backup_file.write(file_path, 'files/' +moodle_activity.sah1[0:2] +'/' + moodle_activity.sah1)
+                    
                 moodle_section.extract_section_data()
                 apply_moodle_template_dir(resource_filename('petljadoc', 'moodle-templates/sections'), moodle_backup_file, root_copy_path = moodle_section.section_dir_path, xml_data = moodle_section.xml_data)
             moodle_course.extract_corse_data()
@@ -415,7 +424,6 @@ class ScormProxyPackager:
         with zipfile.ZipFile(_EXPORT_PATH + '/'+ course_id + '.mbz', 'a') as zip_ref:
             zip_ref.extractall(temp_dir.name)
             total_entries = 0
-            archive_index_lines = []
             for root, dirs, files in os.walk(temp_dir.name):
                 total_entries += len(files) + len(dirs)
             for root, dirs, files in os.walk(temp_dir.name):
@@ -453,7 +461,7 @@ class MoodleSection:
                 "attributes" : {"id" :self.id},
                 './number' : str(self.sort_order),
                 './name' :  self.title,
-                './sequence' :  ','.join([activity.context_id for activity in self.activities]),
+                './sequence' :  ','.join([activity.module_id for activity in self.activities]),
                 './timemodified' : time_stamp,
             }
         }
@@ -518,7 +526,6 @@ class MoodleCourse:
                 self.setting_et_elements.append(self._make_setting_et_element_activity_included(activity))         
                 self.setting_et_elements.append(self._make_setting_et_element_activity_userinfo(activity))  
                 self.file_et_elements.append(self._make_activity_file_et_elements(activity))
-                self.file_et_elements.append(self._make_dummy_et_elements(activity))
 
     
     def _make_activity_file_et_elements(self, activity):
@@ -576,7 +583,7 @@ class MoodleCourse:
         ET.SubElement(el, "contenthash").text = file.hash_file_name
         ET.SubElement(el, "contextid").text = activity.context_id
         ET.SubElement(el, "component").text ='mod_scorm'
-        ET.SubElement(el, "filearea").text = 'content'
+        ET.SubElement(el, "filearea").text = file.filearea
         ET.SubElement(el, "itemid").text = '0'
         ET.SubElement(el, "filepath").text = '/'
         ET.SubElement(el, "filename").text = file.name
@@ -600,17 +607,17 @@ class MoodleCourse:
         el = ET.Element("section")
         ET.SubElement(el, "sectionid").text = section.id
         ET.SubElement(el, "title").text = section.title
-        ET.SubElement(el, "directory").text = section.section_dir_path.rstrip('/') 
+        ET.SubElement(el, "directory").text = section.section_dir_path.lstrip('/') 
 
         return el
     
     def _make_activity_et_element(self,section, activity):
-        el = ET.Element("section")
-        ET.SubElement(el, "moduleid").text = activity.context_id
+        el = ET.Element("activity")
+        ET.SubElement(el, "moduleid").text = activity.module_id
         ET.SubElement(el, "sectionid").text = section.id
         ET.SubElement(el, "modulename").text = 'scorm'
         ET.SubElement(el, "title").text = activity.activity_yaml_block["title"]
-        ET.SubElement(el, "directory").text = activity.activity_dir_path.rstrip('/') 
+        ET.SubElement(el, "directory").text = activity.activity_dir_path.lstrip('/') 
         
         return el
 
@@ -636,8 +643,8 @@ class MoodleCourse:
     def _make_setting_et_element_activity_included(self,activity):
         el = ET.Element("setting")
         ET.SubElement(el, "level").text = 'activity'
-        ET.SubElement(el, "activity").text = 'scorm_' + activity.context_id
-        ET.SubElement(el, "name").text = 'activity_' + activity.context_id + '_included'
+        ET.SubElement(el, "activity").text = 'scorm_' + activity.module_id
+        ET.SubElement(el, "name").text = 'scorm_' + activity.module_id + '_included'
         ET.SubElement(el, "value").text ='1'
         
         return el
@@ -645,8 +652,8 @@ class MoodleCourse:
     def _make_setting_et_element_activity_userinfo(self,activity):
         el = ET.Element("setting")
         ET.SubElement(el, "level").text = 'activity'
-        ET.SubElement(el, "activity").text = 'scorm_' + activity.context_id
-        ET.SubElement(el, "name").text = 'activity_' + activity.context_id + '_userinfo'
+        ET.SubElement(el, "activity").text = 'scorm_' + activity.module_id
+        ET.SubElement(el, "name").text = 'scorm_' + activity.module_id + '_userinfo'
         ET.SubElement(el, "value").text = '0'
         
         return el
@@ -659,7 +666,7 @@ class MoodleActivity:
         self.id = get_unused_id()
         self.sort_order = sort_order
         self.activity_yaml_block = activity_yaml_block
-        self.activity_dir_path = '/activities/scorm_' + str(self.context_id)
+        self.activity_dir_path = 'activities/scorm_' + str(self.module_id)
         self.time_stamp = get_time_stamp()
         self.aggregationcoef2 = aggregationcoef2
         self.grade_item_id = str(get_unused_id())
@@ -687,7 +694,7 @@ class MoodleActivity:
                 "./grade_items/grade_item/timemodified" : self.time_stamp,
             },
             'module' : {
-                "attributes" : {"id" : self.context_id},
+                "attributes" : {"id" : self.module_id},
                 "./sectionid" :  str(self.section_id),
                 "./sectionnumber" : str(self.section_order),
                 "./added" : self.time_stamp,
@@ -720,18 +727,19 @@ class MoodleActivity:
         }
 
 class MoodleFile:
-    def __init__(self,name, hash_file_name, mime_type, rel_path, file_size):
+    def __init__(self,name, hash_file_name, mime_type, rel_path, file_size, filearea):
         self.name = name
         self.id = get_unused_id() 
         self.hash_file_name = hash_file_name
         self.mime_type = mime_type    
         self.rel_path = rel_path
         self.size = file_size
+        self.filearea = filearea
 
 
 class IdGenerator:
     _instance = None
-    id = 1
+    id = 200
 
     @classmethod
     def get_instance(cls):
@@ -795,6 +803,7 @@ def copy_xml_file(xml_template_file_path, data, zip_ref, zip_file_path):
                     element.text = value
 
     temp_file = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+    temp_file.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".encode())
     ET.ElementTree(root).write(temp_file)
     temp_file.flush() 
     zip_ref.write(temp_file.name, zip_file_path)

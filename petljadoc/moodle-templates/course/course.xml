@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<course id="1" contextid="9999">
+<course id="1" contextid="20">
   <shortname></shortname>
   <fullname></fullname>
   <idnumber>1</idnumber>
@@ -27,10 +27,6 @@
   <completionnotify>0</completionnotify>
   <hiddensections>0</hiddensections>
   <coursedisplay>0</coursedisplay>
-  <category id="1">
-    <name>Петљини курсеви</name>
-    <description></description>
-  </category>
   <tags>
   </tags>
   <customfields>
