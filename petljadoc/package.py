@@ -586,7 +586,7 @@ class MoodleCourse:
         ET.SubElement(el, "filearea").text = file.filearea
         ET.SubElement(el, "itemid").text = '0'
         ET.SubElement(el, "filepath").text = '/'
-        ET.SubElement(el, "filename").text = file.name
+        ET.SubElement(el, "filename").text = os.path.basename(file.path)
         ET.SubElement(el, "userid").text = '$@NULL@$'
         ET.SubElement(el, "filesize").text = str(file.size)
         ET.SubElement(el, "mimetype").text = file.mime_type
@@ -686,6 +686,7 @@ class MoodleActivity:
         self.xml_data = {
             'activity_gradebook' : {
                 "./grade_items/grade_item" : {"id" :  self.grade_item_id},
+                "./grade_items/grade_item/categoryid" : get_unused_id(),
                 "./grade_items/grade_item/itemname" : self.activity_yaml_block["title"],
                 "./grade_items/grade_item/iteminstance" : str(self.sort_order - 1),
                 "./grade_items/grade_item/aggregationcoef2" : str(self.aggregationcoef2),
@@ -727,8 +728,8 @@ class MoodleActivity:
         }
 
 class MoodleFile:
-    def __init__(self,name, hash_file_name, mime_type, rel_path, file_size, filearea):
-        self.name = name
+    def __init__(self,path, hash_file_name, mime_type, rel_path, file_size, filearea):
+        self.path = path
         self.id = get_unused_id() 
         self.hash_file_name = hash_file_name
         self.mime_type = mime_type    
