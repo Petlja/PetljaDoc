@@ -194,14 +194,18 @@ def clean():
 @main.command("export")
 @click.option("--skip_build", "-sb", is_flag=True, help="Skip build phase")
 @click.option("--skip_packing", "-sp", is_flag=True, help="Skip build phase")
-def export(skip_build, skip_packing):
+@click.option("--proxy", "-p", is_flag=True, help="Get proxy package without prompts")
+def export(skip_build, skip_packing, proxy):
     """
     Export course as a SCORM package
     """
     path = project_path()
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
-            _course_export_type = _prompt("Do you wish to export as single or multi or proxy sco", default="proxy")
+            if proxy:
+                _course_export_type = "proxy"
+            else:
+                _course_export_type = _prompt("Do you wish to export as single or multi or proxy sco", default="proxy")
             data = json.load(f)
             if not skip_build:
                 if(_course_export_type == "proxy"):
