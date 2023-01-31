@@ -344,7 +344,7 @@ class ScormProxyPackager:
                 single_activity_dict["active_lessons"][0]["active_activities"] = []
                 single_activity_dict["active_lessons"][0]["active_activities"].append(activity)
                 dict_image["active_lessons"] = single_activity_dict["active_lessons"]
-                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' , cyrtranslit.to_latin(lesson["normalized_title"]) , cyrtranslit.to_latin(normalize(activity['title']).removesuffix('.')))
+                zip_path = os.path.join(_EXPORT_PATH,   self.courseId+ '_scorm_aktivnosti' , cyrtranslit.to_latin(lesson["normalized_title"]) , cyrtranslit.to_latin(normalize(activity['title'])))
                 apply_template_dir(resource_filename('petljadoc', 'scorm-proxy-templates'), zip_path, self.package_conf)
                 with open(os.path.join(zip_path, 'course.json'), mode="w+") as f:
                     f.write(json.dumps(dict_image))
@@ -832,4 +832,4 @@ def apply_moodle_template_dir(src_dir, zip_ref, filter_name=None, root_copy_path
 
 def normalize(string: str):
     reserved_chars = ['?', '>', ':', '"', '/', '\\', '|', '*']
-    return ''.join(char for char in string if char not in reserved_chars).removesuffix('.')
+    return ''.join(char for char in string if char not in reserved_chars).rstrip('.')
