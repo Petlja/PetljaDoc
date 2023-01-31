@@ -527,7 +527,7 @@ window.addEventListener('load',function() {
 	import js
 	import micropip
 	micropip.install('utils')
-	micropip.install('${document.location.origin}/_static/simanim-0.0.4-py3-none-any.whl').then(js.pythonInicijalizovan())
+	micropip.install('https://petljastorage.blob.core.windows.net/kursevi/common_assets/simanim-0.0.4-py3-none-any.whl').then(js.pythonInicijalizovan())
 	`)
 	).then(() => {
 		animations = document.getElementsByClassName('simanim')
