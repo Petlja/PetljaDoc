@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<course id="1" contextid="20">
+<course contextid="20">
   <shortname></shortname>
   <fullname></fullname>
-  <idnumber>1</idnumber>
+  <idnumber></idnumber>
   <summary></summary>
   <summaryformat>1</summaryformat>
   <format>topics</format>
