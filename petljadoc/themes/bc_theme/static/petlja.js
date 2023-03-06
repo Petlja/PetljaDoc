@@ -10,6 +10,14 @@ document.addEventListener("DOMContentLoaded", function () {
     c_API = new ContentPage(PetljaRT);
 });
 
+document.addEventListener("click", function(e) {
+    if (e.target.tagName == "IMG")
+    {
+        if(e.target.parentNode && e.target.parentNode.tagName =="A")
+            e.target.parentNode.setAttribute("target", "_blank");
+    }
+});
+
 function ContentPage(PetljaRT){
     this.pageQuestionCollection = {};
     this.correctAnswersCount = 0;
