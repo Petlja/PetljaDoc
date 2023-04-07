@@ -298,12 +298,13 @@ var RobotDrawer = (function () {
             for(var s=1; s<=world.getStreets();s++){
                 if(world.checkBall(a, s) || world.checkHole(a, s)){
                     var pt = worldToScreen.call(this, a, s);
-                    var img, width, height;
+                    var img, width, height, has_balls;
                     if(world.checkBall(a, s)){
                         width = 0.4 * this.cell_width;
                         height = 0.4 * this.cell_height;
                         img = KarelImages.get().images().ball;
                         fontStyle = "black";
+                        has_balls = true
                     } else {
                         width = 0.8 * this.cell_width;
                         height = 0.8 * this.cell_height;
@@ -313,7 +314,11 @@ var RobotDrawer = (function () {
                     ctx.drawImage(img, pt.x - width / 2, pt.y - height / 2, width, height);
                     
                     var fontSize = 15;
-                    var nb = Math.abs(world.getBalls(a, s)).toString();
+                    var nb;
+                    if(has_balls && world.showNumberOfBalls(a, s))
+                        nb = Math.abs(world.getBalls(a, s)).toString();
+                    else
+                        nb = '?'
 
                     while(true) {
                         ctx.fillStyle = fontStyle;

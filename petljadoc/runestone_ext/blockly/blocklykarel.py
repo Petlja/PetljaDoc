@@ -134,7 +134,7 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-        categories = ["KarelCommands", "BeginnerKarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Logic", "KarelSays", "Arithmetic"]
+        categories = ["KarelCommands", "BeginnerKarelCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Arithmetic", "Logic", "KarelSays", "AskUser", "Vars"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
