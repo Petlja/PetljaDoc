@@ -7,6 +7,7 @@ var World = (function () {
         this.robotStartStreet = 0;
         this.robotStartDirection = "N";
         this.robotStartBalls = 0;
+        this.args = {}
 
         for(var av=0; av<avenues; av++){
             var avenue = [];
@@ -124,6 +125,10 @@ var World = (function () {
         throw "no_ball";
     };
 
+    World.prototype.putHiddenNumberOfBalls = function(a,s,n){
+        return this.getCorner(a,s).setHiddenBalls(n);
+    }
+
     World.prototype.putBall = function (a, s) {
 	this.setBalls(a, s, this.getBalls(a, s) + 1);
     };
@@ -152,6 +157,14 @@ var World = (function () {
 
     World.prototype.getHoles = function (a, s) {
         return this.getCorner(a,s).getHoles();
+    };
+
+    World.prototype.showNumberOfBalls = function (a, s){
+        return this.getCorner(a,s).showNumberOfBalls();
+    };
+
+    World.prototype.getRandomNumber = function (range=3){
+        return Math.floor(Math.random() * range) + 1;
     };
 
     return World;

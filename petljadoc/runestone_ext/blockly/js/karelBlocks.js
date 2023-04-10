@@ -270,7 +270,7 @@ Blockly.JavaScript['karel_controls_whileUntil'] = function (block) {
 
 Blockly.Blocks['controls_whileUntil'] = {
   init: function () {
-    this.jsonInit(  {
+    this.jsonInit({
       'type': 'controls_whileUntil',
       'message0': '%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_WHILE} %1',
       'args0': [
@@ -297,76 +297,141 @@ Blockly.Blocks['controls_whileUntil'] = {
 
 Blockly.Blocks['controls_ifelse_simple'] = {
   init: function () {
-    this.jsonInit( {
-    'type': 'controls_ifelse',
-    'message0': '%{BKY_CONTROLS_IF_MSG_IF} %1',
-    'args0': [
-      {
-        'type': 'field_dropdown',
-        'name': 'KAREL_BOOL',
-        'options': [
-          ['робот има лопту', 'has_ball()'],
-          ['постоји лопта на пољу', 'balls_present()'],
-          ['робот може напред', 'can_move()'],
-        ],
-      },
-    ],
-    'message1': '%{BKY_CONTROLS_IF_MSG_THEN} %1',
-    'args1': [
-      {
-        'type': 'input_statement',
-        'name': 'DO0',
-      },
-    ],
-    'message2': '%{BKY_CONTROLS_IF_MSG_ELSE} %1',
-    'args2': [
-      {
-        'type': 'input_statement',
-        'name': 'ELSE',
-      },
-    ],
-    'previousStatement': null,
-    'nextStatement': null,
-    'style': 'logic_blocks',
-    'tooltip': '%{BKYCONTROLS_IF_TOOLTIP_2}',
-    'helpUrl': '%{BKY_CONTROLS_IF_HELPURL}',
-    'suppressPrefixSuffix': true,
-    'extensions': ['controls_if_tooltip'],
+    this.jsonInit({
+      'type': 'controls_ifelse',
+      'message0': '%{BKY_CONTROLS_IF_MSG_IF} %1',
+      'args0': [
+        {
+          'type': 'field_dropdown',
+          'name': 'KAREL_BOOL',
+          'options': [
+            ['робот има лопту', 'has_ball()'],
+            ['постоји лопта на пољу', 'balls_present()'],
+            ['робот може напред', 'can_move()'],
+          ],
+        },
+      ],
+      'message1': '%{BKY_CONTROLS_IF_MSG_THEN} %1',
+      'args1': [
+        {
+          'type': 'input_statement',
+          'name': 'DO0',
+        },
+      ],
+      'message2': '%{BKY_CONTROLS_IF_MSG_ELSE} %1',
+      'args2': [
+        {
+          'type': 'input_statement',
+          'name': 'ELSE',
+        },
+      ],
+      'previousStatement': null,
+      'nextStatement': null,
+      'style': 'logic_blocks',
+      'tooltip': '%{BKYCONTROLS_IF_TOOLTIP_2}',
+      'helpUrl': '%{BKY_CONTROLS_IF_HELPURL}',
+      'suppressPrefixSuffix': true,
+      'extensions': ['controls_if_tooltip'],
     },)
   }
 }
 
 Blockly.Blocks['controls_if_simple'] = {
   init: function () {
-    this.jsonInit( {
-    'type': 'controls_ifelse',
-    'message0': '%{BKY_CONTROLS_IF_MSG_IF} %1',
-    'args0': [
-      {
-        'type': 'field_dropdown',
-        'name': 'KAREL_BOOL',
-        'options': [
-          ['робот има лопту', 'has_ball()'],
-          ['постоји лопта на пољу', 'balls_present()'],
-          ['робот може напред', 'can_move()'],
-        ],
-      },
-    ],
-    'message1': '%{BKY_CONTROLS_IF_MSG_THEN} %1',
-    'args1': [
-      {
-        'type': 'input_statement',
-        'name': 'DO0',
-      },
-    ],
-    'previousStatement': null,
-    'nextStatement': null,
-    'style': 'logic_blocks',
-    'tooltip': '%{BKYCONTROLS_IF_TOOLTIP_2}',
-    'helpUrl': '%{BKY_CONTROLS_IF_HELPURL}',
-    'suppressPrefixSuffix': true,
-    'extensions': ['controls_if_tooltip'],
+    this.jsonInit({
+      'type': 'controls_ifelse',
+      'message0': '%{BKY_CONTROLS_IF_MSG_IF} %1',
+      'args0': [
+        {
+          'type': 'field_dropdown',
+          'name': 'KAREL_BOOL',
+          'options': [
+            ['робот има лопту', 'has_ball()'],
+            ['постоји лопта на пољу', 'balls_present()'],
+            ['робот може напред', 'can_move()'],
+          ],
+        },
+      ],
+      'message1': '%{BKY_CONTROLS_IF_MSG_THEN} %1',
+      'args1': [
+        {
+          'type': 'input_statement',
+          'name': 'DO0',
+        },
+      ],
+      'previousStatement': null,
+      'nextStatement': null,
+      'style': 'logic_blocks',
+      'tooltip': '%{BKYCONTROLS_IF_TOOLTIP_2}',
+      'helpUrl': '%{BKY_CONTROLS_IF_HELPURL}',
+      'suppressPrefixSuffix': true,
+      'extensions': ['controls_if_tooltip'],
     },)
   }
 }
+Blockly.Blocks['variables_get'] = {
+  init: function () {
+    this.jsonInit(
+      {
+        'type': 'variables_get',
+        'message0': '%1',
+        'args0': [
+          {
+            'type': 'field_variable',
+            'name': 'VAR',
+            'variable': 'x',
+          },
+        ],
+        'output': null,
+        'style': 'variable_blocks',
+        'helpUrl': '%{BKY_VARIABLES_GET_HELPURL}',
+        'tooltip': '%{BKY_VARIABLES_GET_TOOLTIP}',
+        'extensions': ['contextMenu_variableSetterGetter'],
+      },
+    )
+  }
+}
+Blockly.Blocks['variables_set'] = {
+  init: function () {
+    this.jsonInit(
+      {
+        'type': 'variables_set',
+        'message0': 'У %1 постави %2',
+        'args0': [
+          {
+            'type': 'field_variable',
+            'name': 'VAR',
+            'variable': 'x',
+          },
+          {
+            'type': 'input_value',
+            'name': 'VALUE',
+          },
+        ],
+        'previousStatement': null,
+        'nextStatement': null,
+        'style': 'variable_blocks',
+        'tooltip': '%{BKY_VARIABLES_SET_TOOLTIP}',
+        'helpUrl': '%{BKY_VARIABLES_SET_HELPURL}',
+        'extensions': ['contextMenu_variableSetterGetter'],
+      },
+    )
+  }
+}
+Blockly.Blocks['number_prompt'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Питај ")
+        .appendField(new Blockly.FieldTextInput(""), "PROMPT");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
+};
 
+Blockly.JavaScript['number_prompt'] = function(block) {
+  var promptText = block.getFieldValue('PROMPT');
+  var code = 'parseFloat(window.prompt(' + JSON.stringify(promptText) + '))';
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
