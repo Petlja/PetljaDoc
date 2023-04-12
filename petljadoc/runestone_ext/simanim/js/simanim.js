@@ -521,8 +521,12 @@ window.addEventListener('load',function() {
 	var simanimWhlUrl = ''
 	if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
 		simanimWhlUrl = document.location.origin +'/_static/simanim-0.0.4-py3-none-any.whl'
-	else 
+	else if(location.hostname.endsWith('github.io')){
+		simanimWhlUrl = document.location.origin + '/' +location.pathname.split('/')[1] +'/_static/simanim-0.0.4-py3-none-any.whl'
+	}
+	else{ 
 		simanimWhlUrl = 'https://petljastorage.blob.core.windows.net/kursevi/common_assets/simanim-0.0.4-py3-none-any.whl'
+	}
 	// init pyodide
 	languagePluginLoader.then(() =>
 		pyodide.runPythonAsync(`
