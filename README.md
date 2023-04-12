@@ -39,8 +39,7 @@ Commands:
 - `export`&nbsp;&nbsp;&nbsp; &nbsp;Builds the project and exports its content as a SCORM package. You can select one of the 3 options with will deliver you diffrent type of packages:
   - `single`: A single SCO (Shareable Content Object) SCORM package, which contains all course content in a single file
   - `multi`: A multi SCO SCORM package, which breaks the course content into multiple modules or units
-  - `proxy`: A proxy SCORM package, that can be used with a Learning Management System (LMS) and an additional Moodle backup file. This option requires you to upload your course files to a web server and provide a link to the packager via `package-conf.json`. We recommend to upload your course files is to use a web server like GitHub Pages, which allows you to host static web content for free. You can create a new repository for your course files and enable GitHub Pages to generate a website URL for your repository. Then, you can update `package-conf.json` to include the GitHub Pages URL as the `data_content_url` property.
-
+  - `proxy`: A proxy SCORM package, that can be used with a Learning Management System (LMS) and an additional Moodle backup file. This option requires you to upload your course files to a web server and provide a link to the packager via `package-conf.json`. We recommend to upload your course files to a web server like GitHub Pages, which allows you to host static web content for free. You can create a new repository for your course files and enable GitHub Pages to generate a website URL for your repository. Then, you can update `package-conf.json` to include the GitHub Pages URL as the `data_content_url` property.
 
 By using `petljadoc preview`, an author may keep opened a browser window for preview. Any saved changes will be updated in browser in about 5-10 seconds.
 
