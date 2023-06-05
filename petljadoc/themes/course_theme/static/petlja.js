@@ -26,8 +26,8 @@ window.addEventListener('load', function () {
 		activeLecture = lecture;
 	}
 
-	if (document.getElementById("activity-" + activity)) {
-		document.getElementById("activity-" + activity).classList.add('active');
+	if (document.getElementById("activity-" + lecture + "-" + activity)) {
+		document.getElementById("activity-" + lecture + "-" + activity).classList.add('active');
 		activeActivity = activity;
 	}
 
@@ -36,11 +36,11 @@ window.addEventListener('load', function () {
             localStorage.setItem('scrollpos',0);
 			e.preventDefault();
             var lectureDiv = document.getElementById(activeLecture);
-            if (document.getElementById("activity-" + activity).parentElement.previousElementSibling != null) {
-                document.getElementById("activity-" + activity).parentElement.previousElementSibling.click();
+            if (document.getElementById("activity-" + lecture + "-" + activity).parentElement.previousElementSibling != null) {
+                document.getElementById("activity-" + lecture + "-" + activity).parentElement.previousElementSibling.click();
             }
             else {
-                document.getElementById("activity-" + activity).parentElement.parentElement.parentElement.previousElementSibling.children[1].lastElementChild.click()
+                document.getElementById("activity-" + lecture + "-" + activity).parentElement.parentElement.parentElement.previousElementSibling.children[1].lastElementChild.click()
             }
 		});
 
@@ -53,8 +53,8 @@ window.addEventListener('load', function () {
 				lectureDiv.nextElementSibling.firstElementChild.click();
 			} else {
                 var lectureDiv = document.getElementById(activeLecture);
-                if (document.getElementById("activity-" + activity).parentElement.nextElementSibling != null) {
-                    document.getElementById("activity-" + activity).parentElement.nextElementSibling.click();
+                if (document.getElementById("activity-" + lecture + "-" + activity).parentElement.nextElementSibling != null) {
+                    document.getElementById("activity-" + lecture + "-" + activity).parentElement.nextElementSibling.click();
                 }
                 else {
 					document.getElementById("lecture-" + lecture).parentElement.nextElementSibling.children[1].firstChild.click()
@@ -63,7 +63,7 @@ window.addEventListener('load', function () {
         });
         
     if (activeLecture != '') {
-        if (document.getElementById("activity-" + activity).parentElement.parentElement.parentElement.previousElementSibling == null && document.getElementById("activity-" + activity).parentElement.previousElementSibling == null)
+        if (document.getElementById("activity-" + lecture + "-" + activity).parentElement.parentElement.parentElement.previousElementSibling == null && document.getElementById("activity-" + lecture + "-" + activity).parentElement.previousElementSibling == null)
             document.getElementById('prevLectureLink').classList.add('invisible');
     }
 
