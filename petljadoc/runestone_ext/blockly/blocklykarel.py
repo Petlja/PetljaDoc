@@ -134,7 +134,7 @@ class BlocklyKarelDirective(Directive):
         """
 
         env = self.state.document.settings.env
-        categories = ["KarelCommands", "BeginnerKarelCommands", "KarelStreightLineCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Arithmetic", "Logic", "KarelSays", "AskUser", "Vars"]
+        categories = ["KarelCommands", "BeginnerKarelCommands", "KarelStraightLineCommands","KarelBrain","Values", "Branching", "KarelBranching", "Loops", "KarelLoops", "Arithmetic", "Logic", "KarelSays", "AskUser", "Vars"]
         self.options['name'] = self.arguments[0].strip()
         self.options['divid'] = self.arguments[0]
 
@@ -157,7 +157,7 @@ class BlocklyKarelDirective(Directive):
             self.options['data_categories'] = json.dumps(author_categories)
         else:
             categories.remove('BeginnerKarelCommands')
-            categories.remove('KarelStreightLineCommands')
+            categories.remove('KarelStraightLineCommands')
             self.options['data_categories'] = json.dumps(categories)
         if 'exportmode' in self.options:
             self.options['export_button'] = '<button class="btn btn-default export-button">Сачувај стање</button>'

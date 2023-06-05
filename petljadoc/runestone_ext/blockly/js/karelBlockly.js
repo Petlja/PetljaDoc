@@ -101,7 +101,7 @@ $(document).ready(function () {
         },
       ]
     },
-    'KarelStreightLineCommands' : {
+    'KarelStraightLineCommands' : {
       "kind": "category",
       "name": "Наредбе роботу",
       "colour": 295,
