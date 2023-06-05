@@ -58,10 +58,6 @@ $(document).ready(function () {
         },
         {
           "kind": "block",
-          "type": "move_back",
-        },
-        {
-          "kind": "block",
           "type": "turn_left"
         },
         {
