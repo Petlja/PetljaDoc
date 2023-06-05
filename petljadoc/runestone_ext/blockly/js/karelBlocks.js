@@ -19,6 +19,26 @@ Blockly.JavaScript['move'] = function (block) {
   return 'move_forward()\n';
 };
 
+Blockly.Blocks['move_back'] = {
+  /**
+   * Block for moving karel forward.
+   * @this {Blockly.Block}
+   */
+  init: function () {
+    this.jsonInit({
+      "message0": 'корак назад',
+      "previousStatement": null,
+      "nextStatement": null,
+      "colour": 250,
+      "tooltip": 'Робот се помера једно поље у назад.'
+    });
+  }
+};
+
+Blockly.JavaScript['move_back'] = function (block) {
+  // Generate JavaScript for moving forward.
+  return 'move_backward()\n';
+};
 Blockly.Blocks['turn_left'] = {
   /**
    * Block for moving forward.

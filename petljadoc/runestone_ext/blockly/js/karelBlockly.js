@@ -58,6 +58,10 @@ $(document).ready(function () {
         },
         {
           "kind": "block",
+          "type": "move_back",
+        },
+        {
+          "kind": "block",
           "type": "turn_left"
         },
         {
@@ -94,6 +98,25 @@ $(document).ready(function () {
         {
           "kind": "block",
           "type": "turn_right"
+        },
+        {
+          "kind": "block",
+          "type": "pick_up"
+        },
+      ]
+    },
+    'KarelStreightLineCommands' : {
+      "kind": "category",
+      "name": "Наредбе роботу",
+      "colour": 295,
+      "contents": [
+        {
+          "kind": "block",
+          "type": "move",
+        },
+        {
+          "kind": "block",
+          "type": "move_back",
         },
         {
           "kind": "block",
@@ -341,6 +364,11 @@ $(document).ready(function () {
         drawer.drawFrame(robot.clone());
       };
       interpreter.setProperty(globalObject, 'move_forward', interpreter.createNativeFunction(wrapper));
+      wrapper = function () {
+        robot.moveBack();
+        drawer.drawFrame(robot.clone());
+      };
+      interpreter.setProperty(globalObject, 'move_backward', interpreter.createNativeFunction(wrapper));
       wrapper = function () {
         robot.turnLeft();
         drawer.drawFrame(robot.clone());
