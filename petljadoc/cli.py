@@ -14,6 +14,7 @@ from yaml.loader import SafeLoader
 from colorama import Fore, init, Style, deinit, reinit
 from pkg_resources import resource_filename, working_set
 from paver.easy import sh
+from paver.tasks import BuildFailure
 from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 from livereload import Server
@@ -268,7 +269,7 @@ def init_runestone(yes, defaults):
     init_template_arguments(template_dir, defaults, 'runestone')
 
 
-def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone', sphinx_builder = 'html'):
+def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild=False, project_type='runestone', sphinx_builder = 'html', warnaserror=False):
     path = project_path()
     if not path:
         raise click.ClickException(
@@ -311,6 +312,9 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         build_module = "sphinx.cmd.build"
         args.append('-a')
         args.append('-E')
+        if warnaserror:
+            args.append('-W')
+            # args.append('--keep-going')
         args.append(f'-b "{sphinx_builder}"')
         args.append(f'-c "{paver_options.build.confdir}"')
         args.append(f'-d "{doctreesdir}"')
@@ -319,7 +323,10 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
         args.append(f'"{paver_options.build.sourcedir}"')
         args.append(f'"{outdir}"')
 
-        sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+        try:
+            sh(f'"{sys.executable}" -m {build_module} ' + " ".join(args))
+        except BuildFailure:
+            raise click.ClickException("Check the error output above.")
         if(project_type!= 'runestone'):
             shutil.copy('course.json', rootdir)
         #FIX ME
@@ -361,7 +368,8 @@ def preview(port, builder):
 
 
 @main.command()
-def publish():
+@click.option("--warnaserror", "-w", is_flag=True, help="Treat warnings as errors")
+def publish(warnaserror):
     """
     Build and copy the publish folder (docs)
     """
@@ -373,9 +381,9 @@ def publish():
         with open('conf-petljadoc.json') as f:
             data = json.load(f)
             build_or_autobuild("publish", sphinx_build=True,
-                               project_type=data["project_type"])
+                               project_type=data["project_type"], warnaserror=warnaserror)
     else:
-        build_or_autobuild("publish", sphinx_build=True)
+        build_or_autobuild("publish", sphinx_build=True, warnaserror=warnaserror)
     os.chdir(path)
     sys.path.insert(0, str(path))
     from pavement import options as paver_options  # pylint: disable=import-error
