@@ -283,7 +283,7 @@ def build_or_autobuild(cmd_name, port=None, sphinx_build=False, sphinx_autobuild
     args = []
     srcdir = os.path.realpath(paver_options.build.sourcedir)
     outdir = os.path.realpath(paver_options.build.builddir)
-    doctreesdir = outdir + './doctrees'
+    doctreesdir = outdir + '/doctrees'
     if sphinx_builder == 'petlja_builder':
         rootdir = outdir + '/bc_html'
     else:
