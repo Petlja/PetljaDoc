@@ -366,6 +366,9 @@ def publish():
     Build and copy the publish folder (docs)
     """
     path = project_path()
+    if not path:
+        raise click.ClickException(
+            "You must be in a Runestone project to execute publish command")
     if path.joinpath('conf-petljadoc.json').exists():
         with open('conf-petljadoc.json') as f:
             data = json.load(f)
@@ -373,9 +376,6 @@ def publish():
                                project_type=data["project_type"])
     else:
         build_or_autobuild("publish", sphinx_build=True)
-    if not path:
-        raise click.ClickException(
-            "You must be in a Runestone project to execute publish command")
     os.chdir(path)
     sys.path.insert(0, str(path))
     from pavement import options as paver_options  # pylint: disable=import-error
