@@ -67,7 +67,7 @@
     cursor: pointer;
 }
 
-    .learnmorenote-type .course-content p:nth-of-type(1)::after {
+.learnmorenote-type .course-content > p:first-child::after{
         font-family: "Font Awesome 5 Free";
         content: "\f107";
         display: inline-block;
