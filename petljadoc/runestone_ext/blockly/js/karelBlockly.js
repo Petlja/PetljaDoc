@@ -47,240 +47,240 @@ $(document).ready(function () {
   errorText.NotImplementedErrorFix = $.i18n("msg_activecode_not_implemented_error_fix");
 
   var categories = {
-    'KarelCommands' : {
-      "kind": "category",
-      "name": "Наредбе роботу",
-      "colour": 295,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "move",
-        },
-        {
-          "kind": "block",
-          "type": "turn_left"
-        },
-        {
-          "kind": "block",
-          "type": "turn_right"
-        },
-        {
-          "kind": "block",
-          "type": "turn_around"
-        },
-        {
-          "kind": "block",
-          "type": "pick_up"
-        },
-        {
-          "kind": "block",
-          "type": "drop_off"
-        },
-      ]
+    'KarelCommands': {
+        "kind": "category",
+        "name": $.i18n('KarelCommands'),
+        "colour": 295,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "move",
+            },
+            {
+                "kind": "block",
+                "type": "turn_left"
+            },
+            {
+                "kind": "block",
+                "type": "turn_right"
+            },
+            {
+                "kind": "block",
+                "type": "turn_around"
+            },
+            {
+                "kind": "block",
+                "type": "pick_up"
+            },
+            {
+                "kind": "block",
+                "type": "drop_off"
+            },
+        ]
     },
-    'BeginnerKarelCommands' : {
-      "kind": "category",
-      "name": "Наредбе роботу",
-      "colour": 295,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "move",
-        },
-        {
-          "kind": "block",
-          "type": "turn_left"
-        },
-        {
-          "kind": "block",
-          "type": "turn_right"
-        },
-        {
-          "kind": "block",
-          "type": "pick_up"
-        },
-      ]
+    'BeginnerKarelCommands': {
+        "kind": "category",
+        "name": $.i18n('BeginnerKarelCommands'),
+        "colour": 295,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "move",
+            },
+            {
+                "kind": "block",
+                "type": "turn_left"
+            },
+            {
+                "kind": "block",
+                "type": "turn_right"
+            },
+            {
+                "kind": "block",
+                "type": "pick_up"
+            },
+        ]
     },
-    'KarelStraightLineCommands' : {
-      "kind": "category",
-      "name": "Наредбе роботу",
-      "colour": 295,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "move",
-        },
-        {
-          "kind": "block",
-          "type": "move_back",
-        },
-        {
-          "kind": "block",
-          "type": "pick_up"
-        },
-      ]
+    'KarelStraightLineCommands': {
+        "kind": "category",
+        "name": $.i18n('KarelStraightLineCommands'),
+        "colour": 295,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "move",
+            },
+            {
+                "kind": "block",
+                "type": "move_back",
+            },
+            {
+                "kind": "block",
+                "type": "pick_up"
+            },
+        ]
     },
-    'KarelBrain' :{
-      "kind": "category",
-      "name": "Питај робота",
-      "colour": 275,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "balls_present",
-        },
-        {
-          "kind": "block",
-          "type": "can_move",
-        },
-        {
-          "kind": "block",
-          "type": "has_balls",
-        },
-        {
-          "kind": "block",
-          "type": "count_balls_on_hand",
-        },
-        {
-          "kind": "block",
-          "type": "count_balls",
-        },
-      ]
+    'KarelBrain': {
+        "kind": "category",
+        "name": $.i18n('KarelBrain'),
+        "colour": 275,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "balls_present",
+            },
+            {
+                "kind": "block",
+                "type": "can_move",
+            },
+            {
+                "kind": "block",
+                "type": "has_balls",
+            },
+            {
+                "kind": "block",
+                "type": "count_balls_on_hand",
+            },
+            {
+                "kind": "block",
+                "type": "count_balls",
+            },
+        ]
     },
-    'Values':{
-      "kind": "category",
-      "name": "Вредности",
-      "colour": 250,
-      "contents": [    
-        {
-          "kind": "block",
-          "type": "math_number",
-        },    
-      ]
+    'Values': {
+        "kind": "category",
+        "name": $.i18n('K_Values'),
+        "colour": 250,
+        "contents": [    
+            {
+                "kind": "block",
+                "type": "math_number",
+            },    
+        ]
     },
-    'Branching':    {
-      "kind": "category",
-      "name": "Гранање",
-      "colour": 130,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "controls_if",
-        },
-        {
-          "kind": "block",
-          "type": "controls_ifelse",
-        },
-      ]
+    'Branching': {
+        "kind": "category",
+        "name": $.i18n('K_Branching'),
+        "colour": 130,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "controls_if",
+            },
+            {
+                "kind": "block",
+                "type": "controls_ifelse",
+            },
+        ]
     },
-    'KarelBranching':    {
-      "kind": "category",
-      "name": "Гранање робот",
-      "colour": 150,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "controls_if_simple",
-        },
-        {
-          "kind": "block",
-          "type": "controls_ifelse_simple",
-        },
-      ]
+    'KarelBranching': {
+        "kind": "category",
+        "name": $.i18n('KarelBranching'),
+        "colour": 150,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "controls_if_simple",
+            },
+            {
+                "kind": "block",
+                "type": "controls_ifelse_simple",
+            },
+        ]
     },
     'Vars': {
         "kind": "category",
         "colour": 310,
-        "name": "Променљиве",
-        "custom": "VARIABLE" ,
+        "name": $.i18n('K_Vars'),
+        "custom": "VARIABLE",
     },
     'Loops': {
-      "kind" : "category",
-      "name" : "Петље",
-      "colour": 190,
-      "contents":[
-        {
-          "kind" : "block",
-          "type" : "controls_repeat"
-        },
-        {
-          "kind": "block",
-          "type": "controls_repeat_ext",
-        },
-        {
-          "kind" : "block",
-          "type" : "controls_whileUntil"
-        },
-      ]
+        "kind": "category",
+        "name": $.i18n('K_Loops'),
+        "colour": 190,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "controls_repeat"
+            },
+            {
+                "kind": "block",
+                "type": "controls_repeat_ext",
+            },
+            {
+                "kind": "block",
+                "type": "controls_whileUntil"
+            },
+        ]
     },
-    'KarelLoops':    {
-      "kind" : "category",
-      "name" : "Петље робот",
-      "colour": 210,
-      "contents":[
-        {
-          "kind" : "block",
-          "type" : "karel_controls_whileUntil"
-        },
-      ]
+    'KarelLoops': {
+        "kind": "category",
+        "name": $.i18n('KarelLoops'),
+        "colour": 210,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "karel_controls_whileUntil"
+            },
+        ]
     },
     'Logic': {
-      "kind": "category",
-      "name": "Логички оператори",
-      "colour": 220,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "logic_compare",
-        },
-        {
-          "kind": "block",
-          "type": "logic_operation",
-        },
-        {
-          "kind": "block",
-          "type": "logic_negate",
-        },
-      ]
+        "kind": "category",
+        "name": $.i18n('K_Logic'),
+        "colour": 220,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "logic_compare",
+            },
+            {
+                "kind": "block",
+                "type": "logic_operation",
+            },
+            {
+                "kind": "block",
+                "type": "logic_negate",
+            },
+        ]
     },
     'Arithmetic': {
-      "kind": "category",
-      "name": "Аритметикa",
-      "colour": 215,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "math_number",
-        },
-        {
-          "kind": "block",
-          "type": "math_arithmetic",
-        },
-      ]
+        "kind": "category",
+        "name": $.i18n('Arithmetic'),
+        "colour": 215,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "math_number",
+            },
+            {
+                "kind": "block",
+                "type": "math_arithmetic",
+            },
+        ]
     },
     'KarelSays': {
-      "kind": "category",
-      "name": "Поруке роботу",
-      "colour": 245,
-      "contents": [
-        {
-        "kind": "block",
-        "type": "text_print",
-        },
-      ]
+        "kind": "category",
+        "name": $.i18n('KarelSays'),
+        "colour": 245,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "text_print",
+            },
+        ]
     },
-    'AskUser':{
-      "kind": "category",
-      "name": "Помози роботу",
-      "colour": 290,
-      "contents": [
-        {
-          "kind": "block",
-          "type": "number_prompt",
-        }
-      ]
+    'AskUser': {
+        "kind": "category",
+        "name": $.i18n('K_AskUser'),
+        "colour": 290,
+        "contents": [
+            {
+                "kind": "block",
+                "type": "number_prompt",
+            }
+        ]
     }
-  }
+};
 
   const startBlocks = {
     "variables": [

@@ -3,13 +3,13 @@ Blockly.Blocks['move'] = {
    * Block for moving karel forward.
    * @this {Blockly.Block}
    */
-  init: function () {
+  init: function () { 
     this.jsonInit({
-      "message0": 'корак напред',
+      "message0": $.i18n('move_forward'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот се помера једно поље у напред.'
+      "tooltip": $.i18n('move_forward_tooltip')
     });
   }
 };
@@ -26,11 +26,11 @@ Blockly.Blocks['move_back'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'корак назад',
+      "message0": $.i18n('move_back'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот се помера једно поље у назад.'
+      "tooltip": $.i18n('move_back_tooltip')
     });
   }
 };
@@ -39,6 +39,7 @@ Blockly.JavaScript['move_back'] = function (block) {
   // Generate JavaScript for moving forward.
   return 'move_backward()\n';
 };
+
 Blockly.Blocks['turn_left'] = {
   /**
    * Block for moving forward.
@@ -46,11 +47,11 @@ Blockly.Blocks['turn_left'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'скрени лево',
+      "message0": $.i18n('turn_left'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот се окреће на лево.'
+      "tooltip": $.i18n('turn_left_tooltip')
     });
   }
 };
@@ -59,6 +60,7 @@ Blockly.JavaScript['turn_left'] = function (block) {
   // Generate JavaScript for moving forward.
   return 'turn_left()\n';
 };
+
 Blockly.Blocks['turn_right'] = {
   /**
    * Block for moving forward.
@@ -66,11 +68,11 @@ Blockly.Blocks['turn_right'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'скрени десно',
+      "message0": $.i18n('turn_right'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот се окреће на десно.'
+      "tooltip": $.i18n('turn_right_tooltip')
     });
   }
 };
@@ -87,11 +89,11 @@ Blockly.Blocks['turn_around'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'окрени полукружно',
+      "message0": $.i18n('turn_around'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 255,
-      "tooltip": 'Робот се окреће на десно.'
+      "tooltip": $.i18n('turn_around_tooltip')
     });
   }
 };
@@ -101,7 +103,6 @@ Blockly.JavaScript['turn_around'] = function (block) {
   return 'turn_around()\n';
 };
 
-
 Blockly.Blocks['pick_up'] = {
   /**
    * Block for moving forward.
@@ -109,11 +110,11 @@ Blockly.Blocks['pick_up'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'узми',
+      "message0": $.i18n('pick_up'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот узима лопту са поља на коме се налази.'
+      "tooltip": $.i18n('pick_up_tooltip')
     });
   }
 };
@@ -123,7 +124,6 @@ Blockly.JavaScript['pick_up'] = function (block) {
   return 'pick_up()\n';
 };
 
-
 Blockly.Blocks['drop_off'] = {
   /**
    * Block for moving forward.
@@ -131,11 +131,11 @@ Blockly.Blocks['drop_off'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'остави',
+      "message0": $.i18n('drop_off'),
       "previousStatement": null,
       "nextStatement": null,
       "colour": 250,
-      "tooltip": 'Робот оставља лопту.'
+      "tooltip": $.i18n('drop_off_tooltip')
     });
   }
 };
@@ -152,10 +152,10 @@ Blockly.Blocks['can_move'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'робот може напред',
+      "message0": $.i18n('can_move'),
       "output": "Boolean",
       "colour": 250,
-      "tooltip": 'Робот одговара на питанње да ли може да направи корак напред.'
+      "tooltip": $.i18n('can_move_tooltip')
     });
   }
 };
@@ -165,7 +165,6 @@ Blockly.JavaScript['can_move'] = function (block) {
   return ['can_move()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
-
 Blockly.Blocks['balls_present'] = {
   /**
    * Block for moving forward.
@@ -173,10 +172,10 @@ Blockly.Blocks['balls_present'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'постоји лоптица',
+      "message0": $.i18n('balls_present'),
       "output": "Boolean",
       "colour": 250,
-      "tooltip": 'Робот одговара на питање да ли има лоптица на пољу на коме се налази.'
+      "tooltip": $.i18n('balls_present_tooltip')
     });
   }
 };
@@ -186,7 +185,6 @@ Blockly.JavaScript['balls_present'] = function (block) {
   return ['balls_present()\n', Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
-
 Blockly.Blocks['has_balls'] = {
   /**
    * Block for moving forward.
@@ -194,10 +192,10 @@ Blockly.Blocks['has_balls'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'робот има лоптицу',
+      "message0": $.i18n('has_balls'),
       "output": "Boolean",
       "colour": 250,
-      "tooltip": 'Да ли робот има лоптице код себе.'
+      "tooltip": $.i18n('has_balls_tooltip')
     });
   }
 };
@@ -214,10 +212,10 @@ Blockly.Blocks['count_balls'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'колико лоптица има на пољу',
+      "message0": $.i18n('count_balls'),
       "output": "Number",
       "colour": 250,
-      "tooltip": 'Робот одговара на питање колико липтица има на пољу на коме се налази.'
+      "tooltip": $.i18n('count_balls_tooltip')
     });
   }
 };
@@ -234,10 +232,10 @@ Blockly.Blocks['count_balls_on_hand'] = {
    */
   init: function () {
     this.jsonInit({
-      "message0": 'колико лоптица има робот',
+      "message0": $.i18n('count_balls_on_hand'),
       "output": "Number",
       "colour": 250,
-      "tooltip": 'Робот одговара на питање колико липтица има код себе.'
+      "tooltip": $.i18n('count_balls_on_hand_tooltip')
     });
   }
 };
@@ -251,15 +249,15 @@ Blockly.Blocks['karel_controls_whileUntil'] = {
   init: function () {
     this.jsonInit({
       'type': 'controls_whileUntil',
-      'message0': 'Понављај све док%1',
+      'message0': $.i18n('karel_controls_whileUntil'),
       'args0': [
         {
           'type': 'field_dropdown',
           'name': 'KAREL_BOOL',
           'options': [
-            ['робот има лопту', 'has_ball()'],
-            ['постоји лопта на пољу', 'balls_present()'],
-            ['робот може напред', 'can_move()'],
+            [$.i18n('robot_has_ball'), 'has_ball()'],
+            [$.i18n('balls_present_on_field'), 'balls_present()'],
+            [$.i18n('robot_can_move_forward'), 'can_move()'],
           ],
         },
       ],
@@ -325,9 +323,9 @@ Blockly.Blocks['controls_ifelse_simple'] = {
           'type': 'field_dropdown',
           'name': 'KAREL_BOOL',
           'options': [
-            ['робот има лопту', 'has_ball()'],
-            ['постоји лопта на пољу', 'balls_present()'],
-            ['робот може напред', 'can_move()'],
+            [$.i18n('robot_has_ball'), 'has_ball()'],
+            [$.i18n('balls_present_on_field'), 'balls_present()'],
+            [$.i18n('robot_can_move_forward'), 'can_move()'],
           ],
         },
       ],
@@ -366,9 +364,9 @@ Blockly.Blocks['controls_if_simple'] = {
           'type': 'field_dropdown',
           'name': 'KAREL_BOOL',
           'options': [
-            ['робот има лопту', 'has_ball()'],
-            ['постоји лопта на пољу', 'balls_present()'],
-            ['робот може напред', 'can_move()'],
+            [$.i18n('robot_has_ball'), 'has_ball()'],
+            [$.i18n('balls_present_on_field'), 'balls_present()'],
+            [$.i18n('robot_can_move_forward'), 'can_move()'],
           ],
         },
       ],
@@ -416,7 +414,7 @@ Blockly.Blocks['variables_set'] = {
     this.jsonInit(
       {
         'type': 'variables_set',
-        'message0': 'У %1 постави %2',
+        'message0': $.i18n('variables_set'),
         'args0': [
           {
             'type': 'field_variable',
@@ -441,7 +439,7 @@ Blockly.Blocks['variables_set'] = {
 Blockly.Blocks['number_prompt'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("Питај ")
+        .appendField($.i18n('number_prompt'))
         .appendField(new Blockly.FieldTextInput(""), "PROMPT");
     this.setOutput(true, "Number");
     this.setColour(230);

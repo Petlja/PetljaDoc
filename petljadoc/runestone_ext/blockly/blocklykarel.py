@@ -13,14 +13,20 @@ from runestone.common.runestonedirective import add_i18n_js, add_codemirror_css_
 def setup(app):
     app.add_directive('blockly-karel', BlocklyKarelDirective)
 
+    add_i18n_js(app, {"en","sr-Cyrl","sr","sr-Latn", "hu"},"karelBlocks-i18n")
     app.add_js_file('acorn_interpreter.js')
     app.add_js_file('blockly_compressed.js')
-    app.add_js_file('msg/sr.js')
+    if(app.config.language in ['sr-Cyrl', 'sr', 'sr-Latn']):
+        app.add_js_file('msg/sr.js')
+    elif(app.config.language == 'hu'):
+        app.add_js_file('msg/hu.js')
+    else:
+        app.add_js_file('msg/en.js')
     app.add_js_file('blocks_compressed.js')
     app.add_js_file('javascript_compressed.js')
     app.add_js_file('karelBlockly.js')
     app.add_js_file('karelBlocks.js')
-
+    
     app.add_css_file('karelBlockly.css')
 
     app.add_node(BlocklyKarelNode, html=(visit_karel_node, depart_karel_node))
