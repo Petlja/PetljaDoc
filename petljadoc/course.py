@@ -86,7 +86,8 @@ class Course:
                 tmp_activities.append({'type': activity.type,
                                        'title': activity.title,
                                        'normalized_title': activity.normalized_title,
-                                       'src': activity.src,
+                                       'src': activity.src if activity.type != 'coding-quiz' else '',
+                                       'problems': activity.src if activity.type == 'coding-quiz' else [],
                                        'file': activity.html_file_src,
                                        'description': activity.description,
                                        'guid': activity.guid}
