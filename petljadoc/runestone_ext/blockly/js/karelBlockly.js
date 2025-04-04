@@ -422,7 +422,8 @@ $(document).ready(function () {
     }
 
     karelCongrolosDiv.querySelector(".run-button").addEventListener("click",function () {
-      $('.run-button').attr('disabled', 'disabled');
+      var runButton = this;
+      runButton.setAttribute('disabled', 'disabled');
       clearError();
       setup = config.setup();
       robot = setup.robot;
@@ -435,13 +436,14 @@ $(document).ready(function () {
       var code = Blockly.JavaScript.workspaceToCode(workspace);
       var myInterpreter = new Interpreter(code, initApi);
       drawer.start()
+      resetInterpreter[workspace.id] = false;
       function nextStep() {
         try {
           if (myInterpreter.step() && !resetInterpreter[workspace.id]) {
             setTimeout(nextStep, 65);
           }
           else {
-            $('.run-button').removeAttr('disabled', 'disabled');
+            runButton.removeAttribute('disabled');
             var result = config.isSuccess(robot, world);
             if (result) {
               showEndMessageSuccess();
@@ -454,7 +456,7 @@ $(document).ready(function () {
           }
         }
         catch (err) {
-          $('.run-button').removeAttr('disabled', 'disabled');
+          runButton.removeAttribute('disabled');
           drawer.stop(function () {
             var message = "";
             var otherError = false;
@@ -519,8 +521,6 @@ $(document).ready(function () {
       eContainer.id = problemId + "-success";
       var msgHead = $('<p>').html($.i18n("msg_karel_correct"));
       eContainer.appendChild(msgHead[0]);
-      $('.run-button').removeAttr('disabled')
-      $('.reset-button').removeAttr('disabled');;
     }
 
     function showEndMessageError(message) {
@@ -529,8 +529,6 @@ $(document).ready(function () {
       eContainer.id = problemId + "-error";
       var msgHead = $('<p>').html(message);
       eContainer.appendChild(msgHead[0]);
-      $('.run-button').removeAttr('disabled');
-      $('.reset-button').removeAttr('disabled');
     }
 
     function showError(err) {
@@ -558,8 +556,6 @@ $(document).ready(function () {
       }
       //var moreInfo = '../ErrorHelp/' + errName.toLowerCase() + '.html';
       console.log("Runtime Error: " + err.toString());
-      $('.run-button').removeAttr('disabled');
-      $('.reset-button').removeAttr('disabled');
     };
 
     function clearError() {
