@@ -29,18 +29,49 @@ def setup(app):
 def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
-TEMPLATE_START = """
-    <div class="note-wrapper %(notetype)s-type">
+TEMPLATE_START_WITH_TITLE = """
+    <div class="note-wrapper %(notetype)s-type" 
+        role="note"
+        aria-label="%(arialabel)s">
+
         <div class="note-icon-holder"> </div>
-        <img src="../_static/img/%(notetype)s-img.svg" class="note-image %(notetype)s-image" /> 
+        <img class="note-image %(notetype)s-image" alt=" " src="../_static/img/%(notetype)s-img.svg"/> 
         <div class="course-content">
+
+        <h3 class="note-title">
+            %(title)s
+            <button class="note-toggle"
+                    aria-expanded="false"
+                    aria-controls="%(content_id)s">
+                ▼
+            </button>
+        </h3>
+
+        <div id="%(content_id)s" hidden>
             
+"""
+
+TEMPLATE_START_NO_TITLE = """
+<div class="note-wrapper %(notetype)s-type"
+         role="note"
+         aria-label="%(arialabel)s">
+
+    <div class="note-icon-holder"></div>
+    <img class="note-image %(notetype)s-image" alt="">
+    <div class="course-content">
+
+        <button class="note-toggle no-title"
+                aria-expanded="false"
+                aria-controls="%(content_id)s">
+            ▼
+        </button>
+
+        <div id="%(content_id)s" hidden>
 """
 
 TEMPLATE_END = """
     </div></div>
 """
-
 
 class NoteNode(nodes.General, nodes.Element):
     def __init__(self, content):
@@ -52,7 +83,14 @@ def visit_note_node(self, node):
     
     node.delimiter = "_start__{}_".format("info")
     self.body.append(node.delimiter)
-    res = TEMPLATE_START % node.note
+
+    node.note["content_id"] = f"note-content-{id(node)}"
+
+    if node.note["title"].strip():
+        res = TEMPLATE_START_WITH_TITLE % node.note
+    else:
+        res = TEMPLATE_START_NO_TITLE % node.note
+
     self.body.append(res)
 
 
@@ -87,7 +125,7 @@ class NoteDirective(Directive):
 TEMPLATE_START_Q = """
     <div class="note-wrapper questionnote-type">
         <div class="note-icon-holder"> </div>
-        <img src="../_static/img/question-mark.png" class="note-image questionnote-image" /> 
+        <img class="note-image questionnote-image" alt=" " src="../_static/img/question-mark.png"/> 
         <div class="course-content">
 """
 
