@@ -27,8 +27,9 @@ TEMPLATE_START = """
     <div id="%(divid)s" class="db" data-db-name="%(dbfile)s" %(solutionquery)s %(checkquery)s %(checkcolumnname)s %(hint)s %(showresult)s> 
         <div class="row">
         <div class="db-input"> 
+            <label id="%(divid)s-label" for="%(divid)s-textarea" class="db-sr-only">SQL upit</label>
             <div class= "editor-div-db"> 
-            <textarea class="query" rows='6'>%(content)s</textarea>
+            <textarea id="%(divid)s-textarea" class="query" rows='6'>%(content)s</textarea>
             </div>
             <br>
             <div class="row">
@@ -38,7 +39,7 @@ TEMPLATE_START = """
                 %(showresultbutton)s
             </div>
             <br>
-            <div class='result'  disabled>
+            <div id="%(divid)s-result" class='result' aria-live="polite" disabled>
         </div>
         </div>
         <div class="stats" > 
