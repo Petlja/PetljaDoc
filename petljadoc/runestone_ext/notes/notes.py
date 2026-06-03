@@ -32,7 +32,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
 TEMPLATE_START = """
     <div class="note-wrapper %(notetype)s-type">
         <div class="note-icon-holder"> </div>
-        <img src="../_static/img/%(notetype)s-img.svg" alt="" role="presentation" class="note-image %(notetype)s-image" /> 
+        <img src="../_static/img/%(notetype)s-img.svg" class="note-image %(notetype)s-image" /> 
         <div class="course-content">
             
 """
@@ -87,7 +87,7 @@ class NoteDirective(Directive):
 TEMPLATE_START_Q = """
     <div class="note-wrapper questionnote-type">
         <div class="note-icon-holder"> </div>
-        <img src="../_static/img/question-mark.png" alt="" role="presentation" class="note-image questionnote-image" /> 
+        <img src="../_static/img/question-mark.png" class="note-image questionnote-image" /> 
         <div class="course-content">
 """
 
