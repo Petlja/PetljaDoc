@@ -28,7 +28,6 @@ class DbDirectives {
         this.editorInput = this.editorCM.getInputField();
         this.editorWrapper = this.editorCM.getWrapperElement();
         this.setEditorLabel();
-        this.editor.remove();
 
         if(opts.hasAttribute('db-check')){
             this.query = opts.getAttribute('db-check');
