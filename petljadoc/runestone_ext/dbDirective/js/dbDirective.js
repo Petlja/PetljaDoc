@@ -6,6 +6,9 @@ class DbDirectives {
         this.id = opts.id;
         this.name = opts.getAttribute('data-db-name');
         this.output = opts.getElementsByClassName('result')[0];
+        this.outputId = this.output ? this.output.id : '';
+        this.label = opts.getElementsByTagName('label')[0];
+        this.labelId = this.label ? this.label.id : '';
         this.run = opts.getElementsByClassName('runQuery')[0];
         this.stats = opts.getElementsByClassName('stats')[0];
         this.editor = this.opts.getElementsByClassName('query')[0];
@@ -22,7 +25,9 @@ class DbDirectives {
             autoMatchParens: true,
             extraKeys: { "Tab": "indentMore", "Shift-Tab": "indentLess" }
         }) 
-        this.editor.remove();
+        this.editorInput = this.editorCM.getInputField();
+        this.editorWrapper = this.editorCM.getWrapperElement();
+        this.setEditorLabel();
 
         if(opts.hasAttribute('db-check')){
             this.query = opts.getAttribute('db-check');
@@ -137,7 +142,44 @@ class DbDirectives {
     }
 
     clearOutput(){
+        this.clearErrorState();
         this.output.innerHTML = '';
+    }
+
+    setEditorLabel() {
+        if (!this.labelId) {
+            return;
+        }
+
+        this.editorWrapper.setAttribute('aria-labelledby', this.labelId);
+
+        if (this.editorInput) {
+            this.editorInput.setAttribute('aria-labelledby', this.labelId);
+        }
+    }
+
+    setErrorState() {
+        if (!this.outputId) {
+            return;
+        }
+
+        this.editorWrapper.setAttribute('aria-describedby', this.outputId);
+        this.editorWrapper.setAttribute('aria-invalid', 'true');
+
+        if (this.editorInput) {
+            this.editorInput.setAttribute('aria-describedby', this.outputId);
+            this.editorInput.setAttribute('aria-invalid', 'true');
+        }
+    }
+
+    clearErrorState() {
+        this.editorWrapper.removeAttribute('aria-describedby');
+        this.editorWrapper.removeAttribute('aria-invalid');
+
+        if (this.editorInput) {
+            this.editorInput.removeAttribute('aria-describedby');
+            this.editorInput.removeAttribute('aria-invalid');
+        }
     }
 
     writeToOutput(rows, trunc, clear){
@@ -205,10 +247,12 @@ class DbDirectives {
 
     writeErrorToOutput(err){
         this.clearOutput();
+        this.setErrorState();
         var errP = document.createElement('p');
         errP.setAttribute('class','errP');
         errP.innerText = err;
         this.output.appendChild(errP);
+        this.editorCM.focus();
     }
 
     querySuccess(str){

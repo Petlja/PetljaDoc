@@ -25,7 +25,7 @@ def html_page_context_handler(app, pagename, templatename, context, doctree):
     app.builder.env.h_ctx = context
 
 TEMPLATE_START = """
-    <div id="%(divid)s" class="petlja-editor" data='%(data)s'>
+    <div id="%(divid)s" class="petlja-editor" data='%(data)s' role="region" aria-label="Petlja editor" lang="sr">
 """
 
 TEMPLATE_END = """
